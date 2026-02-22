@@ -1,11 +1,11 @@
-import logo from '../../assets/logo.png';
+import Logo from '../ui/Logo';
 
 function InvoiceHeader() {
     return (
         <div className="flex items-start justify-between mb-12">
             {/* Logo */}
             <div className="w-20 h-20 bg-brand rounded-xl flex items-center justify-center p-3">
-                <img src={logo} alt="Tradazone" className="w-full object-contain" />
+                <Logo variant="dark" className="w-full object-contain" />
             </div>
 
             {/* Invoice Title */}

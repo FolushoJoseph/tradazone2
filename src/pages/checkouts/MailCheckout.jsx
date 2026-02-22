@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { Wallet, Check } from 'lucide-react';
 import { useData } from '../../context/DataContext';
-import logo from '../../assets/logo.png';
+import Logo from '../../components/ui/Logo';
 
 function MailCheckout() {
     const { checkoutId } = useParams();
@@ -16,7 +16,7 @@ function MailCheckout() {
         <div className="min-h-screen bg-brand flex items-center justify-center p-6">
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
-                    <img src={logo} alt="Tradazone" className="h-7 mx-auto mb-1" />
+                    <Logo variant="dark" className="h-7 mx-auto mb-1" />
                     <p className="text-white/60 text-sm">Secure crypto payment</p>
                 </div>
 
@@ -29,7 +29,7 @@ function MailCheckout() {
                         <span className="text-lg text-t-muted">{checkout.currency}</span>
                     </div>
 
-                    <button className="w-full flex items-center justify-center gap-2 py-3.5 bg-brand text-white font-semibold rounded-xl hover:bg-brand-dark transition-colors" onClick={handlePay}>
+                    <button className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 h-10 bg-brand text-white text-sm font-semibold hover:bg-brand-dark active:scale-95 transition-all" onClick={handlePay}>
                         <Wallet size={20} /> Connect Wallet to Pay
                     </button>
                 </div>

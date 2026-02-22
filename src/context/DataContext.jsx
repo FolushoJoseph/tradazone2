@@ -1,12 +1,4 @@
 import { createContext, useContext, useState, useCallback } from 'react';
-import {
-    mockCustomers,
-    mockInvoices,
-    mockCheckouts,
-    mockItems,
-    mockTransactions,
-    mockDashboardStats,
-} from '../data/mockData';
 
 const DataContext = createContext(null);
 
@@ -33,10 +25,16 @@ function save(key, data) {
 
 /* ---------- Provider ---------- */
 export function DataProvider({ children }) {
-    const [customers, setCustomers] = useState(() => load(KEYS.customers, mockCustomers));
-    const [invoices, setInvoices] = useState(() => load(KEYS.invoices, mockInvoices));
-    const [checkouts, setCheckouts] = useState(() => load(KEYS.checkouts, mockCheckouts));
-    const [items, setItems] = useState(() => load(KEYS.items, mockItems));
+    // Clear persisted data so the app starts as a fresh new user
+    localStorage.removeItem(KEYS.customers);
+    localStorage.removeItem(KEYS.invoices);
+    localStorage.removeItem(KEYS.checkouts);
+    localStorage.removeItem(KEYS.items);
+
+    const [customers, setCustomers] = useState([]);
+    const [invoices, setInvoices] = useState([]);
+    const [checkouts, setCheckouts] = useState([]);
+    const [items, setItems] = useState([]);
 
     // ---------- Customers ----------
     const addCustomer = useCallback((data) => {
@@ -149,8 +147,8 @@ export function DataProvider({ children }) {
                 invoices,
                 checkouts,
                 items,
-                transactions: mockTransactions,
-                dashboardStats: mockDashboardStats,
+                transactions: [],
+                dashboardStats: { walletBalance: '0', currency: 'STRK', receivables: '0', totalTransactions: 0, totalCustomers: 0 },
                 addCustomer,
                 addItem,
                 addInvoice,

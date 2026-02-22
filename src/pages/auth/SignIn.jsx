@@ -1,78 +1,153 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import logo from '../../assets/logo.png';
+import { AlertCircle, ExternalLink } from 'lucide-react';
 import illustration from '../../assets/signin-illustration.png';
+import Logo from '../../components/ui/Logo';
 
 function SignIn() {
     const navigate = useNavigate();
-    const { connectWallet } = useAuth();
+    const [searchParams] = useSearchParams();
+    const { connectWallet, user, lastWallet } = useAuth();
+
     const [connecting, setConnecting] = useState(false);
+    const [error, setError] = useState(null);
+
+    const redirectTo = searchParams.get('redirect') || '/';
+    const sessionExpired = searchParams.get('reason') === 'expired';
+
+    // Auto-redirect already-authenticated users
+    useEffect(() => {
+        if (user.isAuthenticated) {
+            navigate(redirectTo, { replace: true });
+        }
+    }, [user.isAuthenticated, navigate, redirectTo]);
 
     const handleConnect = async () => {
         setConnecting(true);
+        setError(null);
         try {
-            const success = await connectWallet();
-            if (success) {
-                navigate('/');
+            const result = await connectWallet();
+            if (result.success) {
+                navigate(redirectTo, { replace: true });
+            } else if (result.error === 'not_installed') {
+                setError('not_installed');
+            } else {
+                setError('failed');
             }
-        } catch (err) {
-            console.error('Connection failed:', err);
+        } catch {
+            setError('failed');
         } finally {
             setConnecting(false);
         }
     };
 
+    const shortWallet = lastWallet
+        ? `${lastWallet.slice(0, 6)}...${lastWallet.slice(-4)}`
+        : null;
+
     return (
         <div className="min-h-screen flex">
-            {/* Left Panel — White */}
-            <div className="flex-1 flex flex-col justify-start px-12 py-10 bg-white">
+            {/* ── Left Panel ── */}
+            <div className="flex-1 flex flex-col justify-start px-6 py-8 lg:px-10 lg:py-10 bg-white lg:max-w-xl overflow-y-auto">
                 {/* Logo */}
-                <div className="flex items-center gap-2 mb-16">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <rect x="4" y="5" width="16" height="2.5" rx="1" fill="#3C3CEF" />
-                        <rect x="4" y="10.75" width="10" height="2.5" rx="1" fill="#3C3CEF" />
-                        <rect x="4" y="16.5" width="16" height="2.5" rx="1" fill="#3C3CEF" />
-                    </svg>
-                    <span className="text-xl font-bold tracking-tight text-t-primary">trada<span className="text-t-secondary">zone</span></span>
+                <div className="mb-8 lg:mb-12">
+                    <Logo variant="light" className="h-7 lg:h-9" />
                 </div>
 
-                {/* Tagline */}
-                <p className="text-lg text-t-secondary mb-10 max-w-sm">
-                    Your first step  to financial freedom starts with you.
+                {/* Session expired banner */}
+                {sessionExpired && (
+                    <div className="flex items-center gap-2 px-4 py-3 mb-6 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                        <AlertCircle size={16} className="flex-shrink-0" />
+                        <span>Your session expired — reconnect to continue.</span>
+                    </div>
+                )}
+
+                {/* Headline */}
+                <h1 className="text-xl lg:text-2xl font-bold text-t-primary mb-2 leading-snug">
+                    Invoice clients.<br />
+                    Accept crypto.<br />
+                    Get paid on Starknet.
+                </h1>
+                <p className="text-sm text-t-muted mb-8 lg:mb-10">
+                    Sign in with your wallet or create a free account.
                 </p>
 
-                {/* Connect Card */}
-                <div className="max-w-md border border-brand/30 rounded-xl overflow-hidden">
-                    {/* Card Header */}
-                    <div className="px-5 py-4 border-b border-brand/20 bg-brand/[0.02]">
-                        <span className="text-sm font-medium text-t-primary">Connect to Tradazone</span>
+                {/* Returning user hint */}
+                {shortWallet && !sessionExpired && (
+                    <div className="flex items-center gap-2 px-4 py-3 mb-5 bg-brand/5 border border-brand/20 rounded-lg text-sm text-brand">
+                        <span className="w-2 h-2 rounded-full bg-brand flex-shrink-0" />
+                        <span>Welcome back — reconnect <span className="font-mono font-medium">{shortWallet}</span> to continue</span>
                     </div>
+                )}
 
-                    {/* Argent Wallet Row */}
+                {/* Connect card */}
+                <div className="border border-border rounded-xl overflow-hidden mb-5">
+                    <div className="px-5 py-3.5 border-b border-border bg-page/50">
+                        <span className="text-xs font-semibold text-t-muted uppercase tracking-wide">Connect wallet</span>
+                    </div>
                     <div className="flex items-center justify-between px-5 py-4">
                         <div className="flex items-center gap-3">
-                            {/* Argent Logo */}
                             <div className="w-9 h-9 rounded-lg bg-[#FF875B]/10 flex items-center justify-center">
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                     <path d="M10 2L4 18h4.5L10 13l1.5 5H16L10 2z" fill="#FF875B" />
                                 </svg>
                             </div>
-                            <span className="text-sm font-semibold text-t-primary">Argent</span>
+                            <div>
+                                <p className="text-sm font-semibold text-t-primary">Argent</p>
+                                <p className="text-xs text-t-muted">Starknet wallet</p>
+                            </div>
                         </div>
                         <button
+                            id="btn-connect-wallet"
                             onClick={handleConnect}
                             disabled={connecting}
-                            className="text-sm font-semibold text-brand hover:text-brand-dark transition-colors disabled:opacity-50"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 h-10 bg-brand text-white text-sm font-semibold hover:bg-brand-dark active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed min-w-[120px]"
                         >
-                            {connecting ? 'Connecting...' : 'Connect'}
+                            {connecting ? 'Opening Argent…' : 'Connect Wallet'}
                         </button>
                     </div>
                 </div>
+
+                {/* Error states */}
+                {error === 'not_installed' && (
+                    <div className="flex items-start gap-2 px-4 py-3 mb-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
+                        <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+                        <span>
+                            Argent wallet not found.{' '}
+                            <a
+                                href="https://www.argent.xyz/argent-x/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline font-medium inline-flex items-center gap-1"
+                            >
+                                Install Argent <ExternalLink size={12} />
+                            </a>
+                        </span>
+                    </div>
+                )}
+                {error === 'failed' && (
+                    <div className="flex items-center gap-2 px-4 py-3 mb-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
+                        <AlertCircle size={16} className="flex-shrink-0" />
+                        <span>Connection cancelled. Please try again.</span>
+                    </div>
+                )}
+
+                {/* Sign up CTA */}
+                <p className="text-sm text-t-muted text-center mt-2">
+                    New here?{' '}
+                    <Link
+                        to="/signup"
+                        id="btn-create-account"
+                        className="text-brand font-semibold hover:underline"
+                    >
+                        Create a free account →
+                    </Link>
+                </p>
             </div>
 
-            {/* Right Panel — Illustration */}
-            <div className="hidden lg:block lg:w-1/2">
+            {/* ── Right Panel — Illustration ── */}
+            <div className="hidden lg:flex flex-1 items-stretch">
                 <img
                     src={illustration}
                     alt="Tradazone — invoices, payments, crypto"

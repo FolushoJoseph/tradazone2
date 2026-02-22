@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
+import PrivateRoute from './components/routing/PrivateRoute';
 import SignIn from './pages/auth/SignIn';
-import Onboarding from './pages/auth/Onboarding';
+import SignUp from './pages/auth/SignUp';
 import Home from './pages/dashboard/Home';
 import CustomerList from './pages/customers/CustomerList';
 import AddCustomer from './pages/customers/AddCustomer';
@@ -29,16 +30,23 @@ function App() {
   return (
     <AuthProvider>
       <DataProvider>
-        <BrowserRouter>
+        <BrowserRouter basename="/tradazone2">
           <Routes>
             {/* Public routes */}
             <Route path="/signin" element={<SignIn />} />
-            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/signup" element={<SignUp />} />
             <Route path="/pay/:checkoutId" element={<MailCheckout />} />
             <Route path="/invoice/:id" element={<InvoicePreview />} />
 
-            {/* Protected routes with layout */}
-            <Route path="/" element={<Layout />}>
+            {/* Protected routes — require authentication */}
+            <Route
+              path="/"
+              element={
+                <PrivateRoute>
+                  <Layout />
+                </PrivateRoute>
+              }
+            >
               <Route index element={<Home />} />
               <Route path="customers" element={<CustomerList />} />
               <Route path="customers/add" element={<AddCustomer />} />
@@ -60,8 +68,8 @@ function App() {
               </Route>
             </Route>
 
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* Catch-all — redirect to signin */}
+            <Route path="*" element={<Navigate to="/signin" replace />} />
           </Routes>
         </BrowserRouter>
       </DataProvider>

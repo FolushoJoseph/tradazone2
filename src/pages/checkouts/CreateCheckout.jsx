@@ -4,7 +4,7 @@ import { ArrowLeft, Copy, Link as LinkIcon } from 'lucide-react';
 import Input from '../../components/forms/Input';
 import Button from '../../components/forms/Button';
 import { useData } from '../../context/DataContext';
-import logo from '../../assets/logo.png';
+import Logo from '../../components/ui/Logo';
 
 function CreateCheckout() {
     const navigate = useNavigate();
@@ -53,7 +53,7 @@ function CreateCheckout() {
                     <h2 className="text-base font-semibold mb-4">Preview</h2>
                     <div className="bg-white border border-border rounded-card overflow-hidden mb-4">
                         <div className="bg-brand px-5 py-4">
-                            <img src={logo} alt="Tradazone" className="h-5" />
+                            <Logo variant="dark" className="h-5" />
                         </div>
                         <div className="p-6 text-center">
                             <h3 className="text-lg font-semibold mb-2">{formData.title || 'Your Checkout Title'}</h3>
@@ -62,7 +62,7 @@ function CreateCheckout() {
                                 <span className="text-4xl font-bold">{formData.amount || '0'}</span>
                                 <span className="text-t-muted">STRK</span>
                             </div>
-                            <button className="w-full py-3 bg-brand text-white rounded-lg font-medium opacity-50 cursor-not-allowed" disabled>
+                            <button className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 h-10 bg-brand text-white text-sm font-semibold opacity-50 cursor-not-allowed" disabled>
                                 Connect Wallet to Pay
                             </button>
                         </div>

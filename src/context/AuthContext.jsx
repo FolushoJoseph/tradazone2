@@ -2,96 +2,137 @@ import { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext(null);
 
+const SESSION_KEY = 'tradazone_auth';
+const WALLET_KEY = 'tradazone_last_wallet';
+const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+function loadSession() {
+    try {
+        const raw = localStorage.getItem(SESSION_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (Date.now() > parsed.expiresAt) {
+            localStorage.removeItem(SESSION_KEY);
+            return null;
+        }
+        return parsed.user;
+    } catch {
+        return null;
+    }
+}
+
+function saveSession(userData) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+        user: userData,
+        expiresAt: Date.now() + SESSION_TTL_MS,
+    }));
+}
+
+function clearSession() {
+    localStorage.removeItem(SESSION_KEY);
+}
+
+const EMPTY_USER = {
+    id: null,
+    name: '',
+    email: '',
+    avatar: null,
+    isAuthenticated: false,
+    walletAddress: null,
+};
+
 export function AuthProvider({ children }) {
-    const [user, setUser] = useState({
-        id: '1',
-        name: 'John Doe',
-        email: 'john@example.com',
-        avatar: null,
-        isAuthenticated: true
+    const [user, setUser] = useState(() => {
+        const saved = loadSession();
+        return saved ?? { ...EMPTY_USER };
     });
 
     const [wallet, setWallet] = useState({
-        address: '',
+        address: user.walletAddress || '',
         balance: '0',
         currency: 'STRK',
-        isConnected: false,
-        chainId: ''
+        isConnected: !!user.walletAddress,
+        chainId: '',
     });
 
-    const login = (email, password) => {
-        // Mock login
-        setUser(prev => ({ ...prev, isAuthenticated: true, email }));
-        return true;
+    // Returns last connected wallet address (for "welcome back" hint)
+    const lastWallet = localStorage.getItem(WALLET_KEY);
+
+    const login = (userData) => {
+        const authed = { ...userData, isAuthenticated: true };
+        setUser(authed);
+        saveSession(authed);
     };
 
     const logout = () => {
-        setUser(prev => ({ ...prev, isAuthenticated: false }));
+        clearSession();
+        setUser({ ...EMPTY_USER });
+        setWallet({ address: '', balance: '0', currency: 'STRK', isConnected: false, chainId: '' });
     };
 
     const connectWallet = async () => {
         try {
             const { connect } = await import('get-starknet');
-            // Connect to Argent X or Braavos
             const starknet = await connect();
 
-            if (!starknet) {
-                throw new Error("User rejected wallet selection or silent connect found nothing");
-            }
+            if (!starknet) throw new Error('No wallet selected');
 
-            // Enable the wallet
             await starknet.enable({ showModal: true });
 
             if (starknet.isConnected) {
                 const addr = starknet.selectedAddress;
-                setWallet(prev => ({
-                    ...prev,
-                    address: addr,
-                    isConnected: true,
-                    chainId: starknet.chainId
-                }));
 
-                // Also authenticate the user via wallet
-                setUser(prev => ({
-                    ...prev,
-                    isAuthenticated: true,
+                const walletState = { address: addr, isConnected: true, chainId: starknet.chainId, balance: '0', currency: 'STRK' };
+                setWallet(walletState);
+                localStorage.setItem(WALLET_KEY, addr);
+
+                const userData = {
+                    id: addr,
                     name: starknet.name || `${addr.slice(0, 6)}...${addr.slice(-4)}`,
+                    email: '',
+                    avatar: null,
+                    isAuthenticated: true,
                     walletAddress: addr,
-                }));
+                };
+                setUser(userData);
+                saveSession(userData);
 
-                // Listen for account changes
                 starknet.on('accountsChanged', (accounts) => {
                     if (accounts.length === 0) {
-                        disconnectWallet();
+                        logout();
                     } else {
-                        setWallet(prev => ({
-                            ...prev,
-                            address: accounts[0],
-                            isConnected: true
-                        }));
+                        setWallet(prev => ({ ...prev, address: accounts[0] }));
                     }
                 });
 
-                return true;
+                return { success: true };
             }
-            return false;
+            return { success: false, error: 'Wallet not connected' };
         } catch (error) {
-            console.error("Failed to connect wallet:", error);
-            // Mock wallet connect for development
+            console.error('Wallet connect failed:', error);
+
+            // Check if Argent is installed
+            if (error.message?.includes('No wallet') || error.message?.includes('rejected')) {
+                return { success: false, error: 'not_installed' };
+            }
+
+            // Dev / demo fallback
             const mockAddr = '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7';
-            setWallet(prev => ({
-                ...prev,
-                address: mockAddr,
-                isConnected: true,
-                chainId: 'SN_MAIN'
-            }));
-            setUser(prev => ({
-                ...prev,
-                isAuthenticated: true,
+            const walletState = { address: mockAddr, isConnected: true, chainId: 'SN_MAIN', balance: '0', currency: 'STRK' };
+            setWallet(walletState);
+            localStorage.setItem(WALLET_KEY, mockAddr);
+
+            const userData = {
+                id: mockAddr,
                 name: 'Wallet User',
+                email: '',
+                avatar: null,
+                isAuthenticated: true,
                 walletAddress: mockAddr,
-            }));
-            return true;
+            };
+            setUser(userData);
+            saveSession(userData);
+            return { success: true };
         }
     };
 
@@ -99,16 +140,8 @@ export function AuthProvider({ children }) {
         try {
             const { disconnect } = await import('get-starknet');
             await disconnect();
-            setWallet({
-                address: '',
-                balance: '0',
-                currency: 'STRK',
-                isConnected: false,
-                chainId: ''
-            });
-        } catch (error) {
-            console.error("Failed to disconnect wallet:", error);
-        }
+        } catch (_) { /* swallow */ }
+        logout();
     };
 
     return (
@@ -120,7 +153,8 @@ export function AuthProvider({ children }) {
             login,
             logout,
             connectWallet,
-            disconnectWallet
+            disconnectWallet,
+            lastWallet,
         }}>
             {children}
         </AuthContext.Provider>
@@ -129,8 +163,6 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
     const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
+    if (!context) throw new Error('useAuth must be used within an AuthProvider');
     return context;
 }
