@@ -1,4 +1,4 @@
-import logo from '../../assets/logo.png';
+import Logo from '../ui/Logo';
 
 function InvoiceFooter({ notes = '', paymentLink = '' }) {
     return (
@@ -16,9 +16,9 @@ function InvoiceFooter({ notes = '', paymentLink = '' }) {
                         href={paymentLink || '#'}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand text-white text-sm font-medium rounded-lg no-underline"
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 h-10 bg-brand text-white text-sm font-semibold no-underline"
                     >
-                        <img src={logo} alt="Tradazone" className="w-3 h-3" />
+                        <Logo variant="dark" className="w-3 h-3" />
                         Payment Checkout
                     </a>
                 </div>
@@ -28,7 +28,7 @@ function InvoiceFooter({ notes = '', paymentLink = '' }) {
             <div className="flex items-center justify-between mt-auto pt-8">
                 <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-brand rounded flex items-center justify-center p-1">
-                        <img src={logo} alt="Tradazone" className="w-full object-contain" />
+                        <Logo variant="dark" className="w-full object-contain" />
                     </div>
                     <span className="text-sm font-bold text-brand">tradazone</span>
                 </div>

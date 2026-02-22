@@ -15,12 +15,26 @@
 
     button {
         @apply font-sans cursor-pointer border-none bg-transparent;
+        border-radius: 0 !important;
     }
 
     input,
     select,
     textarea {
         @apply font-sans text-sm;
+        border-radius: 0 !important;
+    }
+
+    /* Global zero-radius enforcement for all containers */
+    div,
+    section,
+    article,
+    aside,
+    nav,
+    main,
+    form,
+    fieldset {
+        border-radius: 0;
     }
 
     img {

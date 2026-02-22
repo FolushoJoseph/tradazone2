@@ -54,11 +54,11 @@ function Onboarding() {
 
                     <div className="flex gap-3">
                         {currentStep > 0 && (
-                            <button className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium bg-white text-t-primary border border-border rounded-lg hover:bg-gray-50 transition-colors" onClick={handlePrev}>
+                            <button className="inline-flex items-center justify-center gap-2 px-4 py-2.5 h-10 text-sm font-semibold bg-white text-t-primary border border-border hover:bg-gray-50 active:scale-95 transition-all" onClick={handlePrev}>
                                 <ArrowLeft size={18} /> Back
                             </button>
                         )}
-                        <button className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium bg-brand text-white rounded-lg hover:bg-brand-dark transition-colors" onClick={handleNext}>
+                        <button className="inline-flex items-center justify-center gap-2 px-4 py-2.5 h-10 text-sm font-semibold bg-brand text-white hover:bg-brand-dark active:scale-95 transition-all" onClick={handleNext}>
                             {currentStep === steps.length - 1 ? (<>Get Started <Check size={18} /></>) : (<>Next <ArrowRight size={18} /></>)}
                         </button>
                     </div>

@@ -70,13 +70,13 @@ function InvoicePreview() {
                     <div className="flex gap-2">
                         <button
                             onClick={handlePrint}
-                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border border-border rounded-lg hover:bg-gray-50 transition-colors"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 h-10 text-sm font-semibold bg-white text-t-primary border border-border hover:bg-gray-50 active:scale-95 transition-all"
                         >
                             <Printer size={16} /> Print
                         </button>
                         <button
                             onClick={handleDownload}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white text-sm font-medium rounded-lg hover:bg-brand-dark transition-colors"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 h-10 bg-brand text-white text-sm font-semibold hover:bg-brand-dark active:scale-95 transition-all"
                         >
                             <Download size={16} /> Download PDF
                         </button>

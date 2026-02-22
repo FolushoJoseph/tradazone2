@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Users } from 'lucide-react';
 import DataTable from '../../components/tables/DataTable';
+import EmptyState from '../../components/ui/EmptyState';
 import { useData } from '../../context/DataContext';
 
 function CustomerList() {
@@ -18,24 +19,38 @@ function CustomerList() {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-xl font-semibold text-t-primary">Customers</h1>
-                <button className="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white text-sm font-medium rounded-lg hover:bg-brand-dark transition-colors" onClick={() => navigate('/customers/add')}>
-                    <Plus size={18} /> Add Customer
+            <div className="flex items-center justify-between mb-4 lg:mb-6">
+                <h1 className="text-base lg:text-xl font-semibold text-t-primary">Customers</h1>
+                <button
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 h-10 bg-brand text-white text-sm font-semibold hover:bg-brand-dark active:scale-95 transition-all"
+                    onClick={() => navigate('/customers/add')}
+                >
+                    <Plus size={16} /> <span className="hidden sm:inline">Add</span><span className="sm:hidden">+</span> Customer
                 </button>
             </div>
 
-            <div className="flex items-center gap-3 mb-5 px-4 py-2.5 bg-white border border-border rounded-lg">
-                <Search size={18} className="text-t-muted" />
-                <input type="text" placeholder="Search customers..." className="flex-1 bg-transparent outline-none text-sm" />
-            </div>
-
-            <DataTable
-                columns={columns}
-                data={customers}
-                onRowClick={(customer) => navigate(`/customers/${customer.id}`)}
-                emptyMessage="No customers found"
-            />
+            {customers.length === 0 ? (
+                <EmptyState
+                    icon={Users}
+                    title="No customers yet"
+                    description="Add your first customer to start sending invoices and tracking payments."
+                    actionLabel="Add your first customer"
+                    actionPath="/customers/add"
+                />
+            ) : (
+                <>
+                    <div className="flex items-center gap-3 mb-5 px-4 py-2.5 bg-white border border-border rounded-lg">
+                        <Search size={18} className="text-t-muted" />
+                        <input type="text" placeholder="Search customers..." className="flex-1 bg-transparent outline-none text-sm" />
+                    </div>
+                    <DataTable
+                        columns={columns}
+                        data={customers}
+                        onRowClick={(customer) => navigate(`/customers/${customer.id}`)}
+                        emptyMessage="No customers found"
+                    />
+                </>
+            )}
         </div>
     );
 }
