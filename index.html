@@ -1,14 +1,36 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/tradazone2/favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tradazone</title>
-    <script type="module" crossorigin src="/tradazone2/assets/index-B0_4LTny.js"></script>
-    <link rel="stylesheet" crossorigin href="/tradazone2/assets/index-DnXx_1nf.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/tradazone2/favicon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tradazone</title>
+  <script>
+    // Restore URL encoded by 404.html so React Router sees the correct path
+    (function (l) {
+      if (l.search[1] === 'p') {
+        var params = l.search.slice(1).split('&').reduce(function (p, s) {
+          var r = s.split('=');
+          p[decodeURIComponent(r[0])] = decodeURIComponent(r.slice(1).join('=').replace(/~and~/g, '&'));
+          return p;
+        }, {});
+        if (params.p !== undefined) {
+          window.history.replaceState(
+            null, null,
+            l.pathname.split('/').slice(0, -1).join('/') + (params.p || '/') +
+            (params.q ? '?' + params.q : '') + l.hash
+          );
+        }
+      }
+    }(window.location));
+  </script>
+  <script type="module" crossorigin src="/tradazone2/assets/index-CGm8dcLY.js"></script>
+  <link rel="stylesheet" crossorigin href="/tradazone2/assets/index-DnXx_1nf.css">
+</head>
+
+<body>
+  <div id="root"></div>
+</body>
+
 </html>
