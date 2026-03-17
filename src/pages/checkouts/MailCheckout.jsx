@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Wallet, Check } from 'lucide-react';
 import { useData } from '../../context/DataContext';
+import { useAuth } from '../../context/AuthContext';
 import Logo from '../../components/ui/Logo';
+import ConnectWalletModal from '../../components/ui/ConnectWalletModal';
 
 function MailCheckout() {
     const { checkoutId } = useParams();
@@ -9,8 +12,11 @@ function MailCheckout() {
     const checkout = checkouts.find(c => c.id === checkoutId) || {
         id: checkoutId || 'demo', title: 'Premium Package', description: 'Full service web development package', amount: '200', currency: 'STRK'
     };
+    
+    const { connectWallet } = useAuth();
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const handlePay = () => { console.log('Initiating payment...'); };
+    const handlePay = () => { setIsModalOpen(true); };
 
     return (
         <div className="min-h-screen bg-brand flex items-center justify-center p-6">
@@ -33,6 +39,12 @@ function MailCheckout() {
                         <Wallet size={20} /> Connect Wallet to Pay
                     </button>
                 </div>
+
+                <ConnectWalletModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    connectWalletFn={connectWallet}
+                />
 
                 <p className="text-center text-sm text-white/40 mt-6">Powered by Tradazone on Starknet</p>
             </div>

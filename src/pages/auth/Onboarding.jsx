@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ArrowLeft, Check } from 'lucide-react';
 
 const steps = [
-    { title: 'Welcome to Tradazone', description: 'The easiest way to accept crypto payments for your business on Starknet.', image: '🚀' },
+    { title: 'Welcome to Tradazone', description: 'The easiest way to accept crypto payments for your business on Starknet or Stellar.', image: '🚀' },
     { title: 'Create Invoices', description: 'Generate professional invoices and send them to your customers with just a few clicks.', image: '📄' },
-    { title: 'Accept Payments', description: 'Accept payments in STRK and other tokens. Get paid instantly to your wallet.', image: '💳' },
+    { title: 'Accept Payments', description: 'Accept payments in STRK or XLM. Get paid instantly to your wallet.', image: '💳' },
     { title: 'Manage Your Business', description: 'Track customers, manage transactions, and grow your business with powerful tools.', image: '📊' }
 ];
 

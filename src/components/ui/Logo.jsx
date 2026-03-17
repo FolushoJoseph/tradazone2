@@ -1,5 +1,5 @@
 import logoWhite from '../../assets/logo-white.png';
-import logoBlue from '../../assets/logo-blue.svg';
+import logoBlue from '../../assets/logo-blue.png';
 
 /**
  * Reusable brand logo.
