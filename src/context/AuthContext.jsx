@@ -48,6 +48,8 @@ export function AuthProvider({ children }) {
         return saved ?? { ...EMPTY_USER };
     });
 
+    const [isConnecting, setIsConnecting] = useState(false);
+
     const [wallet, setWallet] = useState({
         address: user.walletAddress || '',
         balance: '0',
@@ -58,6 +60,28 @@ export function AuthProvider({ children }) {
 
     // Derived: which wallet type is currently connected
     const [walletType, setWalletType] = useState(user.walletType || null);
+
+    const completeWalletLogin = (address, type) => {
+        const currency = type === 'stellar' ? 'XLM' : 'STRK';
+        const chainId = type === 'stellar' ? 'stellar' : '';
+        
+        const walletState = { address, isConnected: true, chainId, balance: '0', currency };
+        setWallet(walletState);
+        setWalletType(type);
+        localStorage.setItem(WALLET_KEY, address);
+
+        const userData = {
+            id: address,
+            name: `${address.slice(0, 6)}...${address.slice(-4)}`,
+            email: '',
+            avatar: null,
+            isAuthenticated: true,
+            walletAddress: address,
+            walletType: type,
+        };
+        setUser(userData);
+        saveSession(userData);
+    };
 
     // Returns last connected wallet address (for "welcome back" hint)
     const lastWallet = localStorage.getItem(WALLET_KEY);
@@ -163,11 +187,31 @@ export function AuthProvider({ children }) {
             }
 
             const pkResult = await freighter.getPublicKey();
-            if (pkResult.error) {
+            
+            // Freighter API can return an object with { publicKey } or just { error }
+            // or in some versions the result directly.
+            let addr = '';
+            if (typeof pkResult === 'string' && pkResult.startsWith('G')) {
+                addr = pkResult;
+            } else if (pkResult && pkResult.publicKey) {
+                addr = pkResult.publicKey;
+            } else if (pkResult && pkResult.error) {
                 throw new Error(pkResult.error);
+            } else {
+                // If getPublicKey failed or returned nothing, try requestAccess as fallback/second-attempt
+                const accessResult = await freighter.requestAccess();
+                if (typeof accessResult === 'string' && accessResult.startsWith('G')) {
+                    addr = accessResult;
+                } else if (accessResult && Array.isArray(accessResult) && accessResult.length > 0) {
+                    addr = accessResult[0];
+                } else if (accessResult && accessResult.address) {
+                    addr = accessResult.address;
+                } else if (accessResult && accessResult.error) {
+                    throw new Error(accessResult.error);
+                } else {
+                    throw new Error('Could not retrieve public key from Freighter');
+                }
             }
-
-            const addr = pkResult.publicKey;
 
             const walletState = { address: addr, isConnected: true, chainId: 'stellar', balance: '0', currency: 'XLM' };
             setWallet(walletState);
@@ -191,44 +235,34 @@ export function AuthProvider({ children }) {
             console.error('Stellar wallet connect failed:', error);
 
             if (error.message?.includes('not installed') || error.message?.includes('Freighter')) {
-                // Dev / demo fallback — mock a Stellar G-address
-                const mockAddr = 'GDRXE2BQUC3AZNPVFSCEZ76NJ3WWL25FYFK6RGZGIEKWE4SOOHSUJUJ';
-                const walletState = { address: mockAddr, isConnected: true, chainId: 'stellar', balance: '0', currency: 'XLM' };
-                setWallet(walletState);
-                setWalletType('stellar');
-                localStorage.setItem(WALLET_KEY, mockAddr);
-
-                const userData = {
-                    id: mockAddr,
-                    name: `${mockAddr.slice(0, 6)}...${mockAddr.slice(-4)}`,
-                    email: '',
-                    avatar: null,
-                    isAuthenticated: true,
-                    walletAddress: mockAddr,
-                    walletType: 'stellar',
-                };
-                setUser(userData);
-                saveSession(userData);
-                return { success: true };
+                return { success: false, error: 'not_installed' };
             }
 
-            if (error.message?.includes('User declined') || error.message?.includes('rejected')) {
+            if (error.message?.includes('User declined') || 
+                error.message?.includes('rejected') || 
+                error.message?.includes('cancelled')) {
                 return { success: false, error: 'rejected' };
             }
 
-            return { success: false, error: 'not_installed' };
+            // Return the specific error message if possible to help debugging
+            return { success: false, error: 'failed', message: error.message };
         }
     };
 
     // ── EVM / Browser Wallets (MetaMask, Trust, etc.) ────────────────────────
-    const connectEvmWallet = async () => {
+    const connectEvmWallet = async (specificProvider = null) => {
+        if (isConnecting) return { success: false, error: 'already_connecting' };
+        
+        setIsConnecting(true);
         try {
-            if (!window.ethereum) {
+            const injectedProvider = specificProvider || window.ethereum;
+            
+            if (!injectedProvider) {
                 throw new Error('EVM Wallet not installed');
             }
 
             const { BrowserProvider } = await import('ethers');
-            const provider = new BrowserProvider(window.ethereum);
+            const provider = new BrowserProvider(injectedProvider);
 
             // Request Accounts
             const accounts = await provider.send('eth_requestAccounts', []);
@@ -263,14 +297,17 @@ export function AuthProvider({ children }) {
             saveSession(userData);
 
             // Listen for account changes
-            window.ethereum.on('accountsChanged', (newAccounts) => {
-                if (newAccounts.length === 0) {
-                    logout();
-                } else {
-                    setWallet(prev => ({ ...prev, address: newAccounts[0] }));
-                }
-            });
+            if (injectedProvider.on) {
+                injectedProvider.on('accountsChanged', (newAccounts) => {
+                    if (newAccounts.length === 0) {
+                        logout();
+                    } else {
+                        setWallet(prev => ({ ...prev, address: newAccounts[0] }));
+                    }
+                });
+            }
 
+            setIsConnecting(false);
             return { success: true };
         } catch (error) {
             console.error('EVM wallet connect failed:', error);
@@ -283,17 +320,16 @@ export function AuthProvider({ children }) {
                 return { success: false, error: 'rejected' };
             }
 
+            setIsConnecting(false);
             return { success: false, error: 'failed' };
         }
     };
 
-    // ── Public: connectWallet(type) ──────────────────────────────────────────
-    const connectWallet = async (type = 'starknet') => {
+    // ── Public: connectWallet(type, provider) ──────────────────────────────────────────
+    const connectWallet = async (type = 'starknet', provider = null) => {
         if (type === 'stellar') return connectStellarWallet();
-        if (type === 'evm') return connectEvmWallet();
+        if (type === 'evm') return connectEvmWallet(provider);
         if (type === 'starknet_generic') {
-            // For generic starknet, we just call the same get-starknet connect but want to ensure the modal shows.
-            // Since get-starknet's connect() auto-opens its modal if no last wallet is found, we just run the same flow.
             return connectStarknetWallet();
         }
         return connectStarknetWallet();
@@ -321,7 +357,9 @@ export function AuthProvider({ children }) {
             logout,
             connectWallet,
             disconnectWallet,
+            completeWalletLogin,
             lastWallet,
+            isConnecting,
         }}>
             {children}
         </AuthContext.Provider>

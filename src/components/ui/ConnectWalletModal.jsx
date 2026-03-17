@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { X, ExternalLink, AlertCircle, ChevronLeft } from 'lucide-react';
 import Logo from './Logo';
+import { useDiscoveredProviders } from '../../utils/wallet-discovery';
+import { useFreighter } from '../../hooks/useFreighter';
+import { useAuth } from '../../context/AuthContext';
 
 // Stellar star icon
 function StellarIcon({ size = 20 }) {
@@ -65,12 +68,14 @@ function BaseIcon({ size = 20 }) {
 }
 
 function useWalletDetection() {
+    const discoveredProviders = useDiscoveredProviders();
     const [installed, setInstalled] = useState({
         freighter: false,
         argent: false,
         metamask: false,
         phantom: false,
         base: false,
+        discovered: [],
     });
 
     useEffect(() => {
@@ -78,12 +83,14 @@ function useWalletDetection() {
             const eth = window.ethereum;
             
             // Checking common identifiers in window
-            const hasFreighter = !!window.freighterApi;
-            const hasArgent = !!window.starknet_argentX;
-            const hasMetaMask = !!(eth && eth.isMetaMask);
-            const hasPhantom = !!(window.phantom?.ethereum || (eth && eth.isPhantom));
-            // Base Smart Wallet via Coinbase Wallet extension injection
-            const hasBase = !!window.coinbaseWalletExtension || !!(eth && eth.isCoinbaseWallet);
+            // Freighter: strictly check window.freighterApi as requested
+            const hasFreighter = typeof window !== 'undefined' && !!window.freighterApi;
+            const hasArgent = typeof window !== 'undefined' && !!(window.starknet_argentX || window.starknet?.argentX);
+            
+            // Use EIP-6963 providers for detection if available
+            const hasMetaMask = discoveredProviders.some(p => p.info.rdns === 'io.metamask') || !!(eth && eth.isMetaMask);
+            const hasPhantom = discoveredProviders.some(p => p.info.rdns === 'app.phantom') || !!(window.phantom?.ethereum || (eth && eth.isPhantom));
+            const hasBase = discoveredProviders.some(p => p.info.rdns === 'com.coinbase.wallet') || !!window.coinbaseWalletExtension || !!(eth && eth.isCoinbaseWallet);
 
             setInstalled({
                 freighter: hasFreighter,
@@ -91,15 +98,21 @@ function useWalletDetection() {
                 metamask: hasMetaMask,
                 phantom: hasPhantom,
                 base: hasBase,
+                discovered: discoveredProviders,
             });
         };
 
         checkInstallations();
+
+        // Non-EIP-6963 extensions (like Freighter/Argent) sometimes inject a bit later
+        const timer = setTimeout(checkInstallations, 1000);
+        const timer2 = setTimeout(checkInstallations, 2500); // Second check for slow injectors
         
-        // Sometimes extensions inject script a fraction of a second later
-        const timer = setTimeout(checkInstallations, 500);
-        return () => clearTimeout(timer);
-    }, []);
+        return () => {
+            clearTimeout(timer);
+            clearTimeout(timer2);
+        };
+    }, [discoveredProviders]);
 
     return installed;
 }
@@ -108,6 +121,9 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
     const [connecting, setConnecting] = useState(null); // 'starknet' | 'stellar' | 'evm' | 'starknet_generic' | null
     const [error, setError] = useState(null);
     const [view, setView] = useState('primary'); // 'primary' | 'secondary'
+
+    const { completeWalletLogin, isConnecting: isAuthConnecting } = useAuth();
+    const freighter = useFreighter();
 
     const installed = useWalletDetection();
 
@@ -122,16 +138,19 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
 
     if (!isOpen) return null;
 
-    const handleConnect = async (type) => {
+    const handleConnect = async (type, provider = null) => {
+        if (connecting) return;
         setConnecting(type);
         setError(null);
         try {
-            const result = await connectWalletFn(type);
+            const result = await connectWalletFn(type, provider);
             if (result.success) {
                 if (onConnect) onConnect(type);
             } else if (result.error === 'not_installed') {
                 setError({ type, code: 'not_installed' });
                 setConnecting(null);
+            } else if (result.error === 'already_connecting') {
+                // Connection already in progress, don't reset state
             } else {
                 setError({ type, code: 'failed' });
                 setConnecting(null);
@@ -197,10 +216,18 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                                 <>
                                     {/* Freighter */}
                                     <button
-                                        onClick={() => handleConnect('stellar')}
-                                        disabled={connecting !== null}
+                                        onClick={async () => {
+                                            const result = await freighter.connect();
+                                            if (result?.success) {
+                                                completeWalletLogin(result.address, 'stellar');
+                                                if (onConnect) onConnect('stellar');
+                                            } else if (result?.error) {
+                                                setError({ type: 'stellar', code: result.error.includes('detected') ? 'not_installed' : 'failed', message: result.error });
+                                            }
+                                        }}
+                                        disabled={connecting !== null || freighter.isConnecting}
                                         className={`w-full text-left p-4 rounded-xl border flex items-center justify-between transition-all outline-none 
-                                            ${connecting === 'stellar' ? 'border-blue-400 bg-blue-50/50' : connecting !== null ? 'border-border/50 opacity-50' : 'border-border hover:border-blue-300 hover:bg-blue-50/30'}`}
+                                            ${connecting === 'stellar' || freighter.isConnecting ? 'border-blue-400 bg-blue-50/50' : connecting !== null ? 'border-border/50 opacity-50' : 'border-border hover:border-blue-300 hover:bg-blue-50/30'}`}
                                     >
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
@@ -216,7 +243,7 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                                                 <div className="text-xs text-t-muted">Stellar Network</div>
                                             </div>
                                         </div>
-                                        {connecting === 'stellar' ? (
+                                        {freighter.isConnecting ? (
                                             <span className="w-4 h-4 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
                                         ) : installed.freighter && (
                                             <span className="text-[10px] uppercase font-bold tracking-wide text-green-600 bg-green-50 px-2 py-1 rounded-md">Installed</span>
@@ -248,7 +275,10 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
 
                                     {/* MetaMask */}
                                     <button
-                                        onClick={() => handleConnect('evm')}
+                                        onClick={() => {
+                                            const provider = installed.discovered.find(p => p.info.rdns === 'io.metamask')?.provider;
+                                            handleConnect('evm', provider);
+                                        }}
                                         disabled={connecting !== null}
                                         className={`w-full text-left p-4 rounded-xl border flex items-center justify-between transition-all outline-none 
                                             ${connecting === 'evm' ? 'border-orange-200 bg-orange-50/50' : connecting !== null ? 'border-border/50 opacity-50' : 'border-border hover:border-orange-200 hover:bg-orange-50/30'}`}
@@ -271,7 +301,10 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
 
                                     {/* Phantom */}
                                     <button
-                                        onClick={() => handleConnect('evm')}
+                                        onClick={() => {
+                                            const provider = installed.discovered.find(p => p.info.rdns === 'app.phantom')?.provider;
+                                            handleConnect('evm', provider);
+                                        }}
                                         disabled={connecting !== null}
                                         className={`w-full text-left p-4 rounded-xl border flex items-center justify-between transition-all outline-none 
                                             ${connecting === 'evm' ? 'border-purple-200 bg-purple-50/50' : connecting !== null ? 'border-border/50 opacity-50' : 'border-border hover:border-purple-200 hover:bg-purple-50/30'}`}
@@ -294,7 +327,10 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
 
                                     {/* Base Account */}
                                     <button
-                                        onClick={() => handleConnect('evm')}
+                                        onClick={() => {
+                                            const provider = installed.discovered.find(p => p.info.rdns === 'com.coinbase.wallet')?.provider;
+                                            handleConnect('evm', provider);
+                                        }}
                                         disabled={connecting !== null}
                                         className={`w-full text-left p-4 rounded-xl border flex items-center justify-between transition-all outline-none 
                                             ${connecting === 'evm' ? 'border-blue-200 bg-blue-50/50' : connecting !== null ? 'border-border/50 opacity-50' : 'border-border hover:border-blue-200 hover:bg-blue-50/30'}`}
@@ -397,7 +433,22 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                         {error?.code === 'failed' && (
                             <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2 text-sm text-red-800 animate-fade-in">
                                 <AlertCircle size={16} className="flex-shrink-0 mt-0.5 text-red-500" />
-                                <p>Connection was cancelled or failed. Please try again.</p>
+                                <div>
+                                    <p className="font-medium">
+                                        {error.message === 'LOCKED' ? 'Freighter is locked' : 
+                                         error.message === 'ACCESS_DENIED' ? 'Access denied' : 
+                                         'Connection failed'}
+                                    </p>
+                                    <div className="text-xs mt-1 opacity-80">
+                                        {error.message === 'LOCKED' ? (
+                                            <span>Open the extension and enter your password.</span>
+                                        ) : error.message === 'ACCESS_DENIED' ? (
+                                            <span>Open Freighter &rarr; Connected Sites and allow this site.</span>
+                                        ) : (
+                                            error.message || 'The connection was cancelled or failed. Please try again.'
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>
