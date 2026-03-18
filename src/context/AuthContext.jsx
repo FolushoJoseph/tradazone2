@@ -106,8 +106,15 @@ export function AuthProvider({ children }) {
             const starknet = await connect();
 
             if (!starknet) throw new Error('No wallet selected');
-
-            await starknet.enable({ showModal: true });
+            
+            // For v3 of get-starknet we just use the connect() method which returns the selected connection
+            const isPreauthorized = await starknet.isPreauthorized();
+            if (!isPreauthorized) {
+                await starknet.enable({ starknetVersion: "v4" }).catch(() => {
+                     // try v3 as fallback
+                     return starknet.enable();
+                });
+            }
 
             if (starknet.isConnected) {
                 const addr = starknet.selectedAddress;

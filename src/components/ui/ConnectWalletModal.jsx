@@ -145,6 +145,8 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
         try {
             const result = await connectWalletFn(type, provider);
             if (result.success) {
+                // For stellar, the connect() method only returned the result and didn't update state.
+                // But connectWalletFn (from useAuth) actually updates state internally.
                 if (onConnect) onConnect(type);
             } else if (result.error === 'not_installed') {
                 setError({ type, code: 'not_installed' });
