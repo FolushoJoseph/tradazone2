@@ -1,0 +1,17 @@
+services:
+  tradazone-dev:
+    container_name: tradazone-customer-list-dev
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      # Map the current directory to /app in the container for hot-reloading
+      - .:/app
+      # Prevent the local node_modules from overwriting the container's linux-compiled node_modules
+      - /app/node_modules
+    environment:
+      # Vite sometimes needs this explicitly set for HMR (Hot Module Replacement) inside Docker
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true

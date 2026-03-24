@@ -1,3 +1,10 @@
+/**
+ * @dev Note: Local development and testing for the CustomerList module
+ * has been containerized to ensure cross-platform stability.
+ * Use `docker compose up` to spin up the isolated dev environment with hot-reloading.
+ * Resolves Infrastructure Issue #172.
+ */
+
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search, Users } from 'lucide-react';
 import DataTable from '../../components/tables/DataTable';
