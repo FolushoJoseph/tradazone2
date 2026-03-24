@@ -43,7 +43,7 @@ The goal is to give small businesses and freelancers a **single, elegant dashboa
 git clone https://github.com/FolushoJoseph/Tradazone.git
 
 # 2. Navigate into the project directory
-cd Tradazone/tradazone
+cd Tradazone
 
 # 3. Install dependencies
 npm install
@@ -157,11 +157,52 @@ We have adopted the following core architectural components:
 - **Positive**: Lightweight bundle size, ultra-fast UI response times, and a clear, modular architecture that lowers the barrier to entry for new contributors.
 - **Negative**: Requires manual implementation of complex side effects that more prescriptive state management libraries would otherwise automate.
 
+### ADR-002: API Gateway Stack Selection (Implementation Reference)
+
+- **Status:** Accepted
+- **Date:** 2026-03-24
+- **Context:** The app currently runs in frontend-only mode with mock data, but feature modules (`customers`, `invoices`, `checkouts`, `items`) already depend on a stable API boundary.
+- **Decision:** Keep a centralized JavaScript API gateway module in `src/services/api.js`, using `VITE_API_URL` for runtime base URL configuration and mock-backed async methods until backend endpoints are ready.
+- **Consequences:** UI pages can evolve independently from backend readiness and move to real endpoints incrementally by replacing gateway methods. Tradeoff: temporary mock parity maintenance is required.
+
+---
+
+## 🔧 Developer Setup Notes
+
+### Modifying `ProfileSettings`
+
+`ProfileSettings` lives in `src/pages/settings/ProfileSettings.jsx` and depends on:
+- `useAuth()` from `src/context/AuthContext.jsx` (for initial `name`/`email`)
+- Reusable form controls in `src/components/forms/Input` and `src/components/forms/Button`
+
+Recommended local workflow before editing:
+
+```bash
+# Start dev server
+npm run dev
+
+# Optional quality checks before pushing
+npm run lint
+npm run build
+```
+
+Implementation notes:
+- Keep `formData` keys aligned with field names used in `handleChange`.
+- Preserve controlled inputs (`value` + `onChange`) to avoid React state drift.
+- If introducing persistence, wire submit logic through `src/services/api.js` (or context action) rather than direct component-level side effects.
+- Validate mobile behavior for the `grid grid-cols-1 md:grid-cols-2` layout.
+
+Manual test checklist after edits:
+- Navigate to Settings > Profile and confirm existing user name/email are prefilled.
+- Edit each field and verify updates are reflected in local component state.
+- Submit and verify there are no runtime errors in the browser console.
+
 ---
 
 ## 🤝 Contributing
 
 Contributions, bug reports, and feature suggestions are all welcome!
+For full onboarding and SignUp-specific contributor guidance, see `CONTRIBUTING.md`.
 
 ### How to Contribute
 

@@ -1,5 +1,13 @@
 // API Service for Tradazone
 // Handles data fetching and backend integration
+//
+// ADR-API-001 (Accepted, 2026-03-24):
+// We use a centralized JavaScript gateway module as the API boundary for UI features.
+// Context: backend endpoints are still being phased in while pages need stable contracts.
+// Decision: keep `api` domain groups (`customers`, `invoices`, `checkouts`, `items`)
+// in this file and resolve base URL from `VITE_API_URL` with a local fallback.
+// Consequence: feature pages can ship against consistent async interfaces now and
+// migrate method-by-method to real HTTP calls without rewriting page-level logic.
 
 import { mockCustomers, mockInvoices, mockCheckouts, mockItems } from '../data/mockData';
 
