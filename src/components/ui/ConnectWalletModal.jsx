@@ -1,3 +1,21 @@
+/**
+ * @fileoverview ConnectWalletModal — multi-network wallet connection modal.
+ *
+ * Supports the following wallet providers:
+ *  - LOBSTR  (Stellar / XLM)
+ *  - Argent  (Starknet / STRK)
+ *  - MetaMask (EVM)
+ *  - Phantom  (Solana / EVM)
+ *  - Base Account / Coinbase Wallet (EVM)
+ *  - Generic Starknet wallets (Braavos, etc.)
+ *  - Generic EVM / browser-injected wallets
+ *
+ * Wallet discovery relies on EIP-6963 (`useDiscoveredProviders`) for EVM
+ * providers, and on direct `window` object sniffing for Stellar/Starknet.
+ *
+ * @module ConnectWalletModal
+ */
+
 import { useState, useEffect } from 'react';
 import { X, ExternalLink, AlertCircle, ChevronLeft } from 'lucide-react';
 import Logo from './Logo';
@@ -5,7 +23,126 @@ import { useDiscoveredProviders } from '../../utils/wallet-discovery';
 import { useLobstr } from '../../hooks/useLobstr';
 import { useAuth } from '../../context/AuthContext';
 
-// Stellar star icon
+// ---------------------------------------------------------------------------
+// Type definitions (JSDoc interfaces)
+// ---------------------------------------------------------------------------
+
+/**
+ * @typedef {'stellar' | 'starknet' | 'evm' | 'starknet_generic'} WalletType
+ * Identifies which network / protocol the wallet uses.
+ *
+ * | Value             | Network     | Example wallets          |
+ * |-------------------|-------------|--------------------------|
+ * | `'stellar'`       | Stellar     | LOBSTR                   |
+ * | `'starknet'`      | Starknet    | Argent X                 |
+ * | `'evm'`           | EVM         | MetaMask, Phantom, Base  |
+ * | `'starknet_generic'` | Starknet | Braavos, any injected    |
+ */
+
+/**
+ * @typedef {'not_installed' | 'failed' | 'already_connecting'} WalletErrorCode
+ * Standardised error codes surfaced from `connectWalletFn`.
+ *
+ * | Code               | Meaning                                                  |
+ * |--------------------|----------------------------------------------------------|
+ * | `'not_installed'`  | Extension / app is not present in the browser            |
+ * | `'failed'`         | Connection attempt rejected or errored out               |
+ * | `'already_connecting'` | A connection attempt is already in flight           |
+ */
+
+/**
+ * @typedef {Object} ConnectWalletResult
+ * Shape returned by `connectWalletFn`.
+ *
+ * @property {true}  [success]  - Present and `true` when the wallet connected successfully.
+ * @property {WalletErrorCode} [error] - Present when the connection did not succeed.
+ *   - `'not_installed'`      — wallet extension / app absent from browser
+ *   - `'already_connecting'` — a prior attempt is still in progress
+ *   - Any other string       — generic failure (user rejected, timeout, etc.)
+ */
+
+/**
+ * @typedef {Object} LobstrConnectResult
+ * Shape returned by `useLobstr().connect()`.
+ * Mirrors the LOBSTR Signer Extension API response, normalised by `useLobstr`.
+ *
+ * @property {true}   [success]  - Set when the connection succeeded.
+ * @property {string} [address]  - The Stellar public key (G-address) of the connected account.
+ * @property {'PUBLIC' | 'TESTNET'} [network] - The Stellar network the wallet is on.
+ * @property {string} [error]    - Error token on failure.
+ *   Known values:
+ *   - `'NOT_INSTALLED'`  — LOBSTR extension not detected
+ *   - `'LOCKED'`         — Extension is installed but password-locked
+ *   - `'ACCESS_DENIED'`  — User denied the connection request
+ */
+
+/**
+ * @typedef {Object} WalletErrorState
+ * Internal error state stored in `ConnectWalletModal`.
+ *
+ * @property {WalletType} type    - Which wallet provider triggered the error.
+ * @property {WalletErrorCode} code - Normalised error code for rendering the
+ *   correct error message and install-link.
+ * @property {string} [message]  - Raw error token forwarded from the provider
+ *   (e.g. `'LOCKED'`, `'ACCESS_DENIED'`). Used for fine-grained messaging.
+ */
+
+/**
+ * @typedef {Object} InstalledWallets
+ * Map of detected (installed) wallet providers in the current browser.
+ * Built by `useWalletDetection` and updated asynchronously.
+ *
+ * @property {boolean}  lobstr    - LOBSTR Stellar extension is detected.
+ * @property {boolean}  argent    - Argent X (Starknet) extension is detected.
+ * @property {boolean}  metamask  - MetaMask extension is detected.
+ * @property {boolean}  phantom   - Phantom wallet is detected.
+ * @property {boolean}  base      - Coinbase / Base wallet is detected.
+ * @property {Array<import('../../utils/wallet-discovery').EIP6963ProviderDetail>} discovered
+ *   - Full list of EIP-6963 discovered providers, used to extract the
+ *     matching `provider` object when initiating an EVM connection.
+ */
+
+/**
+ * @typedef {Object} ConnectWalletModalProps
+ * Props accepted by the `ConnectWalletModal` component.
+ *
+ * @property {boolean} isOpen
+ *   Controls modal visibility. The component renders `null` when `false`.
+ *
+ * @property {() => void} onClose
+ *   Called when the user dismisses the modal (backdrop click or ✕ button).
+ *   Not called while a connection attempt is in flight (`connecting !== null`).
+ *
+ * @property {(walletType: WalletType) => void} [onConnect]
+ *   Optional success callback. Invoked after a wallet connects successfully,
+ *   receiving the `WalletType` string of the connected wallet.
+ *
+ * @property {(type: WalletType, provider?: unknown) => Promise<ConnectWalletResult>} connectWalletFn
+ *   Async function that performs the actual wallet connection. Typically
+ *   sourced from `useAuth().connectWallet`.
+ *
+ *   Parameters:
+ *   - `type`     — `WalletType` indicating which protocol to use.
+ *   - `provider` — Optional EIP-6963 provider object for EVM wallets.
+ *     When `undefined`, the function should fall back to `window.ethereum`.
+ *
+ *   Returns a `ConnectWalletResult` promise.
+ */
+
+// ---------------------------------------------------------------------------
+// Internal icon components
+// ---------------------------------------------------------------------------
+
+/**
+ * @typedef {Object} IconProps
+ * @property {number} [size=20] - Width and height of the SVG in pixels.
+ */
+
+/**
+ * Stellar star icon used for the LOBSTR wallet button.
+ * @param {IconProps} props
+ * @returns {JSX.Element}
+ */
 function StellarIcon({ size = 20 }) {
     return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -14,7 +151,11 @@ function StellarIcon({ size = 20 }) {
     );
 }
 
-// Argent Icon
+/**
+ * Argent X icon used for the Starknet wallet button.
+ * @param {IconProps} props
+ * @returns {JSX.Element}
+ */
 function ArgentIcon({ size = 20 }) {
     return (
         <svg width={size} height={size} viewBox="0 0 20 20" fill="none">
@@ -23,7 +164,11 @@ function ArgentIcon({ size = 20 }) {
     );
 }
 
-// Generic Wallet Icon
+/**
+ * Generic wallet icon used as a fallback for unknown / generic wallets.
+ * @param {IconProps} props
+ * @returns {JSX.Element}
+ */
 function WalletIcon({ size = 20 }) {
     return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -34,7 +179,11 @@ function WalletIcon({ size = 20 }) {
     );
 }
 
-// MetaMask Icon (simplified fox)
+/**
+ * MetaMask fox icon used for the MetaMask wallet button.
+ * @param {IconProps} props
+ * @returns {JSX.Element}
+ */
 function MetaMaskIcon({ size = 20 }) {
     return (
         <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
@@ -48,7 +197,11 @@ function MetaMaskIcon({ size = 20 }) {
     );
 }
 
-// Phantom Icon (simplified ghost)
+/**
+ * Phantom ghost icon used for the Phantom wallet button.
+ * @param {IconProps} props
+ * @returns {JSX.Element}
+ */
 function PhantomIcon({ size = 20 }) {
     return (
         <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
@@ -57,7 +210,11 @@ function PhantomIcon({ size = 20 }) {
     );
 }
 
-// Base Icon (blue circle over hollow circle)
+/**
+ * Base / Coinbase Wallet icon used for the Base Account wallet button.
+ * @param {IconProps} props
+ * @returns {JSX.Element}
+ */
 function BaseIcon({ size = 20 }) {
     return (
         <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
@@ -67,8 +224,32 @@ function BaseIcon({ size = 20 }) {
     );
 }
 
+// ---------------------------------------------------------------------------
+// useWalletDetection hook
+// ---------------------------------------------------------------------------
+
+/**
+ * Detects which wallet extensions / apps are present in the current browser.
+ *
+ * Detection strategy:
+ * - **EIP-6963** (`useDiscoveredProviders`): Standard discovery for EVM wallets.
+ *   Provider objects are matched by their `rdns` identifier.
+ * - **Window sniffing**: Used for Stellar (`window.lobstr`) and Starknet
+ *   (`window.starknet_argentX` / `window.starknet?.argentX`) which do not
+ *   participate in EIP-6963.
+ * - **Legacy `window.ethereum` flags** (`isMetaMask`, `isPhantom`, etc.): Checked
+ *   as a fallback for EVM wallets not yet using EIP-6963.
+ *
+ * Two follow-up checks are scheduled at 1 s and 2.5 s after mount because some
+ * extensions (especially LOBSTR and Argent) inject their objects into `window`
+ * after the initial render cycle.
+ *
+ * @returns {InstalledWallets} Snapshot of detected wallet providers.
+ */
 function useWalletDetection() {
     const discoveredProviders = useDiscoveredProviders();
+
+    /** @type {[InstalledWallets, React.Dispatch<React.SetStateAction<InstalledWallets>>]} */
     const [installed, setInstalled] = useState({
         lobstr: false,
         argent: false,
@@ -81,16 +262,13 @@ function useWalletDetection() {
     useEffect(() => {
         const checkInstallations = () => {
             const eth = window.ethereum;
-            
-            // Checking common identifiers in window
-            // LOBSTR
+
             const hasLobstr = typeof window !== 'undefined' && !!window.lobstr;
             const hasArgent = typeof window !== 'undefined' && !!(window.starknet_argentX || window.starknet?.argentX);
-            
-            // Use EIP-6963 providers for detection if available
+
             const hasMetaMask = discoveredProviders.some(p => p.info.rdns === 'io.metamask') || !!(eth && eth.isMetaMask);
-            const hasPhantom = discoveredProviders.some(p => p.info.rdns === 'app.phantom') || !!(window.phantom?.ethereum || (eth && eth.isPhantom));
-            const hasBase = discoveredProviders.some(p => p.info.rdns === 'com.coinbase.wallet') || !!window.coinbaseWalletExtension || !!(eth && eth.isCoinbaseWallet);
+            const hasPhantom  = discoveredProviders.some(p => p.info.rdns === 'app.phantom')  || !!(window.phantom?.ethereum || (eth && eth.isPhantom));
+            const hasBase     = discoveredProviders.some(p => p.info.rdns === 'com.coinbase.wallet') || !!window.coinbaseWalletExtension || !!(eth && eth.isCoinbaseWallet);
 
             setInstalled({
                 lobstr: hasLobstr,
@@ -104,10 +282,10 @@ function useWalletDetection() {
 
         checkInstallations();
 
-        // Non-EIP-6963 extensions (like LOBSTR/Argent) sometimes inject a bit later
-        const timer = setTimeout(checkInstallations, 1000);
-        const timer2 = setTimeout(checkInstallations, 2500); // Second check for slow injectors
-        
+        // Some extensions (LOBSTR, Argent) inject into window after first render
+        const timer  = setTimeout(checkInstallations, 1000);
+        const timer2 = setTimeout(checkInstallations, 2500);
+
         return () => {
             clearTimeout(timer);
             clearTimeout(timer2);
@@ -117,17 +295,97 @@ function useWalletDetection() {
     return installed;
 }
 
+// ---------------------------------------------------------------------------
+// ConnectWalletModal component
+// ---------------------------------------------------------------------------
+
+/**
+ * ConnectWalletModal
+ *
+ * A bottom-sheet (mobile) / centred dialog (desktop) that lets the user
+ * connect one of several supported wallets to Tradazone.
+ *
+ * ## Connection flows
+ *
+ * ### LOBSTR (Stellar)
+ * Bypasses `connectWalletFn` and calls `useLobstr().connect()` directly,
+ * then calls `completeWalletLogin(address, 'stellar')` from `useAuth` to
+ * persist the session.
+ *
+ * Expected `LobstrConnectResult` on success:
+ * ```json
+ * { "success": true, "address": "GABC...XYZ", "network": "PUBLIC" }
+ * ```
+ *
+ * Expected `LobstrConnectResult` on failure:
+ * ```json
+ * { "success": false, "error": "LOCKED" }
+ * ```
+ *
+ * ### Argent / Starknet
+ * Calls `connectWalletFn('starknet')`.
+ * Expected `ConnectWalletResult` on success:
+ * ```json
+ * { "success": true }
+ * ```
+ *
+ * ### MetaMask / Phantom / Base (EVM — named)
+ * Extracts the matching EIP-6963 provider from `installed.discovered` and
+ * calls `connectWalletFn('evm', provider)`.
+ * Expected `ConnectWalletResult` on success:
+ * ```json
+ * { "success": true }
+ * ```
+ *
+ * ### Generic Starknet wallets (Braavos, etc.)
+ * Calls `connectWalletFn('starknet_generic')` with no provider.
+ *
+ * ### Generic EVM / browser wallets
+ * Calls `connectWalletFn('evm')` with no provider, relying on the
+ * implementation to fall back to `window.ethereum`.
+ *
+ * ## Error handling
+ *
+ * `connectWalletFn` must resolve (never reject) and return a
+ * `ConnectWalletResult`. The component maps the `error` field:
+ *
+ * | `error` value          | UX behaviour                              |
+ * |------------------------|-------------------------------------------|
+ * | `'not_installed'`      | Shows install banner with extension link  |
+ * | `'already_connecting'` | Silently ignored; spinner stays visible   |
+ * | Anything else          | Shows generic "Connection failed" banner  |
+ *
+ * @param {ConnectWalletModalProps} props
+ * @returns {JSX.Element | null} The modal element, or `null` when `isOpen` is `false`.
+ */
 function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
-    const [connecting, setConnecting] = useState(null); // 'starknet' | 'stellar' | 'evm' | 'starknet_generic' | null
+    /**
+     * Tracks which wallet type is currently mid-connection.
+     * `null` means no connection is in progress.
+     * @type {[WalletType | null, React.Dispatch<React.SetStateAction<WalletType | null>>]}
+     */
+    const [connecting, setConnecting] = useState(null);
+
+    /**
+     * Stores the most recent connection error for display in the modal.
+     * Reset to `null` on every new connection attempt and when the modal opens.
+     * @type {[WalletErrorState | null, React.Dispatch<React.SetStateAction<WalletErrorState | null>>]}
+     */
     const [error, setError] = useState(null);
-    const [view, setView] = useState('primary'); // 'primary' | 'secondary'
+
+    /**
+     * Controls which wallet list is rendered.
+     * - `'primary'`   — main wallets (LOBSTR, Argent, MetaMask, Phantom, Base)
+     * - `'secondary'` — overflow wallets (generic Starknet / EVM)
+     * @type {['primary' | 'secondary', React.Dispatch<React.SetStateAction<'primary' | 'secondary'>>]}
+     */
+    const [view, setView] = useState('primary');
 
     const { completeWalletLogin, isConnecting: isAuthConnecting } = useAuth();
     const lobstrHook = useLobstr();
-
     const installed = useWalletDetection();
 
-    // Reset state when modal opens
+    // Reset transient state each time the modal is opened
     useEffect(() => {
         if (isOpen) {
             setConnecting(null);
@@ -138,21 +396,32 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
 
     if (!isOpen) return null;
 
+    /**
+     * Initiates a wallet connection via `connectWalletFn`.
+     *
+     * Used for all wallets **except** LOBSTR (which uses `useLobstr().connect()`
+     * directly and has its own inline handler).
+     *
+     * @param {WalletType} type - The wallet protocol to connect.
+     * @param {unknown} [provider] - Optional EIP-6963 provider object. When
+     *   supplied, `connectWalletFn` should use this provider instead of
+     *   `window.ethereum`. Pass `null` / `undefined` for non-EVM wallets.
+     * @returns {Promise<void>}
+     */
     const handleConnect = async (type, provider = null) => {
-        if (connecting) return;
+        if (connecting) return; // Guard: prevent double-invocation
         setConnecting(type);
         setError(null);
         try {
+            /** @type {ConnectWalletResult} */
             const result = await connectWalletFn(type, provider);
             if (result.success) {
-                // For stellar, the connect() method only returned the result and didn't update state.
-                // But connectWalletFn (from useAuth) actually updates state internally.
                 if (onConnect) onConnect(type);
             } else if (result.error === 'not_installed') {
                 setError({ type, code: 'not_installed' });
                 setConnecting(null);
             } else if (result.error === 'already_connecting') {
-                // Connection already in progress, don't reset state
+                // A prior attempt is still in flight — leave spinner visible
             } else {
                 setError({ type, code: 'failed' });
                 setConnecting(null);
@@ -165,13 +434,13 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
 
     return (
         <>
-            {/* Backdrop */}
-            <div 
-                className="fixed inset-0 bg-black/40 z-40 backdrop-blur-sm transition-opacity" 
-                onClick={() => !connecting && onClose()} 
+            {/* Backdrop — clicking dismisses the modal unless connecting */}
+            <div
+                className="fixed inset-0 bg-black/40 z-40 backdrop-blur-sm transition-opacity"
+                onClick={() => !connecting && onClose()}
             />
 
-            {/* Modal */}
+            {/* Modal container */}
             <div className="
                 fixed z-40
                 bottom-0 left-0 right-0
@@ -179,7 +448,7 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                 bg-white shadow-2xl rounded-t-2xl lg:rounded-2xl flex flex-col max-h-[90vh] overflow-hidden
                 animate-slide-up lg:animate-none lg:zoom-in
             ">
-                {/* Header line for mobile */}
+                {/* Mobile drag handle */}
                 <div className="lg:hidden w-10 h-1 bg-border rounded-full mx-auto my-3" />
 
                 <div className="flex-1 overflow-y-auto w-full">
@@ -190,7 +459,7 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                                 <Logo variant="light" className="h-6" />
                             </div>
                         ) : (
-                            <button 
+                            <button
                                 onClick={() => setView('primary')}
                                 className="flex items-center gap-1.5 text-sm font-semibold text-t-primary hover:text-brand transition-colors"
                             >
@@ -198,10 +467,11 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                                 Back
                             </button>
                         )}
-                        <button 
+                        <button
                             onClick={onClose}
                             disabled={connecting !== null}
                             className="text-t-muted hover:text-t-primary transition-colors disabled:opacity-50"
+                            aria-label="Close modal"
                         >
                             <X size={20} />
                         </button>
@@ -216,16 +486,25 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                         <div className="flex flex-col gap-3">
                             {view === 'primary' ? (
                                 <>
-                                    {/* LOBSTR */}
+                                    {/* -------------------------------------------------- */}
+                                    {/* LOBSTR — Stellar / XLM                             */}
+                                    {/* Uses useLobstr().connect() directly, then calls    */}
+                                    {/* completeWalletLogin(address, 'stellar') on success. */}
+                                    {/* -------------------------------------------------- */}
                                     <button
                                         onClick={async () => {
+                                            /** @type {LobstrConnectResult} */
                                             const result = await lobstrHook.connect();
                                             if (result?.success) {
+                                                // Persist wallet session via AuthContext
                                                 completeWalletLogin(result.address, 'stellar');
                                                 if (onConnect) onConnect('stellar');
                                             } else if (result?.error) {
-                                                // Pass the error code (e.g. NOT_INSTALLED, LOCKED, ACCESS_DENIED)
-                                                setError({ type: 'stellar', code: result.error === 'NOT_INSTALLED' ? 'not_installed' : 'failed', message: result.error });
+                                                setError({
+                                                    type: 'stellar',
+                                                    code: result.error === 'NOT_INSTALLED' ? 'not_installed' : 'failed',
+                                                    message: result.error,
+                                                });
                                             }
                                         }}
                                         disabled={connecting !== null || lobstrHook.isConnecting}
@@ -253,7 +532,10 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                                         )}
                                     </button>
 
-                                    {/* Argent */}
+                                    {/* -------------------------------------------------- */}
+                                    {/* Argent X — Starknet / STRK                         */}
+                                    {/* connectWalletFn('starknet')                        */}
+                                    {/* -------------------------------------------------- */}
                                     <button
                                         onClick={() => handleConnect('starknet')}
                                         disabled={connecting !== null}
@@ -276,7 +558,11 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                                         )}
                                     </button>
 
-                                    {/* MetaMask */}
+                                    {/* -------------------------------------------------- */}
+                                    {/* MetaMask — EVM                                      */}
+                                    {/* Extracts EIP-6963 provider (rdns: io.metamask)      */}
+                                    {/* connectWalletFn('evm', provider)                   */}
+                                    {/* -------------------------------------------------- */}
                                     <button
                                         onClick={() => {
                                             const provider = installed.discovered.find(p => p.info.rdns === 'io.metamask')?.provider;
@@ -302,7 +588,11 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                                         )}
                                     </button>
 
-                                    {/* Phantom */}
+                                    {/* -------------------------------------------------- */}
+                                    {/* Phantom — Solana / EVM                             */}
+                                    {/* Extracts EIP-6963 provider (rdns: app.phantom)     */}
+                                    {/* connectWalletFn('evm', provider)                   */}
+                                    {/* -------------------------------------------------- */}
                                     <button
                                         onClick={() => {
                                             const provider = installed.discovered.find(p => p.info.rdns === 'app.phantom')?.provider;
@@ -328,7 +618,11 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                                         )}
                                     </button>
 
-                                    {/* Base Account */}
+                                    {/* -------------------------------------------------- */}
+                                    {/* Base Account — Coinbase Smart Wallet / EVM         */}
+                                    {/* Extracts EIP-6963 provider (rdns: com.coinbase…)   */}
+                                    {/* connectWalletFn('evm', provider)                   */}
+                                    {/* -------------------------------------------------- */}
                                     <button
                                         onClick={() => {
                                             const provider = installed.discovered.find(p => p.info.rdns === 'com.coinbase.wallet')?.provider;
@@ -364,7 +658,10 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                                 </>
                             ) : (
                                 <>
-                                    {/* Generic Starknet Wallets */}
+                                    {/* -------------------------------------------------- */}
+                                    {/* Other Starknet wallets (Braavos, etc.)             */}
+                                    {/* connectWalletFn('starknet_generic')                */}
+                                    {/* -------------------------------------------------- */}
                                     <button
                                         onClick={() => handleConnect('starknet_generic')}
                                         disabled={connecting !== null}
@@ -385,7 +682,10 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                                         )}
                                     </button>
 
-                                    {/* EVM / Browser Wallets */}
+                                    {/* -------------------------------------------------- */}
+                                    {/* Generic EVM / browser-injected wallet              */}
+                                    {/* connectWalletFn('evm') — falls back to window.ethereum */}
+                                    {/* -------------------------------------------------- */}
                                     <button
                                         onClick={() => handleConnect('evm')}
                                         disabled={connecting !== null}
@@ -409,21 +709,27 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                             )}
                         </div>
 
-                        {/* Error Handling */}
+                        {/* ---------------------------------------------------------------- */}
+                        {/* Error banners                                                    */}
+                        {/*                                                                  */}
+                        {/* not_installed → show wallet-specific install link               */}
+                        {/* failed        → show error message / instructions               */}
+                        {/* ---------------------------------------------------------------- */}
+
                         {error?.code === 'not_installed' && (
                             <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2 text-sm text-red-800 animate-fade-in">
                                 <AlertCircle size={16} className="flex-shrink-0 mt-0.5 text-red-500" />
                                 <div>
                                     <p className="font-medium">
-                                        {error.type === 'stellar' ? 'LOBSTR is not installed.' : 
-                                         error.type === 'starknet' ? 'Argent is not installed.' :
-                                         error.type === 'evm' ? 'EVM wallet not detected in browser.' :
+                                        {error.type === 'stellar'  ? 'LOBSTR is not installed.'       :
+                                         error.type === 'starknet' ? 'Argent is not installed.'        :
+                                         error.type === 'evm'      ? 'EVM wallet not detected in browser.' :
                                          'Wallet is not installed.'}
                                     </p>
                                     {(error.type === 'stellar' || error.type === 'starknet') && (
-                                        <a 
-                                            href={error.type === 'stellar' ? 'https://lobstr.co/' : 'https://www.argent.xyz/argent-x/'} 
-                                            target="_blank" 
+                                        <a
+                                            href={error.type === 'stellar' ? 'https://lobstr.co/' : 'https://www.argent.xyz/argent-x/'}
+                                            target="_blank"
                                             rel="noopener noreferrer"
                                             className="inline-flex items-center gap-1 font-semibold underline mt-1"
                                         >
@@ -433,13 +739,14 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                                 </div>
                             </div>
                         )}
+
                         {error?.code === 'failed' && (
                             <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2 text-sm text-red-800 animate-fade-in">
                                 <AlertCircle size={16} className="flex-shrink-0 mt-0.5 text-red-500" />
                                 <div>
                                     <p className="font-medium">
-                                        {error.message === 'LOCKED' ? 'LOBSTR is locked' : 
-                                         error.message === 'ACCESS_DENIED' ? 'Access denied' : 
+                                        {error.message === 'LOCKED'       ? 'LOBSTR is locked'  :
+                                         error.message === 'ACCESS_DENIED' ? 'Access denied'     :
                                          'Connection failed'}
                                     </p>
                                     <div className="text-xs mt-1 opacity-80">
