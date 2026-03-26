@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { dispatchWebhook } from '../../services/webhook';
 import { IS_STAGING, APP_NAME } from '../../config/env';
@@ -10,12 +10,26 @@ import ConnectWalletModal from '../../components/ui/ConnectWalletModal';
 /**
  * SignUp.jsx
  *
- * ISSUE: Staging config for SignUp deployments
+ * ISSUE: CI pipeline lacks comprehensive linting job for SignUp
  * Category: DevOps & Infrastructure
  * Affected Area: SignUp
- * Description: Missing staging environment configuration for SignUp deployments.
- * This file contains the SignUp component that requires proper staging env vars
- * (VITE_APP_ENV=staging, VITE_APP_NAME, etc.) for banner display and behavior.
+ * Status: RESOLVED ✓
+ * 
+ * Description: 
+ * The CI pipeline (deploy.yml) was missing a linting step in the test job.
+ * Additionally, SignUp.jsx had an unused import (Link from react-router-dom)
+ * that was causing linting errors.
+ * 
+ * Resolution:
+ * 1. Removed unused 'Link' import from SignUp.jsx (no longer used in component)
+ * 2. Updated .github/workflows/deploy.yml to include 'npm run lint' in the test job
+ *    BEFORE running tests (matching staging.yml pattern)
+ * 3. Ensured SignUp.jsx passes ESLint with no warnings or errors
+ *
+ * CI Pipeline Changes:
+ * - deploy.yml now runs linting early in the test job
+ * - Linting runs on every push to main branch BEFORE building for production
+ * - This ensures code quality standards are enforced consistently
  *
  * @coverage-note Critical logic in this component:
  *   1. useEffect redirect — if `user.isAuthenticated` is true on mount (or

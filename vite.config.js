@@ -48,7 +48,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     test: {
-      environment: 'jsdom',
+      environment: 'happy-dom',
       globals: true,
       setupFiles: './src/test/setup.js',
     },
