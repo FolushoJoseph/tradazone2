@@ -85,6 +85,28 @@ describe('addItem', () => {
   });
 });
 
+// ─── deleteItems ─────────────────────────────────────────────────────────────
+
+describe('deleteItems', () => {
+  it('removes multiple items from the list by ids', () => {
+    const { result } = renderHook(() => useData(), { wrapper });
+    let i1, i2, i3;
+    act(() => {
+      i1 = result.current.addItem({ name: 'Item 1', price: '10' });
+      i2 = result.current.addItem({ name: 'Item 2', price: '20' });
+      i3 = result.current.addItem({ name: 'Item 3', price: '30' });
+    });
+    expect(result.current.items).toHaveLength(3);
+
+    act(() => {
+      result.current.deleteItems([i1.id, i3.id]);
+    });
+
+    expect(result.current.items).toHaveLength(1);
+    expect(result.current.items[0].id).toBe(i2.id);
+  });
+});
+
 // ─── addInvoice ──────────────────────────────────────────────────────────────
 
 describe('addInvoice', () => {

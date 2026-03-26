@@ -57,7 +57,8 @@ The goal is to give small businesses and freelancers a **single, elegant dashboa
 - 🛒 **Checkout flows** — Create shareable checkout links for products/services
 - 📬 **Mail Checkout** — Send payment links directly to customers via email
 - 👥 **Customer management** — Add, view, and manage your customer directory
-- 📦 **Items & Services catalog** — Build a reusable catalog of your offerings
+- 📦 **Items & Services catalog** — Build a reusable catalog of your offerings (now supports bulk-delete, resolving issue #123)
+<!-- ISSUE #123: Added bulk-delete functionality for items in README catalog -->
 - 📊 **Dashboard analytics** — Visual overview of revenue and activity via Chart.js
 - 🔐 **Authentication & Onboarding** — Sign up/in flows with a multi-step onboarding experience
 - 🌐 **Web3 wallet support** — Connect Freighter (Stellar) and Starknet wallets for crypto payments

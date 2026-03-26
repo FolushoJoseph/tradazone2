@@ -20,9 +20,11 @@
  *   - pnpm build:size  : Build and check sizes
  */
 
-import { createContext, useContext, useState, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { dispatchWebhook, setWebhookUrl, getWebhookUrl } from '../services/webhook';
 import { toUtcMidnightIso } from '../utils/date';
+
+// ISSUE #123: Added bulk-delete functionality for items.
 
 /**
  * DataContext - React Context for managing application data state
@@ -146,6 +148,19 @@ export function DataProvider({ children }) {
             return next;
         });
         return newItem;
+    }, []);
+
+    /**
+     * deleteItems — Bulk deletes multiple items/services by their IDs
+     * @param {string[]} ids - Array of item IDs to delete
+     * @returns {void}
+     */
+    const deleteItems = useCallback((ids) => {
+        setItems((prev) => {
+            const next = prev.filter((item) => !ids.includes(item.id));
+            save(KEYS.items, next);
+            return next;
+        });
     }, []);
 
     // ---------- Invoices ----------
@@ -309,6 +324,7 @@ export function DataProvider({ children }) {
                 dashboardStats: { walletBalance: '0', currency: 'STRK', receivables: '0', totalTransactions: 0, totalCustomers: 0 },
                 addCustomer,
                 addItem,
+                deleteItems,
                 addInvoice,
                 addCheckout,
                 markCheckoutPaid,
