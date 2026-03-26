@@ -1,9 +1,19 @@
 import { createContext, useContext, useState, useCallback, useRef } from 'react';
 import { dispatchWebhook, setWebhookUrl, getWebhookUrl } from '../services/webhook';
 
+/**
+ * DataContext - React Context for managing application data state
+ * Handles customers, invoices, checkouts, and items with localStorage persistence
+ * @readonly
+ */
 const DataContext = createContext(null);
 
 /* ---------- localStorage helpers ---------- */
+/**
+ * localStorage keys for data persistence
+ * @readonly
+ * @enum {string}
+ */
 const KEYS = {
     customers: 'tradazone_customers',
     invoices: 'tradazone_invoices',
@@ -13,11 +23,24 @@ const KEYS = {
 
 
 
+/**
+ * Saves data to localStorage as JSON
+ * @param {string} key - localStorage key
+ * @param {*} data - Data to serialize and store
+ */
 function save(key, data) {
     localStorage.setItem(key, JSON.stringify(data));
 }
 
 /* ---------- Provider ---------- */
+/**
+ * DataProvider - Main data management context for the application
+ * Provides state and operations for customers, invoices, checkouts, and items
+ * Persists all data to localStorage and dispatches webhooks on certain actions
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components
+ * @returns {JSX.Element}
+ */
 export function DataProvider({ children }) {
     // Clear persisted data so the app starts as a fresh new user
     localStorage.removeItem(KEYS.customers);
@@ -36,6 +59,15 @@ export function DataProvider({ children }) {
     const checkoutCountRef = useRef(0);
 
     // ---------- Customers ----------
+    /**
+     * Adds a new customer to the system
+     * @param {Object} data - Customer data
+     * @param {string} data.name - Customer name
+     * @param {string} data.email - Customer email address
+     * @param {string} [data.phone] - Customer phone number (optional)
+     * @param {string} [data.address] - Customer address (optional)
+     * @returns {Object} The created customer object with generated ID
+     */
     const addCustomer = useCallback((data) => {
         const newCustomer = {
             id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -57,6 +89,16 @@ export function DataProvider({ children }) {
     }, []);
 
     // ---------- Items ----------
+    /**
+     * Adds a new item/service to the catalog
+     * @param {Object} data - Item data
+     * @param {string} data.name - Item name
+     * @param {string} [data.description] - Item description (optional)
+     * @param {string} [data.type] - Item type: 'service' or 'product' (default: 'service')
+     * @param {string|number} data.price - Item price
+     * @param {string} [data.unit] - Unit of measurement (default: 'unit')
+     * @returns {Object} The created item object with generated ID
+     */
     const addItem = useCallback((data) => {
         const newItem = {
             id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -76,6 +118,15 @@ export function DataProvider({ children }) {
     }, []);
 
     // ---------- Invoices ----------
+    /**
+     * Creates a new invoice linked to a customer
+     * Calculates total from items and persists to localStorage
+     * @param {Object} data - Invoice data
+     * @param {string} data.customerId - ID of the customer this invoice belongs to
+     * @param {Array} data.items - Array of line items with itemId and quantity
+     * @param {string} [data.dueDate] - Invoice due date
+     * @returns {Object} The created invoice object with generated ID
+     */
     const addInvoice = useCallback(
         (data) => {
             const customer = customers.find((c) => c.id === data.customerId);
@@ -113,6 +164,17 @@ export function DataProvider({ children }) {
     );
 
     // ---------- Checkouts ----------
+    /**
+     * Creates a new checkout/payment request
+     * Generates a unique checkout ID and creates a payment link
+     * Dispatches 'checkout.created' webhook asynchronously
+     * @param {Object} data - Checkout data
+     * @param {string} data.title - Checkout title/description
+     * @param {string|number} data.amount - Payment amount
+     * @param {string} [data.currency] - Currency code (default: 'STRK')
+     * @param {string} [data.description] - Additional description (optional)
+     * @returns {Object} The created checkout object with generated ID and payment link
+     */
     const addCheckout = useCallback(
         (data) => {
             const id = `CHK-${String(++checkoutCountRef.current).padStart(3, '0')}`;
@@ -222,6 +284,12 @@ export function DataProvider({ children }) {
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
+/**
+ * Custom hook to access DataContext state and operations
+ * Must be used within a DataProvider component
+ * @throws {Error} If used outside of DataProvider
+ * @returns {Object} Context value containing state and functions
+ */
 export function useData() {
     const ctx = useContext(DataContext);
     if (!ctx) throw new Error('useData must be used within a DataProvider');
