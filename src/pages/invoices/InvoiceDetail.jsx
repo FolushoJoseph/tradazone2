@@ -92,14 +92,6 @@ function InvoiceDetail() {
     );
   }, [invoice, debouncedSearch]);
 
-    const filteredItems = useMemo(() => {
-        if (!invoice) return [];
-        if (!debouncedSearch.trim()) return invoice.items;
-
-        const term = debouncedSearch.toLowerCase();
-        return invoice.items.filter((item) => item.name.toLowerCase().includes(term));
-    }, [invoice, debouncedSearch]);
-
   const calculateTotal = () => {
     return invoice.items.reduce(
       (total, item) => total + parseFloat(item.price) * item.quantity,

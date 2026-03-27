@@ -29,6 +29,11 @@
       "path": "dist/assets/data-context*.js",
       "limit": "50 kB",
       "gzip": true
+    },
+    {
+      "path": "dist/assets/signin-*.js",
+      "limit": "100 kB",
+      "gzip": true
     }
   ],
   "scripts": {

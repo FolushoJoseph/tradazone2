@@ -8,6 +8,8 @@ const SIZE_LIMITS = {
   maxChunkSize: 500,
   // Maximum size for the DataContext chunk specifically (KB)
   maxDataContextSize: 50,
+  // Maximum size for the SignIn chunk specifically (KB)
+  maxSignInSize: 100,
   // Maximum total bundle size (KB)
   maxTotalSize: 1000,
 };
@@ -31,6 +33,10 @@ export default defineConfig(({ mode }) => {
             // Separate DataContext into its own chunk for size monitoring
             if (id.includes('DataContext')) {
               return 'data-context';
+            }
+            // Separate SignIn into its own chunk for size monitoring
+            if (id.includes('SignIn')) {
+              return 'signin';
             }
             // Separate wallet-related code into its own chunk
             if (id.includes('@lobstrco/signer-extension-api') || id.includes('get-starknet') || id.includes('ethers')) {

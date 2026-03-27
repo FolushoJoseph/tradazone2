@@ -2,11 +2,24 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { AlertCircle } from "lucide-react";
-import { IS_STAGING, APP_NAME } from "../../config/env";
+import { APP_NAME } from "../../config/env";
 import illustration from "../../assets/auth-splash.svg";
 import Logo from "../../components/ui/Logo";
 import ConnectWalletModal from "../../components/ui/ConnectWalletModal";
+import StagingBanner from "../../components/ui/StagingBanner";
 
+/**
+ * @fileoverview SignIn page — handles wallet connection and authentication.
+ *
+ * ISSUE: #151 (Build size limits for SignIn)
+ * Category: DevOps & Infrastructure
+ * Affected Area: SignIn
+ * Description: Implement production build size limits and monitoring for SignIn.
+ * This chunk must remain under 100 KB to ensure fast initial page load.
+ * Size limits and monitoring are enforced in vite.config.js and CI.
+ *
+ * @module SignIn
+ */
 function SignIn() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -50,17 +63,7 @@ function SignIn() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* ── Staging environment banner ── */}
-      {IS_STAGING && (
-        <div
-          role="banner"
-          data-testid="staging-banner"
-          className="w-full bg-amber-400 text-amber-900 text-xs font-semibold text-center py-1.5 px-4"
-        >
-          ⚠️ {APP_NAME} — STAGING ENVIRONMENT. Data is not real and may be reset
-          at any time.
-        </div>
-      )}
+      <StagingBanner />
       <div className="flex flex-1">
         {/* ── Left Panel ── */}
         <div className="w-full lg:w-[40%] flex flex-col justify-start px-6 py-8 lg:px-10 lg:py-10 bg-white overflow-y-auto">

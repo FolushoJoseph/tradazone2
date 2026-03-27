@@ -45,6 +45,7 @@ import {
 } from '../../context/AuthContext';
 import { useVirtualList } from '../../hooks/useVirtualList';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import StagingBanner from './StagingBanner';
 
 // ISSUE #70: Virtualization constants for the wallet list.
 // Wallets enter via EIP-6963 discovery and can be numerous; rendering every
@@ -306,6 +307,8 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                 animate-slide-up lg:animate-none lg:zoom-in
             ">
                 <div className="lg:hidden w-10 h-1 bg-border rounded-full mx-auto my-3" />
+
+                <StagingBanner />
 
                 <div className="flex-1 overflow-y-auto w-full">
                     <div className="px-6 pt-2 pb-4 flex justify-between items-center relative border-b border-border/50">

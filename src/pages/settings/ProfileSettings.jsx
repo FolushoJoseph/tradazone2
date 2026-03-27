@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Input from '../../components/forms/Input';
 import Button from '../../components/forms/Button';
 import { useAuthUser } from '../../context/AuthContext';
+import StagingBanner from '../../components/ui/StagingBanner';
 
 // BUG FIX: Form submission succeeded without validating required fields (name, email).
 // Added a `errors` state and a validate() guard in handleSubmit so the form
@@ -45,7 +46,8 @@ function ProfileSettings() {
 
     return (
         <div>
-            <h2 className="text-lg font-semibold mb-6">Profile Settings</h2>
+            <StagingBanner />
+            <h2 className="text-lg font-semibold mb-6 mt-4">Profile Settings</h2>
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <Input label="Full Name" placeholder="Enter your name" value={formData.name} onChange={handleChange('name')} required error={errors.name} />

@@ -46,6 +46,11 @@ jobs:
             echo ""
             echo "DataContext chunk:"
             ls -lh dist/assets/*data-context*.js 2>/dev/null || echo "No data-context chunk found"
+
+            # Check SignIn chunk specifically
+            echo ""
+            echo "SignIn chunk:"
+            ls -lh dist/assets/*signin*.js 2>/dev/null || echo "No signin chunk found"
           fi
 
           # Check total dist size
