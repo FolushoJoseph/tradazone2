@@ -15,26 +15,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "pnpm"
+          cache: "npm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Build project
-        run: pnpm build
+        run: npm run build
 
       - name: Run size-limit check
         run: |
-          pnpm size --json 2>&1 || true
+          npm run size -- --json 2>&1 || true
 
       - name: Analyze bundle sizes
         run: |
@@ -71,7 +66,7 @@ jobs:
       - name: Fail if size limits exceeded
         run: |
           # Check if size-limit reported any errors
-          RESULT=$(pnpm size --json 2>&1 || true)
+          RESULT=$(npm run size -- --json 2>&1 || true)
           if echo "$RESULT" | grep -q "Error"; then
             echo "❌ Bundle size limits exceeded!"
             echo "$RESULT"
