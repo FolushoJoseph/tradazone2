@@ -43,21 +43,46 @@ import ConnectWalletModal from '../../components/ui/ConnectWalletModal';
  *      role="banner" and data-testid="staging-banner" for a11y and testing.
  * Tests: src/test/SignUp.test.jsx
  */
+/**
+ * SignUp page component - entry point for new users to connect their wallet.
+ * 
+ * This component serves as the authentication entry point for the application.
+ * Users who are not yet authenticated can connect their wallet here to sign up.
+ * Authenticated users are automatically redirected away from this page.
+ *
+ * @returns {JSX.Element} The SignUp page with wallet connection UI
+ */
 function SignUp() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const { connectWallet, user } = useAuth();
 
+    /** @type {boolean} */
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    /** @type {string} */
     const redirectTo = searchParams.get('redirect') || '/';
 
+    /**
+     * Redirects authenticated users to the specified destination.
+     * 
+     * Runs on mount and whenever user.isAuthenticated changes.
+     *
+     * @see https://react.dev/learn/you-might-not-need-an-effect
+     */
     useEffect(() => {
         if (user.isAuthenticated) {
             navigate(redirectTo, { replace: true });
         }
     }, [user.isAuthenticated, navigate, redirectTo]);
 
+    /**
+     * Handles successful wallet connection - marks user for onboarding,
+     * fires webhook event, and navigates to redirect destination.
+     *
+     * @param {string | null} walletAddress - Connected wallet address or null to use fallback
+     * @param {string | null} walletType - Wallet type (e.g., 'evm', 'stellar') or null to use fallback
+     */
     const handleConnectSuccess = (walletAddress, walletType) => {
         // Mark as first-time user so Onboarding/Welcome logic can trigger if needed
         localStorage.setItem('tradazone_onboarded', 'false');
