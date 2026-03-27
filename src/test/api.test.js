@@ -140,6 +140,16 @@ describe("paginate", () => {
     expect(result.data[0].id).toBe(1);
   });
 
+  it("handles transition from page 1 to page 0 without underflow", () => {
+    const pageOne = paginate(items, 1, 10);
+    expect(pageOne.page).toBe(1);
+    expect(pageOne.data[0].id).toBe(1);
+
+    const nextState = paginate(items, pageOne.page - 1, 10);
+    expect(nextState.page).toBe(1);
+    expect(nextState.data[0].id).toBe(1);
+  });
+
   it("clamps negative page numbers to page 1", () => {
     const result = paginate(items, -5, 10);
     expect(result.page).toBe(1);

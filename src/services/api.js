@@ -202,7 +202,6 @@ const api = {
             await delay(800);
             return { id: Date.now().toString(), ...data };
         },
-    },
         delete: async (id) => {
             await delay(500);
             return true;
@@ -210,8 +209,8 @@ const api = {
         bulkDelete: async (ids) => {
             await delay(800);
             return true;
-        }
-    }
+        },
+    },
 };
 
 export default api;
