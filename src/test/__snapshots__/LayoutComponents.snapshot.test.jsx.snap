@@ -1,0 +1,1628 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Layout Components Snapshots > BottomNav Component > should match snapshot for bottom navigation 1`] = `
+<nav
+  class="
+            lg:hidden fixed bottom-0 left-0 right-0 z-[95]
+            bg-white border-t border-border
+            flex items-center justify-around
+            h-16 px-1 safe-bottom
+        "
+>
+  <a
+    aria-current="page"
+    class="flex flex-col items-center justify-center gap-1 flex-1 h-full min-w-0 transition-colors text-brand"
+    data-discover="true"
+    href="/"
+  >
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-house"
+      fill="none"
+      height="22"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2.2"
+      viewBox="0 0 24 24"
+      width="22"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"
+      />
+      <path
+        d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+      />
+    </svg>
+    <span
+      class="text-[10px] font-medium truncate"
+    >
+      Home
+    </span>
+  </a>
+  <a
+    class="flex flex-col items-center justify-center gap-1 flex-1 h-full min-w-0 transition-colors text-t-muted"
+    data-discover="true"
+    href="/invoices"
+  >
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-file-text"
+      fill="none"
+      height="22"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="1.8"
+      viewBox="0 0 24 24"
+      width="22"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+      />
+      <path
+        d="M14 2v5a1 1 0 0 0 1 1h5"
+      />
+      <path
+        d="M10 9H8"
+      />
+      <path
+        d="M16 13H8"
+      />
+      <path
+        d="M16 17H8"
+      />
+    </svg>
+    <span
+      class="text-[10px] font-medium truncate"
+    >
+      Invoice
+    </span>
+  </a>
+  <a
+    class="flex flex-col items-center justify-center gap-1 flex-1 h-full min-w-0 transition-colors text-t-muted"
+    data-discover="true"
+    href="/checkout"
+  >
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-shopping-cart"
+      fill="none"
+      height="22"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="1.8"
+      viewBox="0 0 24 24"
+      width="22"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle
+        cx="8"
+        cy="21"
+        r="1"
+      />
+      <circle
+        cx="19"
+        cy="21"
+        r="1"
+      />
+      <path
+        d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"
+      />
+    </svg>
+    <span
+      class="text-[10px] font-medium truncate"
+    >
+      Checkout
+    </span>
+  </a>
+  <a
+    class="flex flex-col items-center justify-center gap-1 flex-1 h-full min-w-0 transition-colors text-t-muted"
+    data-discover="true"
+    href="/customers"
+  >
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-users"
+      fill="none"
+      height="22"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="1.8"
+      viewBox="0 0 24 24"
+      width="22"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+      />
+      <path
+        d="M16 3.128a4 4 0 0 1 0 7.744"
+      />
+      <path
+        d="M22 21v-2a4 4 0 0 0-3-3.87"
+      />
+      <circle
+        cx="9"
+        cy="7"
+        r="4"
+      />
+    </svg>
+    <span
+      class="text-[10px] font-medium truncate"
+    >
+      Customers
+    </span>
+  </a>
+  <a
+    class="flex flex-col items-center justify-center gap-1 flex-1 h-full min-w-0 transition-colors text-t-muted"
+    data-discover="true"
+    href="/items"
+  >
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-package"
+      fill="none"
+      height="22"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="1.8"
+      viewBox="0 0 24 24"
+      width="22"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"
+      />
+      <path
+        d="M12 22V12"
+      />
+      <polyline
+        points="3.29 7 12 12 20.71 7"
+      />
+      <path
+        d="m7.5 4.27 9 5.15"
+      />
+    </svg>
+    <span
+      class="text-[10px] font-medium truncate"
+    >
+      Items
+    </span>
+  </a>
+</nav>
+`;
+
+exports[`Layout Components Snapshots > Header Component > should match snapshot for default header 1`] = `
+<header
+  class="h-header bg-brand fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-5 lg:px-6"
+>
+  <div
+    class="flex items-center gap-3"
+  >
+    <button
+      aria-label="Open menu"
+      class="lg:hidden w-9 h-9 rounded-lg flex items-center justify-center text-white/80 hover:bg-white/10 transition-colors"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-menu"
+        fill="none"
+        height="22"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="22"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M4 5h16"
+        />
+        <path
+          d="M4 12h16"
+        />
+        <path
+          d="M4 19h16"
+        />
+      </svg>
+    </button>
+    <img
+      alt="Tradazone"
+      class="object-contain h-7"
+      src="/src/assets/logo-white.png"
+    />
+  </div>
+  <div
+    class="flex items-center gap-4"
+  >
+    <button
+      class="w-9 h-9 rounded-full flex items-center justify-center text-white/80 hover:bg-white/10 transition-colors"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-bell"
+        fill="none"
+        height="22"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="22"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M10.268 21a2 2 0 0 0 3.464 0"
+        />
+        <path
+          d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"
+        />
+      </svg>
+    </button>
+    <div
+      class="w-9 h-9 rounded-full overflow-hidden border-2 border-white/30 flex-shrink-0"
+    >
+      <img
+        alt="Test User"
+        class="w-full h-full object-cover"
+        src="https://example.com/avatar.jpg"
+      />
+    </div>
+  </div>
+</header>
+`;
+
+exports[`Layout Components Snapshots > Header Component > should match snapshot for header with menu toggle 1`] = `
+<header
+  class="h-header bg-brand fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-5 lg:px-6"
+>
+  <div
+    class="flex items-center gap-3"
+  >
+    <button
+      aria-label="Open menu"
+      class="lg:hidden w-9 h-9 rounded-lg flex items-center justify-center text-white/80 hover:bg-white/10 transition-colors"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-menu"
+        fill="none"
+        height="22"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="22"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M4 5h16"
+        />
+        <path
+          d="M4 12h16"
+        />
+        <path
+          d="M4 19h16"
+        />
+      </svg>
+    </button>
+    <img
+      alt="Tradazone"
+      class="object-contain h-7"
+      src="/src/assets/logo-white.png"
+    />
+  </div>
+  <div
+    class="flex items-center gap-4"
+  >
+    <button
+      class="w-9 h-9 rounded-full flex items-center justify-center text-white/80 hover:bg-white/10 transition-colors"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-bell"
+        fill="none"
+        height="22"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="22"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M10.268 21a2 2 0 0 0 3.464 0"
+        />
+        <path
+          d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"
+        />
+      </svg>
+    </button>
+    <div
+      class="w-9 h-9 rounded-full overflow-hidden border-2 border-white/30 flex-shrink-0"
+    >
+      <img
+        alt="Test User"
+        class="w-full h-full object-cover"
+        src="https://example.com/avatar.jpg"
+      />
+    </div>
+  </div>
+</header>
+`;
+
+exports[`Layout Components Snapshots > Layout Component > should match snapshot for default layout 1`] = `
+<div
+  class="min-h-screen bg-page"
+>
+  <header
+    class="h-header bg-brand fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-5 lg:px-6"
+  >
+    <div
+      class="flex items-center gap-3"
+    >
+      <button
+        aria-label="Open menu"
+        class="lg:hidden w-9 h-9 rounded-lg flex items-center justify-center text-white/80 hover:bg-white/10 transition-colors"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-menu"
+          fill="none"
+          height="22"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="22"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M4 5h16"
+          />
+          <path
+            d="M4 12h16"
+          />
+          <path
+            d="M4 19h16"
+          />
+        </svg>
+      </button>
+      <img
+        alt="Tradazone"
+        class="object-contain h-7"
+        src="/src/assets/logo-white.png"
+      />
+    </div>
+    <div
+      class="flex items-center gap-4"
+    >
+      <button
+        class="w-9 h-9 rounded-full flex items-center justify-center text-white/80 hover:bg-white/10 transition-colors"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-bell"
+          fill="none"
+          height="22"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="22"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M10.268 21a2 2 0 0 0 3.464 0"
+          />
+          <path
+            d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"
+          />
+        </svg>
+      </button>
+      <div
+        class="w-9 h-9 rounded-full overflow-hidden border-2 border-white/30 flex-shrink-0"
+      >
+        <img
+          alt="Test User"
+          class="w-full h-full object-cover"
+          src="https://example.com/avatar.jpg"
+        />
+      </div>
+    </div>
+  </header>
+  <aside
+    class="
+            fixed top-header left-0 z-[95]
+            h-[calc(100vh-theme(spacing.header))]
+            w-sidebar bg-[#F8FAFC] border-r border-border
+            flex flex-col justify-between overflow-y-auto
+            transition-transform duration-300 ease-in-out
+            -translate-x-full
+            lg:translate-x-0
+        "
+  >
+    <div>
+      <button
+        class="lg:hidden flex items-center gap-2 px-5 py-3 text-t-muted text-sm hover:text-t-primary transition-colors"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-x"
+          fill="none"
+          height="18"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="18"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6 6 18"
+          />
+          <path
+            d="m6 6 12 12"
+          />
+        </svg>
+         Close
+      </button>
+      <nav
+        class="flex flex-col"
+      >
+        <div>
+          <a
+            aria-current="page"
+            class="flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all text-brand bg-brand-bg border-l-brand font-semibold"
+            data-discover="true"
+            href="/"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-house"
+              fill="none"
+              height="20"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+              width="20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"
+              />
+              <path
+                d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+              />
+            </svg>
+            <span
+              class="whitespace-nowrap overflow-hidden text-ellipsis"
+            >
+              Home
+            </span>
+          </a>
+          <div
+            class="mx-5 border-b border-border"
+          />
+        </div>
+        <div>
+          <a
+            class="flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all text-t-secondary border-l-transparent hover:text-brand hover:bg-brand-bg/50"
+            data-discover="true"
+            href="/invoices"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-file-text"
+              fill="none"
+              height="20"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+              width="20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+              />
+              <path
+                d="M14 2v5a1 1 0 0 0 1 1h5"
+              />
+              <path
+                d="M10 9H8"
+              />
+              <path
+                d="M16 13H8"
+              />
+              <path
+                d="M16 17H8"
+              />
+            </svg>
+            <span
+              class="whitespace-nowrap overflow-hidden text-ellipsis"
+            >
+              Invoice
+            </span>
+          </a>
+          <div
+            class="mx-5 border-b border-border"
+          />
+        </div>
+        <div>
+          <a
+            class="flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all text-t-secondary border-l-transparent hover:text-brand hover:bg-brand-bg/50"
+            data-discover="true"
+            href="/checkout"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-shopping-cart"
+              fill="none"
+              height="20"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+              width="20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="8"
+                cy="21"
+                r="1"
+              />
+              <circle
+                cx="19"
+                cy="21"
+                r="1"
+              />
+              <path
+                d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"
+              />
+            </svg>
+            <span
+              class="whitespace-nowrap overflow-hidden text-ellipsis"
+            >
+              Checkout
+            </span>
+          </a>
+          <div
+            class="mx-5 border-b border-border"
+          />
+        </div>
+        <div>
+          <a
+            class="flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all text-t-secondary border-l-transparent hover:text-brand hover:bg-brand-bg/50"
+            data-discover="true"
+            href="/customers"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-users"
+              fill="none"
+              height="20"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+              width="20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+              />
+              <path
+                d="M16 3.128a4 4 0 0 1 0 7.744"
+              />
+              <path
+                d="M22 21v-2a4 4 0 0 0-3-3.87"
+              />
+              <circle
+                cx="9"
+                cy="7"
+                r="4"
+              />
+            </svg>
+            <span
+              class="whitespace-nowrap overflow-hidden text-ellipsis"
+            >
+              Customer
+            </span>
+          </a>
+          <div
+            class="mx-5 border-b border-border"
+          />
+        </div>
+        <div>
+          <a
+            class="flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all text-t-secondary border-l-transparent hover:text-brand hover:bg-brand-bg/50"
+            data-discover="true"
+            href="/items"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-package"
+              fill="none"
+              height="20"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+              width="20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"
+              />
+              <path
+                d="M12 22V12"
+              />
+              <polyline
+                points="3.29 7 12 12 20.71 7"
+              />
+              <path
+                d="m7.5 4.27 9 5.15"
+              />
+            </svg>
+            <span
+              class="whitespace-nowrap overflow-hidden text-ellipsis"
+            >
+              Item and Services
+            </span>
+          </a>
+          <div
+            class="mx-5 border-b border-border"
+          />
+        </div>
+        <div>
+          <a
+            class="flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all text-t-secondary border-l-transparent hover:text-brand hover:bg-brand-bg/50"
+            data-discover="true"
+            href="/settings"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-settings"
+              fill="none"
+              height="20"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+              width="20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"
+              />
+              <circle
+                cx="12"
+                cy="12"
+                r="3"
+              />
+            </svg>
+            <span
+              class="whitespace-nowrap overflow-hidden text-ellipsis"
+            >
+              Settings
+            </span>
+          </a>
+        </div>
+      </nav>
+    </div>
+    <div>
+      <div
+        class="mx-5 border-b border-border"
+      />
+      <button
+        class="flex items-center gap-3 px-6 py-4 text-sm font-medium text-t-muted border-l-[3px] border-l-transparent hover:text-error hover:bg-error-bg transition-all w-full"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-log-out"
+          fill="none"
+          height="20"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1.8"
+          viewBox="0 0 24 24"
+          width="20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m16 17 5-5-5-5"
+          />
+          <path
+            d="M21 12H9"
+          />
+          <path
+            d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
+          />
+        </svg>
+        <span>
+          Logout
+        </span>
+      </button>
+    </div>
+  </aside>
+  <main
+    class="
+                mt-header
+                lg:ml-sidebar
+                min-h-[calc(100vh-theme(spacing.header))]
+                pb-20 lg:pb-0
+                p-4 lg:p-8
+            "
+  />
+  <nav
+    class="
+            lg:hidden fixed bottom-0 left-0 right-0 z-[95]
+            bg-white border-t border-border
+            flex items-center justify-around
+            h-16 px-1 safe-bottom
+        "
+  >
+    <a
+      aria-current="page"
+      class="flex flex-col items-center justify-center gap-1 flex-1 h-full min-w-0 transition-colors text-brand"
+      data-discover="true"
+      href="/"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-house"
+        fill="none"
+        height="22"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2.2"
+        viewBox="0 0 24 24"
+        width="22"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"
+        />
+        <path
+          d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+        />
+      </svg>
+      <span
+        class="text-[10px] font-medium truncate"
+      >
+        Home
+      </span>
+    </a>
+    <a
+      class="flex flex-col items-center justify-center gap-1 flex-1 h-full min-w-0 transition-colors text-t-muted"
+      data-discover="true"
+      href="/invoices"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-file-text"
+        fill="none"
+        height="22"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.8"
+        viewBox="0 0 24 24"
+        width="22"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+        />
+        <path
+          d="M14 2v5a1 1 0 0 0 1 1h5"
+        />
+        <path
+          d="M10 9H8"
+        />
+        <path
+          d="M16 13H8"
+        />
+        <path
+          d="M16 17H8"
+        />
+      </svg>
+      <span
+        class="text-[10px] font-medium truncate"
+      >
+        Invoice
+      </span>
+    </a>
+    <a
+      class="flex flex-col items-center justify-center gap-1 flex-1 h-full min-w-0 transition-colors text-t-muted"
+      data-discover="true"
+      href="/checkout"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-shopping-cart"
+        fill="none"
+        height="22"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.8"
+        viewBox="0 0 24 24"
+        width="22"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle
+          cx="8"
+          cy="21"
+          r="1"
+        />
+        <circle
+          cx="19"
+          cy="21"
+          r="1"
+        />
+        <path
+          d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"
+        />
+      </svg>
+      <span
+        class="text-[10px] font-medium truncate"
+      >
+        Checkout
+      </span>
+    </a>
+    <a
+      class="flex flex-col items-center justify-center gap-1 flex-1 h-full min-w-0 transition-colors text-t-muted"
+      data-discover="true"
+      href="/customers"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-users"
+        fill="none"
+        height="22"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.8"
+        viewBox="0 0 24 24"
+        width="22"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+        />
+        <path
+          d="M16 3.128a4 4 0 0 1 0 7.744"
+        />
+        <path
+          d="M22 21v-2a4 4 0 0 0-3-3.87"
+        />
+        <circle
+          cx="9"
+          cy="7"
+          r="4"
+        />
+      </svg>
+      <span
+        class="text-[10px] font-medium truncate"
+      >
+        Customers
+      </span>
+    </a>
+    <a
+      class="flex flex-col items-center justify-center gap-1 flex-1 h-full min-w-0 transition-colors text-t-muted"
+      data-discover="true"
+      href="/items"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-package"
+        fill="none"
+        height="22"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.8"
+        viewBox="0 0 24 24"
+        width="22"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"
+        />
+        <path
+          d="M12 22V12"
+        />
+        <polyline
+          points="3.29 7 12 12 20.71 7"
+        />
+        <path
+          d="m7.5 4.27 9 5.15"
+        />
+      </svg>
+      <span
+        class="text-[10px] font-medium truncate"
+      >
+        Items
+      </span>
+    </a>
+  </nav>
+</div>
+`;
+
+exports[`Layout Components Snapshots > Sidebar Component > should match snapshot for closed sidebar 1`] = `
+<aside
+  class="
+            fixed top-header left-0 z-[95]
+            h-[calc(100vh-theme(spacing.header))]
+            w-sidebar bg-[#F8FAFC] border-r border-border
+            flex flex-col justify-between overflow-y-auto
+            transition-transform duration-300 ease-in-out
+            -translate-x-full
+            lg:translate-x-0
+        "
+>
+  <div>
+    <button
+      class="lg:hidden flex items-center gap-2 px-5 py-3 text-t-muted text-sm hover:text-t-primary transition-colors"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-x"
+        fill="none"
+        height="18"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="18"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M18 6 6 18"
+        />
+        <path
+          d="m6 6 12 12"
+        />
+      </svg>
+       Close
+    </button>
+    <nav
+      class="flex flex-col"
+    >
+      <div>
+        <a
+          aria-current="page"
+          class="flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all text-brand bg-brand-bg border-l-brand font-semibold"
+          data-discover="true"
+          href="/"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-house"
+            fill="none"
+            height="20"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.8"
+            viewBox="0 0 24 24"
+            width="20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"
+            />
+            <path
+              d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+            />
+          </svg>
+          <span
+            class="whitespace-nowrap overflow-hidden text-ellipsis"
+          >
+            Home
+          </span>
+        </a>
+        <div
+          class="mx-5 border-b border-border"
+        />
+      </div>
+      <div>
+        <a
+          class="flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all text-t-secondary border-l-transparent hover:text-brand hover:bg-brand-bg/50"
+          data-discover="true"
+          href="/invoices"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-file-text"
+            fill="none"
+            height="20"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.8"
+            viewBox="0 0 24 24"
+            width="20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+            />
+            <path
+              d="M14 2v5a1 1 0 0 0 1 1h5"
+            />
+            <path
+              d="M10 9H8"
+            />
+            <path
+              d="M16 13H8"
+            />
+            <path
+              d="M16 17H8"
+            />
+          </svg>
+          <span
+            class="whitespace-nowrap overflow-hidden text-ellipsis"
+          >
+            Invoice
+          </span>
+        </a>
+        <div
+          class="mx-5 border-b border-border"
+        />
+      </div>
+      <div>
+        <a
+          class="flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all text-t-secondary border-l-transparent hover:text-brand hover:bg-brand-bg/50"
+          data-discover="true"
+          href="/checkout"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-shopping-cart"
+            fill="none"
+            height="20"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.8"
+            viewBox="0 0 24 24"
+            width="20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="8"
+              cy="21"
+              r="1"
+            />
+            <circle
+              cx="19"
+              cy="21"
+              r="1"
+            />
+            <path
+              d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"
+            />
+          </svg>
+          <span
+            class="whitespace-nowrap overflow-hidden text-ellipsis"
+          >
+            Checkout
+          </span>
+        </a>
+        <div
+          class="mx-5 border-b border-border"
+        />
+      </div>
+      <div>
+        <a
+          class="flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all text-t-secondary border-l-transparent hover:text-brand hover:bg-brand-bg/50"
+          data-discover="true"
+          href="/customers"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-users"
+            fill="none"
+            height="20"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.8"
+            viewBox="0 0 24 24"
+            width="20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+            />
+            <path
+              d="M16 3.128a4 4 0 0 1 0 7.744"
+            />
+            <path
+              d="M22 21v-2a4 4 0 0 0-3-3.87"
+            />
+            <circle
+              cx="9"
+              cy="7"
+              r="4"
+            />
+          </svg>
+          <span
+            class="whitespace-nowrap overflow-hidden text-ellipsis"
+          >
+            Customer
+          </span>
+        </a>
+        <div
+          class="mx-5 border-b border-border"
+        />
+      </div>
+      <div>
+        <a
+          class="flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all text-t-secondary border-l-transparent hover:text-brand hover:bg-brand-bg/50"
+          data-discover="true"
+          href="/items"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-package"
+            fill="none"
+            height="20"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.8"
+            viewBox="0 0 24 24"
+            width="20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"
+            />
+            <path
+              d="M12 22V12"
+            />
+            <polyline
+              points="3.29 7 12 12 20.71 7"
+            />
+            <path
+              d="m7.5 4.27 9 5.15"
+            />
+          </svg>
+          <span
+            class="whitespace-nowrap overflow-hidden text-ellipsis"
+          >
+            Item and Services
+          </span>
+        </a>
+        <div
+          class="mx-5 border-b border-border"
+        />
+      </div>
+      <div>
+        <a
+          class="flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all text-t-secondary border-l-transparent hover:text-brand hover:bg-brand-bg/50"
+          data-discover="true"
+          href="/settings"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-settings"
+            fill="none"
+            height="20"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.8"
+            viewBox="0 0 24 24"
+            width="20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"
+            />
+            <circle
+              cx="12"
+              cy="12"
+              r="3"
+            />
+          </svg>
+          <span
+            class="whitespace-nowrap overflow-hidden text-ellipsis"
+          >
+            Settings
+          </span>
+        </a>
+      </div>
+    </nav>
+  </div>
+  <div>
+    <div
+      class="mx-5 border-b border-border"
+    />
+    <button
+      class="flex items-center gap-3 px-6 py-4 text-sm font-medium text-t-muted border-l-[3px] border-l-transparent hover:text-error hover:bg-error-bg transition-all w-full"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-log-out"
+        fill="none"
+        height="20"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.8"
+        viewBox="0 0 24 24"
+        width="20"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m16 17 5-5-5-5"
+        />
+        <path
+          d="M21 12H9"
+        />
+        <path
+          d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
+        />
+      </svg>
+      <span>
+        Logout
+      </span>
+    </button>
+  </div>
+</aside>
+`;
+
+exports[`Layout Components Snapshots > Sidebar Component > should match snapshot for open sidebar 1`] = `
+<aside
+  class="
+            fixed top-header left-0 z-[95]
+            h-[calc(100vh-theme(spacing.header))]
+            w-sidebar bg-[#F8FAFC] border-r border-border
+            flex flex-col justify-between overflow-y-auto
+            transition-transform duration-300 ease-in-out
+            translate-x-0
+            lg:translate-x-0
+        "
+>
+  <div>
+    <button
+      class="lg:hidden flex items-center gap-2 px-5 py-3 text-t-muted text-sm hover:text-t-primary transition-colors"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-x"
+        fill="none"
+        height="18"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="18"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M18 6 6 18"
+        />
+        <path
+          d="m6 6 12 12"
+        />
+      </svg>
+       Close
+    </button>
+    <nav
+      class="flex flex-col"
+    >
+      <div>
+        <a
+          aria-current="page"
+          class="flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all text-brand bg-brand-bg border-l-brand font-semibold"
+          data-discover="true"
+          href="/"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-house"
+            fill="none"
+            height="20"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.8"
+            viewBox="0 0 24 24"
+            width="20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"
+            />
+            <path
+              d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+            />
+          </svg>
+          <span
+            class="whitespace-nowrap overflow-hidden text-ellipsis"
+          >
+            Home
+          </span>
+        </a>
+        <div
+          class="mx-5 border-b border-border"
+        />
+      </div>
+      <div>
+        <a
+          class="flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all text-t-secondary border-l-transparent hover:text-brand hover:bg-brand-bg/50"
+          data-discover="true"
+          href="/invoices"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-file-text"
+            fill="none"
+            height="20"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.8"
+            viewBox="0 0 24 24"
+            width="20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+            />
+            <path
+              d="M14 2v5a1 1 0 0 0 1 1h5"
+            />
+            <path
+              d="M10 9H8"
+            />
+            <path
+              d="M16 13H8"
+            />
+            <path
+              d="M16 17H8"
+            />
+          </svg>
+          <span
+            class="whitespace-nowrap overflow-hidden text-ellipsis"
+          >
+            Invoice
+          </span>
+        </a>
+        <div
+          class="mx-5 border-b border-border"
+        />
+      </div>
+      <div>
+        <a
+          class="flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all text-t-secondary border-l-transparent hover:text-brand hover:bg-brand-bg/50"
+          data-discover="true"
+          href="/checkout"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-shopping-cart"
+            fill="none"
+            height="20"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.8"
+            viewBox="0 0 24 24"
+            width="20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="8"
+              cy="21"
+              r="1"
+            />
+            <circle
+              cx="19"
+              cy="21"
+              r="1"
+            />
+            <path
+              d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"
+            />
+          </svg>
+          <span
+            class="whitespace-nowrap overflow-hidden text-ellipsis"
+          >
+            Checkout
+          </span>
+        </a>
+        <div
+          class="mx-5 border-b border-border"
+        />
+      </div>
+      <div>
+        <a
+          class="flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all text-t-secondary border-l-transparent hover:text-brand hover:bg-brand-bg/50"
+          data-discover="true"
+          href="/customers"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-users"
+            fill="none"
+            height="20"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.8"
+            viewBox="0 0 24 24"
+            width="20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+            />
+            <path
+              d="M16 3.128a4 4 0 0 1 0 7.744"
+            />
+            <path
+              d="M22 21v-2a4 4 0 0 0-3-3.87"
+            />
+            <circle
+              cx="9"
+              cy="7"
+              r="4"
+            />
+          </svg>
+          <span
+            class="whitespace-nowrap overflow-hidden text-ellipsis"
+          >
+            Customer
+          </span>
+        </a>
+        <div
+          class="mx-5 border-b border-border"
+        />
+      </div>
+      <div>
+        <a
+          class="flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all text-t-secondary border-l-transparent hover:text-brand hover:bg-brand-bg/50"
+          data-discover="true"
+          href="/items"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-package"
+            fill="none"
+            height="20"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.8"
+            viewBox="0 0 24 24"
+            width="20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"
+            />
+            <path
+              d="M12 22V12"
+            />
+            <polyline
+              points="3.29 7 12 12 20.71 7"
+            />
+            <path
+              d="m7.5 4.27 9 5.15"
+            />
+          </svg>
+          <span
+            class="whitespace-nowrap overflow-hidden text-ellipsis"
+          >
+            Item and Services
+          </span>
+        </a>
+        <div
+          class="mx-5 border-b border-border"
+        />
+      </div>
+      <div>
+        <a
+          class="flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all text-t-secondary border-l-transparent hover:text-brand hover:bg-brand-bg/50"
+          data-discover="true"
+          href="/settings"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-settings"
+            fill="none"
+            height="20"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.8"
+            viewBox="0 0 24 24"
+            width="20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"
+            />
+            <circle
+              cx="12"
+              cy="12"
+              r="3"
+            />
+          </svg>
+          <span
+            class="whitespace-nowrap overflow-hidden text-ellipsis"
+          >
+            Settings
+          </span>
+        </a>
+      </div>
+    </nav>
+  </div>
+  <div>
+    <div
+      class="mx-5 border-b border-border"
+    />
+    <button
+      class="flex items-center gap-3 px-6 py-4 text-sm font-medium text-t-muted border-l-[3px] border-l-transparent hover:text-error hover:bg-error-bg transition-all w-full"
+    >
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-log-out"
+        fill="none"
+        height="20"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.8"
+        viewBox="0 0 24 24"
+        width="20"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m16 17 5-5-5-5"
+        />
+        <path
+          d="M21 12H9"
+        />
+        <path
+          d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
+        />
+      </svg>
+      <span>
+        Logout
+      </span>
+    </button>
+  </div>
+</aside>
+`;

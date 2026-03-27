@@ -1,0 +1,542 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Table Components Snapshots > DataTable Component > should match snapshot for data table with custom column width 1`] = `
+<div
+  class="bg-white border border-border rounded-card overflow-hidden "
+>
+  <div
+    class="overflow-x-auto -webkit-overflow-scrolling-touch"
+  >
+    <table
+      class="w-full border-collapse min-w-[600px]"
+    >
+      <thead>
+        <tr
+          class="border-b border-border"
+        >
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+            style="width: 200px;"
+          >
+            Name
+          </th>
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+            style="width: 250px;"
+          >
+            Email
+          </th>
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+            style="width: 100px;"
+          >
+            Status
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          class="border-b border-border last:border-b-0 "
+        >
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            John Doe
+          </td>
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            john@example.com
+          </td>
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            Active
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+`;
+
+exports[`Table Components Snapshots > DataTable Component > should match snapshot for data table with custom empty message 1`] = `
+<div
+  class="bg-white border border-border rounded-card overflow-hidden "
+>
+  <div
+    class="overflow-x-auto -webkit-overflow-scrolling-touch"
+  >
+    <table
+      class="w-full border-collapse min-w-[600px]"
+    >
+      <thead>
+        <tr
+          class="border-b border-border"
+        >
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+          >
+            Name
+          </th>
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+          >
+            Email
+          </th>
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+          >
+            Status
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td
+            class="text-center py-10 text-t-muted"
+            colspan="3"
+          >
+            No customers found
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+`;
+
+exports[`Table Components Snapshots > DataTable Component > should match snapshot for data table with custom render function 1`] = `
+<div
+  class="bg-white border border-border rounded-card overflow-hidden "
+>
+  <div
+    class="overflow-x-auto -webkit-overflow-scrolling-touch"
+  >
+    <table
+      class="w-full border-collapse min-w-[600px]"
+    >
+      <thead>
+        <tr
+          class="border-b border-border"
+        >
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+          >
+            Name
+          </th>
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+          >
+            Email
+          </th>
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+          >
+            Status
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          class="border-b border-border last:border-b-0 "
+        >
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            John Doe
+          </td>
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            john@example.com
+          </td>
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            <span
+              class="inline-flex items-center px-3 py-1 text-xs font-medium bg-success-bg text-success "
+            >
+              Paid
+            </span>
+          </td>
+        </tr>
+        <tr
+          class="border-b border-border last:border-b-0 "
+        >
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            Jane Smith
+          </td>
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            jane@example.com
+          </td>
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            <span
+              class="inline-flex items-center px-3 py-1 text-xs font-medium bg-info-bg text-info "
+            >
+              Pending
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+`;
+
+exports[`Table Components Snapshots > DataTable Component > should match snapshot for data table with multiple rows 1`] = `
+<div
+  class="bg-white border border-border rounded-card overflow-hidden "
+>
+  <div
+    class="overflow-x-auto -webkit-overflow-scrolling-touch"
+  >
+    <table
+      class="w-full border-collapse min-w-[600px]"
+    >
+      <thead>
+        <tr
+          class="border-b border-border"
+        >
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+          >
+            Name
+          </th>
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+          >
+            Email
+          </th>
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+          >
+            Status
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          class="border-b border-border last:border-b-0 "
+        >
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            John Doe
+          </td>
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            john@example.com
+          </td>
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            Active
+          </td>
+        </tr>
+        <tr
+          class="border-b border-border last:border-b-0 "
+        >
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            Jane Smith
+          </td>
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            jane@example.com
+          </td>
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            Inactive
+          </td>
+        </tr>
+        <tr
+          class="border-b border-border last:border-b-0 "
+        >
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            Bob Johnson
+          </td>
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            bob@example.com
+          </td>
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            Pending
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+`;
+
+exports[`Table Components Snapshots > DataTable Component > should match snapshot for data table with one row 1`] = `
+<div
+  class="bg-white border border-border rounded-card overflow-hidden "
+>
+  <div
+    class="overflow-x-auto -webkit-overflow-scrolling-touch"
+  >
+    <table
+      class="w-full border-collapse min-w-[600px]"
+    >
+      <thead>
+        <tr
+          class="border-b border-border"
+        >
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+          >
+            Name
+          </th>
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+          >
+            Email
+          </th>
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+          >
+            Status
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          class="border-b border-border last:border-b-0 "
+        >
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            John Doe
+          </td>
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            john@example.com
+          </td>
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            Active
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+`;
+
+exports[`Table Components Snapshots > DataTable Component > should match snapshot for data table with row click handler 1`] = `
+<div
+  class="bg-white border border-border rounded-card overflow-hidden "
+>
+  <div
+    class="overflow-x-auto -webkit-overflow-scrolling-touch"
+  >
+    <table
+      class="w-full border-collapse min-w-[600px]"
+    >
+      <thead>
+        <tr
+          class="border-b border-border"
+        >
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+          >
+            Name
+          </th>
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+          >
+            Email
+          </th>
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+          >
+            Status
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          class="border-b border-border last:border-b-0 cursor-pointer hover:bg-page active:bg-brand-bg"
+        >
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            John Doe
+          </td>
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            john@example.com
+          </td>
+          <td
+            class="px-4 py-3 text-sm text-t-primary min-h-[44px]"
+          >
+            Active
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+`;
+
+exports[`Table Components Snapshots > DataTable Component > should match snapshot for empty data table 1`] = `
+<div
+  class="bg-white border border-border rounded-card overflow-hidden "
+>
+  <div
+    class="overflow-x-auto -webkit-overflow-scrolling-touch"
+  >
+    <table
+      class="w-full border-collapse min-w-[600px]"
+    >
+      <thead>
+        <tr
+          class="border-b border-border"
+        >
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+          >
+            Name
+          </th>
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+          >
+            Email
+          </th>
+          <th
+            class="text-left px-4 py-3 text-xs font-semibold text-t-muted uppercase tracking-wide bg-page whitespace-nowrap"
+          >
+            Status
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td
+            class="text-center py-10 text-t-muted"
+            colspan="3"
+          >
+            No data available
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+`;
+
+exports[`Table Components Snapshots > StatusBadge Component > should match snapshot for active status 1`] = `
+<span
+  class="inline-flex items-center px-3 py-1 text-xs font-medium bg-success-bg text-success "
+>
+  Active
+</span>
+`;
+
+exports[`Table Components Snapshots > StatusBadge Component > should match snapshot for cancelled status 1`] = `
+<span
+  class="inline-flex items-center px-3 py-1 text-xs font-medium bg-error-bg text-error "
+>
+  Cancelled
+</span>
+`;
+
+exports[`Table Components Snapshots > StatusBadge Component > should match snapshot for case-insensitive status 1`] = `
+<span
+  class="inline-flex items-center px-3 py-1 text-xs font-medium bg-success-bg text-success "
+>
+  Paid
+</span>
+`;
+
+exports[`Table Components Snapshots > StatusBadge Component > should match snapshot for completed status 1`] = `
+<span
+  class="inline-flex items-center px-3 py-1 text-xs font-medium bg-success-bg text-success "
+>
+  Completed
+</span>
+`;
+
+exports[`Table Components Snapshots > StatusBadge Component > should match snapshot for draft status 1`] = `
+<span
+  class="inline-flex items-center px-3 py-1 text-xs font-medium bg-gray-100 text-t-muted "
+>
+  Draft
+</span>
+`;
+
+exports[`Table Components Snapshots > StatusBadge Component > should match snapshot for inactive status 1`] = `
+<span
+  class="inline-flex items-center px-3 py-1 text-xs font-medium bg-gray-100 text-t-muted "
+>
+  Inactive
+</span>
+`;
+
+exports[`Table Components Snapshots > StatusBadge Component > should match snapshot for overdue status 1`] = `
+<span
+  class="inline-flex items-center px-3 py-1 text-xs font-medium bg-error-bg text-error "
+>
+  Overdue
+</span>
+`;
+
+exports[`Table Components Snapshots > StatusBadge Component > should match snapshot for paid status 1`] = `
+<span
+  class="inline-flex items-center px-3 py-1 text-xs font-medium bg-success-bg text-success "
+>
+  Paid
+</span>
+`;
+
+exports[`Table Components Snapshots > StatusBadge Component > should match snapshot for pending status 1`] = `
+<span
+  class="inline-flex items-center px-3 py-1 text-xs font-medium bg-info-bg text-info "
+>
+  Pending
+</span>
+`;
+
+exports[`Table Components Snapshots > StatusBadge Component > should match snapshot for status with custom className 1`] = `
+<span
+  class="inline-flex items-center px-3 py-1 text-xs font-medium bg-success-bg text-success ml-2"
+>
+  Paid
+</span>
+`;
+
+exports[`Table Components Snapshots > StatusBadge Component > should match snapshot for unknown status 1`] = `
+<span
+  class="inline-flex items-center px-3 py-1 text-xs font-medium bg-gray-100 text-t-muted "
+>
+  unknown
+</span>
+`;
+
+exports[`Table Components Snapshots > StatusBadge Component > should match snapshot for unpaid status 1`] = `
+<span
+  class="inline-flex items-center px-3 py-1 text-xs font-medium bg-warning-bg text-warning "
+>
+  Unpaid
+</span>
+`;

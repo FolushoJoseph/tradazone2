@@ -1,0 +1,150 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`UI Components Snapshots > EmptyState Component > should match snapshot for empty state with icon 1`] = `
+<div
+  class="flex flex-col items-center justify-center py-20 px-6 text-center"
+>
+  <div
+    class="w-16 h-16 rounded-2xl bg-brand/8 flex items-center justify-center mb-5"
+  >
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-file-text text-brand/60"
+      fill="none"
+      height="28"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="1.5"
+      viewBox="0 0 24 24"
+      width="28"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+      />
+      <path
+        d="M14 2v5a1 1 0 0 0 1 1h5"
+      />
+      <path
+        d="M10 9H8"
+      />
+      <path
+        d="M16 13H8"
+      />
+      <path
+        d="M16 17H8"
+      />
+    </svg>
+  </div>
+  <h3
+    class="text-base font-semibold text-t-primary mb-2"
+  >
+    No invoices yet
+  </h3>
+  <p
+    class="text-sm text-t-muted max-w-xs mb-6"
+  >
+    Create your first invoice to get started
+  </p>
+  <button
+    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 h-10 bg-brand text-white text-sm font-semibold hover:bg-brand-dark active:scale-95 transition-all shadow-sm shadow-brand/20"
+  >
+    Create Invoice
+  </button>
+</div>
+`;
+
+exports[`UI Components Snapshots > EmptyState Component > should match snapshot for empty state without action 1`] = `
+<div
+  class="flex flex-col items-center justify-center py-20 px-6 text-center"
+>
+  <div
+    class="w-16 h-16 rounded-2xl bg-brand/8 flex items-center justify-center mb-5"
+  >
+    <svg
+      aria-hidden="true"
+      class="lucide lucide-file-text text-brand/60"
+      fill="none"
+      height="28"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="1.5"
+      viewBox="0 0 24 24"
+      width="28"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+      />
+      <path
+        d="M14 2v5a1 1 0 0 0 1 1h5"
+      />
+      <path
+        d="M10 9H8"
+      />
+      <path
+        d="M16 13H8"
+      />
+      <path
+        d="M16 17H8"
+      />
+    </svg>
+  </div>
+  <h3
+    class="text-base font-semibold text-t-primary mb-2"
+  >
+    No items found
+  </h3>
+  <p
+    class="text-sm text-t-muted max-w-xs mb-6"
+  >
+    Try adjusting your search criteria
+  </p>
+</div>
+`;
+
+exports[`UI Components Snapshots > EmptyState Component > should match snapshot for empty state without icon 1`] = `
+<div
+  class="flex flex-col items-center justify-center py-20 px-6 text-center"
+>
+  <div
+    class="w-16 h-16 rounded-2xl bg-brand/8 flex items-center justify-center mb-5"
+  />
+  <h3
+    class="text-base font-semibold text-t-primary mb-2"
+  >
+    No data available
+  </h3>
+  <p
+    class="text-sm text-t-muted max-w-xs mb-6"
+  >
+    Check back later for updates
+  </p>
+</div>
+`;
+
+exports[`UI Components Snapshots > Logo Component > should match snapshot for dark variant 1`] = `
+<img
+  alt="Tradazone"
+  class="object-contain h-6 lg:h-7"
+  src="/src/assets/logo-white.png"
+/>
+`;
+
+exports[`UI Components Snapshots > Logo Component > should match snapshot for light variant 1`] = `
+<img
+  alt="Tradazone"
+  class="object-contain h-6 lg:h-7"
+  src="/src/assets/logo-blue.png"
+/>
+`;
+
+exports[`UI Components Snapshots > Logo Component > should match snapshot with custom className 1`] = `
+<img
+  alt="Tradazone"
+  class="object-contain h-10"
+  src="/src/assets/logo-blue.png"
+/>
+`;

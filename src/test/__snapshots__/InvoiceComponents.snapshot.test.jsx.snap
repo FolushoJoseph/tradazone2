@@ -1,0 +1,2097 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Invoice Components Snapshots > InvoiceFooter Component > should match snapshot for invoice footer with all props 1`] = `
+<div
+  class="flex justify-between items-start border-t border-gray-200 pt-6 pb-16"
+>
+  <div>
+    <h3
+      class="text-sm font-bold text-t-primary mb-1"
+    >
+      Notes
+    </h3>
+    <p
+      class="text-sm text-t-muted"
+    >
+      Payment due within 30 days
+    </p>
+  </div>
+  <div
+    class="text-right"
+  >
+    <p
+      class="text-sm font-semibold text-t-primary mb-2"
+    >
+      Pay for the service
+    </p>
+    <a
+      class="inline-flex items-center justify-center gap-2 px-4 py-2.5 h-10 bg-brand text-white text-sm font-semibold no-underline"
+      href="https://pay.example.com/invoice456"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      <img
+        alt="Tradazone"
+        class="object-contain w-3 h-3"
+        src="/src/assets/logo-white.png"
+      />
+      Payment Checkout
+    </a>
+  </div>
+</div>
+`;
+
+exports[`Invoice Components Snapshots > InvoiceFooter Component > should match snapshot for invoice footer with default props 1`] = `
+<div
+  class="flex justify-between items-start border-t border-gray-200 pt-6 pb-16"
+>
+  <div>
+    <h3
+      class="text-sm font-bold text-t-primary mb-1"
+    >
+      Notes
+    </h3>
+    <p
+      class="text-sm text-t-muted"
+    >
+      Sender
+    </p>
+  </div>
+  <div
+    class="text-right"
+  >
+    <p
+      class="text-sm font-semibold text-t-primary mb-2"
+    >
+      Pay for the service
+    </p>
+    <a
+      class="inline-flex items-center justify-center gap-2 px-4 py-2.5 h-10 bg-brand text-white text-sm font-semibold no-underline"
+      href="#"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      <img
+        alt="Tradazone"
+        class="object-contain w-3 h-3"
+        src="/src/assets/logo-white.png"
+      />
+      Payment Checkout
+    </a>
+  </div>
+</div>
+`;
+
+exports[`Invoice Components Snapshots > InvoiceFooter Component > should match snapshot for invoice footer with notes 1`] = `
+<div
+  class="flex justify-between items-start border-t border-gray-200 pt-6 pb-16"
+>
+  <div>
+    <h3
+      class="text-sm font-bold text-t-primary mb-1"
+    >
+      Notes
+    </h3>
+    <p
+      class="text-sm text-t-muted"
+    >
+      Thank you for your business!
+    </p>
+  </div>
+  <div
+    class="text-right"
+  >
+    <p
+      class="text-sm font-semibold text-t-primary mb-2"
+    >
+      Pay for the service
+    </p>
+    <a
+      class="inline-flex items-center justify-center gap-2 px-4 py-2.5 h-10 bg-brand text-white text-sm font-semibold no-underline"
+      href="#"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      <img
+        alt="Tradazone"
+        class="object-contain w-3 h-3"
+        src="/src/assets/logo-white.png"
+      />
+      Payment Checkout
+    </a>
+  </div>
+</div>
+`;
+
+exports[`Invoice Components Snapshots > InvoiceFooter Component > should match snapshot for invoice footer with payment link 1`] = `
+<div
+  class="flex justify-between items-start border-t border-gray-200 pt-6 pb-16"
+>
+  <div>
+    <h3
+      class="text-sm font-bold text-t-primary mb-1"
+    >
+      Notes
+    </h3>
+    <p
+      class="text-sm text-t-muted"
+    >
+      Sender
+    </p>
+  </div>
+  <div
+    class="text-right"
+  >
+    <p
+      class="text-sm font-semibold text-t-primary mb-2"
+    >
+      Pay for the service
+    </p>
+    <a
+      class="inline-flex items-center justify-center gap-2 px-4 py-2.5 h-10 bg-brand text-white text-sm font-semibold no-underline"
+      href="https://pay.example.com/invoice123"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      <img
+        alt="Tradazone"
+        class="object-contain w-3 h-3"
+        src="/src/assets/logo-white.png"
+      />
+      Payment Checkout
+    </a>
+  </div>
+</div>
+`;
+
+exports[`Invoice Components Snapshots > InvoiceHeader Component > should match snapshot for invoice header 1`] = `
+<div
+  class="flex items-start justify-between mb-12"
+>
+  <div
+    class="w-20 h-20 bg-brand rounded-xl flex items-center justify-center p-3"
+  >
+    <img
+      alt="Tradazone"
+      class="object-contain w-full object-contain"
+      src="/src/assets/logo-white.png"
+    />
+  </div>
+  <h1
+    class="text-6xl font-light text-t-primary tracking-tight"
+  >
+    Invoice
+  </h1>
+</div>
+`;
+
+exports[`Invoice Components Snapshots > InvoiceLayout Component > should match snapshot for complete invoice layout 1`] = `
+<div
+  class="w-[794px] min-h-[1123px] bg-white mx-auto flex flex-col"
+  style="padding: 48px 56px;"
+>
+  <div
+    class="flex items-start justify-between mb-12"
+  >
+    <div
+      class="w-20 h-20 bg-brand rounded-xl flex items-center justify-center p-3"
+    >
+      <img
+        alt="Tradazone"
+        class="object-contain w-full object-contain"
+        src="/src/assets/logo-white.png"
+      />
+    </div>
+    <h1
+      class="text-6xl font-light text-t-primary tracking-tight"
+    >
+      Invoice
+    </h1>
+  </div>
+  <div
+    class="grid grid-cols-3 border-t border-gray-200 py-4 mb-6"
+  >
+    <div>
+      <span
+        class="block text-xs font-bold text-t-primary mb-1"
+      >
+        Invoice date:
+      </span>
+      <span
+        class="text-sm text-t-muted"
+      >
+        2024-01-15
+      </span>
+    </div>
+    <div>
+      <span
+        class="block text-xs font-bold text-t-primary mb-1"
+      >
+        Due date:
+      </span>
+      <span
+        class="text-sm text-t-muted"
+      >
+        2024-02-15
+      </span>
+    </div>
+    <div>
+      <span
+        class="block text-xs font-bold text-brand mb-1"
+      >
+        Invoice number:
+      </span>
+      <span
+        class="text-sm text-brand"
+      >
+        #
+        00001
+      </span>
+    </div>
+  </div>
+  <div
+    class="grid grid-cols-3 border-t border-gray-200 py-4 mb-8"
+  >
+    <div>
+      <span
+        class="block text-xs font-bold text-t-primary mb-1"
+      >
+        From:
+      </span>
+      <span
+        class="block text-sm text-t-muted"
+      >
+        Tradazone
+      </span>
+      <span
+        class="block text-sm text-t-muted"
+      >
+        billing@tradazone.com
+      </span>
+    </div>
+    <div>
+      <span
+        class="block text-xs font-bold text-t-primary mb-1"
+      >
+        To
+      </span>
+      <span
+        class="block text-sm text-t-muted"
+      >
+        John Doe
+      </span>
+      <span
+        class="block text-sm text-t-muted"
+      >
+        john@example.com
+      </span>
+    </div>
+    <div>
+      <span
+        class="block text-xs font-bold text-t-primary mb-1"
+      >
+        Address
+      </span>
+      <span
+        class="block text-sm text-t-muted"
+      >
+        123 Main St, New York, NY 10001
+      </span>
+    </div>
+  </div>
+  <div
+    class="mb-8"
+  >
+    <div
+      class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-3"
+    >
+      <span
+        class="text-sm font-semibold text-t-primary"
+      >
+        Item Description
+      </span>
+      <span
+        class="text-sm font-semibold text-brand text-center"
+      >
+        Price
+      </span>
+      <span
+        class="text-sm font-semibold text-brand text-center"
+      >
+        Quantity
+      </span>
+      <span
+        class="text-sm font-semibold text-brand text-right"
+      >
+        Amount
+      </span>
+    </div>
+    <div
+      class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+    >
+      <span
+        class="text-sm text-t-primary"
+      >
+        Web Development
+      </span>
+      <span
+        class="text-sm text-brand text-center"
+      >
+        500
+      </span>
+      <span
+        class="text-sm text-brand text-center"
+      >
+        1
+      </span>
+      <span
+        class="text-sm text-brand text-right"
+      >
+        500
+      </span>
+    </div>
+    <div
+      class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+    >
+      <span
+        class="text-sm text-t-primary"
+      >
+        Design Services
+      </span>
+      <span
+        class="text-sm text-brand text-center"
+      >
+        300
+      </span>
+      <span
+        class="text-sm text-brand text-center"
+      >
+        2
+      </span>
+      <span
+        class="text-sm text-brand text-right"
+      >
+        600
+      </span>
+    </div>
+    <div
+      class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+    >
+      <span
+        class="text-sm text-gray-300"
+      >
+        Item Description
+      </span>
+      <span
+        class="text-sm text-gray-300 text-center"
+      >
+        Price
+      </span>
+      <span
+        class="text-sm text-gray-300 text-center"
+      >
+        Quantity
+      </span>
+      <span
+        class="text-sm text-gray-300 text-right"
+      >
+        Amount
+      </span>
+    </div>
+    <div
+      class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+    >
+      <span
+        class="text-sm text-gray-300"
+      >
+        Item Description
+      </span>
+      <span
+        class="text-sm text-gray-300 text-center"
+      >
+        Price
+      </span>
+      <span
+        class="text-sm text-gray-300 text-center"
+      >
+        Quantity
+      </span>
+      <span
+        class="text-sm text-gray-300 text-right"
+      >
+        Amount
+      </span>
+    </div>
+  </div>
+  <div
+    class="flex justify-end mb-10"
+  >
+    <div
+      class="w-64"
+    >
+      <div
+        class="flex items-center justify-between py-3 border-t border-gray-200"
+      >
+        <span
+          class="text-sm text-t-secondary"
+        >
+          Sub total
+        </span>
+        <span
+          class="text-sm"
+        >
+          <span
+            class="font-semibold text-t-primary"
+          >
+            1100
+          </span>
+          <span
+            class="text-brand ml-0.5"
+          >
+            STRK
+          </span>
+        </span>
+      </div>
+      <div
+        class="flex items-center justify-between py-3"
+      >
+        <span
+          class="text-sm text-t-secondary"
+        >
+          Tax
+        </span>
+        <span
+          class="text-sm"
+        >
+          <span
+            class="font-semibold text-t-primary"
+          >
+            1100
+          </span>
+          <span
+            class="text-brand ml-0.5"
+          >
+            STRK
+          </span>
+        </span>
+      </div>
+      <div
+        class="flex items-center justify-between py-3 border-t border-gray-200"
+      >
+        <span
+          class="text-sm font-semibold text-t-primary"
+        >
+          Total Due
+        </span>
+        <span
+          class="text-sm"
+        >
+          <span
+            class="font-bold text-t-primary"
+          >
+            1100
+          </span>
+          <span
+            class="text-brand ml-0.5"
+          >
+            STRK
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div
+    class="mt-auto"
+  >
+    <div
+      class="flex justify-between items-start border-t border-gray-200 pt-6 pb-16"
+    >
+      <div>
+        <h3
+          class="text-sm font-bold text-t-primary mb-1"
+        >
+          Notes
+        </h3>
+        <p
+          class="text-sm text-t-muted"
+        >
+          Tradazone
+        </p>
+      </div>
+      <div
+        class="text-right"
+      >
+        <p
+          class="text-sm font-semibold text-t-primary mb-2"
+        >
+          Pay for the service
+        </p>
+        <a
+          class="inline-flex items-center justify-center gap-2 px-4 py-2.5 h-10 bg-brand text-white text-sm font-semibold no-underline"
+          href="https://pay.tradazone.com/INV-001"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <img
+            alt="Tradazone"
+            class="object-contain w-3 h-3"
+            src="/src/assets/logo-white.png"
+          />
+          Payment Checkout
+        </a>
+      </div>
+    </div>
+    <div
+      class="flex items-center justify-between mt-auto pt-8"
+    >
+      <div
+        class="flex items-center gap-2"
+      >
+        <div
+          class="w-8 h-8 bg-brand rounded flex items-center justify-center p-1"
+        >
+          <img
+            alt="Tradazone"
+            class="object-contain w-full object-contain"
+            src="/src/assets/logo-white.png"
+          />
+        </div>
+        <span
+          class="text-sm font-bold text-brand"
+        >
+          tradazone
+        </span>
+      </div>
+      <span
+        class="text-sm text-t-secondary"
+      >
+        Tradazone.com
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Invoice Components Snapshots > InvoiceLayout Component > should match snapshot for invoice layout with minimal data 1`] = `
+<div
+  class="w-[794px] min-h-[1123px] bg-white mx-auto flex flex-col"
+  style="padding: 48px 56px;"
+>
+  <div
+    class="flex items-start justify-between mb-12"
+  >
+    <div
+      class="w-20 h-20 bg-brand rounded-xl flex items-center justify-center p-3"
+    >
+      <img
+        alt="Tradazone"
+        class="object-contain w-full object-contain"
+        src="/src/assets/logo-white.png"
+      />
+    </div>
+    <h1
+      class="text-6xl font-light text-t-primary tracking-tight"
+    >
+      Invoice
+    </h1>
+  </div>
+  <div
+    class="grid grid-cols-3 border-t border-gray-200 py-4 mb-6"
+  >
+    <div>
+      <span
+        class="block text-xs font-bold text-t-primary mb-1"
+      >
+        Invoice date:
+      </span>
+      <span
+        class="text-sm text-t-muted"
+      >
+        2024-01-20
+      </span>
+    </div>
+    <div>
+      <span
+        class="block text-xs font-bold text-t-primary mb-1"
+      >
+        Due date:
+      </span>
+      <span
+        class="text-sm text-t-muted"
+      >
+        2024-02-20
+      </span>
+    </div>
+    <div>
+      <span
+        class="block text-xs font-bold text-brand mb-1"
+      >
+        Invoice number:
+      </span>
+      <span
+        class="text-sm text-brand"
+      >
+        #
+        00002
+      </span>
+    </div>
+  </div>
+  <div
+    class="grid grid-cols-3 border-t border-gray-200 py-4 mb-8"
+  >
+    <div>
+      <span
+        class="block text-xs font-bold text-t-primary mb-1"
+      >
+        From:
+      </span>
+      <span
+        class="block text-sm text-t-muted"
+      >
+        Sender
+      </span>
+      <span
+        class="block text-sm text-t-muted"
+      >
+        Sender Email
+      </span>
+    </div>
+    <div>
+      <span
+        class="block text-xs font-bold text-t-primary mb-1"
+      >
+        To
+      </span>
+      <span
+        class="block text-sm text-t-muted"
+      >
+        Jane Smith
+      </span>
+      <span
+        class="block text-sm text-t-muted"
+      >
+        Receiver Email
+      </span>
+    </div>
+    <div>
+      <span
+        class="block text-xs font-bold text-t-primary mb-1"
+      >
+        Address
+      </span>
+      <span
+        class="block text-sm text-t-muted"
+      >
+        123 Fashion Avenue, London, W1F 7TY
+United Kingdom
+      </span>
+    </div>
+  </div>
+  <div
+    class="mb-8"
+  >
+    <div
+      class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-3"
+    >
+      <span
+        class="text-sm font-semibold text-t-primary"
+      >
+        Item Description
+      </span>
+      <span
+        class="text-sm font-semibold text-brand text-center"
+      >
+        Price
+      </span>
+      <span
+        class="text-sm font-semibold text-brand text-center"
+      >
+        Quantity
+      </span>
+      <span
+        class="text-sm font-semibold text-brand text-right"
+      >
+        Amount
+      </span>
+    </div>
+    <div
+      class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+    >
+      <span
+        class="text-sm text-gray-300"
+      >
+        Item Description
+      </span>
+      <span
+        class="text-sm text-gray-300 text-center"
+      >
+        Price
+      </span>
+      <span
+        class="text-sm text-gray-300 text-center"
+      >
+        Quantity
+      </span>
+      <span
+        class="text-sm text-gray-300 text-right"
+      >
+        Amount
+      </span>
+    </div>
+    <div
+      class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+    >
+      <span
+        class="text-sm text-gray-300"
+      >
+        Item Description
+      </span>
+      <span
+        class="text-sm text-gray-300 text-center"
+      >
+        Price
+      </span>
+      <span
+        class="text-sm text-gray-300 text-center"
+      >
+        Quantity
+      </span>
+      <span
+        class="text-sm text-gray-300 text-right"
+      >
+        Amount
+      </span>
+    </div>
+    <div
+      class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+    >
+      <span
+        class="text-sm text-gray-300"
+      >
+        Item Description
+      </span>
+      <span
+        class="text-sm text-gray-300 text-center"
+      >
+        Price
+      </span>
+      <span
+        class="text-sm text-gray-300 text-center"
+      >
+        Quantity
+      </span>
+      <span
+        class="text-sm text-gray-300 text-right"
+      >
+        Amount
+      </span>
+    </div>
+    <div
+      class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+    >
+      <span
+        class="text-sm text-gray-300"
+      >
+        Item Description
+      </span>
+      <span
+        class="text-sm text-gray-300 text-center"
+      >
+        Price
+      </span>
+      <span
+        class="text-sm text-gray-300 text-center"
+      >
+        Quantity
+      </span>
+      <span
+        class="text-sm text-gray-300 text-right"
+      >
+        Amount
+      </span>
+    </div>
+  </div>
+  <div
+    class="flex justify-end mb-10"
+  >
+    <div
+      class="w-64"
+    >
+      <div
+        class="flex items-center justify-between py-3 border-t border-gray-200"
+      >
+        <span
+          class="text-sm text-t-secondary"
+        >
+          Sub total
+        </span>
+        <span
+          class="text-sm"
+        >
+          <span
+            class="font-semibold text-t-primary"
+          >
+            0
+          </span>
+          <span
+            class="text-brand ml-0.5"
+          >
+            USD
+          </span>
+        </span>
+      </div>
+      <div
+        class="flex items-center justify-between py-3"
+      >
+        <span
+          class="text-sm text-t-secondary"
+        >
+          Tax
+        </span>
+        <span
+          class="text-sm"
+        >
+          <span
+            class="font-semibold text-t-primary"
+          >
+            0
+          </span>
+          <span
+            class="text-brand ml-0.5"
+          >
+            USD
+          </span>
+        </span>
+      </div>
+      <div
+        class="flex items-center justify-between py-3 border-t border-gray-200"
+      >
+        <span
+          class="text-sm font-semibold text-t-primary"
+        >
+          Total Due
+        </span>
+        <span
+          class="text-sm"
+        >
+          <span
+            class="font-bold text-t-primary"
+          >
+            0
+          </span>
+          <span
+            class="text-brand ml-0.5"
+          >
+            USD
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div
+    class="mt-auto"
+  >
+    <div
+      class="flex justify-between items-start border-t border-gray-200 pt-6 pb-16"
+    >
+      <div>
+        <h3
+          class="text-sm font-bold text-t-primary mb-1"
+        >
+          Notes
+        </h3>
+        <p
+          class="text-sm text-t-muted"
+        >
+          Sender
+        </p>
+      </div>
+      <div
+        class="text-right"
+      >
+        <p
+          class="text-sm font-semibold text-t-primary mb-2"
+        >
+          Pay for the service
+        </p>
+        <a
+          class="inline-flex items-center justify-center gap-2 px-4 py-2.5 h-10 bg-brand text-white text-sm font-semibold no-underline"
+          href="https://pay.tradazone.com/INV-002"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <img
+            alt="Tradazone"
+            class="object-contain w-3 h-3"
+            src="/src/assets/logo-white.png"
+          />
+          Payment Checkout
+        </a>
+      </div>
+    </div>
+    <div
+      class="flex items-center justify-between mt-auto pt-8"
+    >
+      <div
+        class="flex items-center gap-2"
+      >
+        <div
+          class="w-8 h-8 bg-brand rounded flex items-center justify-center p-1"
+        >
+          <img
+            alt="Tradazone"
+            class="object-contain w-full object-contain"
+            src="/src/assets/logo-white.png"
+          />
+        </div>
+        <span
+          class="text-sm font-bold text-brand"
+        >
+          tradazone
+        </span>
+      </div>
+      <span
+        class="text-sm text-t-secondary"
+      >
+        Tradazone.com
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Invoice Components Snapshots > InvoiceLayout Component > should match snapshot for invoice layout with single item 1`] = `
+<div
+  class="w-[794px] min-h-[1123px] bg-white mx-auto flex flex-col"
+  style="padding: 48px 56px;"
+>
+  <div
+    class="flex items-start justify-between mb-12"
+  >
+    <div
+      class="w-20 h-20 bg-brand rounded-xl flex items-center justify-center p-3"
+    >
+      <img
+        alt="Tradazone"
+        class="object-contain w-full object-contain"
+        src="/src/assets/logo-white.png"
+      />
+    </div>
+    <h1
+      class="text-6xl font-light text-t-primary tracking-tight"
+    >
+      Invoice
+    </h1>
+  </div>
+  <div
+    class="grid grid-cols-3 border-t border-gray-200 py-4 mb-6"
+  >
+    <div>
+      <span
+        class="block text-xs font-bold text-t-primary mb-1"
+      >
+        Invoice date:
+      </span>
+      <span
+        class="text-sm text-t-muted"
+      >
+        2024-01-25
+      </span>
+    </div>
+    <div>
+      <span
+        class="block text-xs font-bold text-t-primary mb-1"
+      >
+        Due date:
+      </span>
+      <span
+        class="text-sm text-t-muted"
+      >
+        2024-02-25
+      </span>
+    </div>
+    <div>
+      <span
+        class="block text-xs font-bold text-brand mb-1"
+      >
+        Invoice number:
+      </span>
+      <span
+        class="text-sm text-brand"
+      >
+        #
+        00003
+      </span>
+    </div>
+  </div>
+  <div
+    class="grid grid-cols-3 border-t border-gray-200 py-4 mb-8"
+  >
+    <div>
+      <span
+        class="block text-xs font-bold text-t-primary mb-1"
+      >
+        From:
+      </span>
+      <span
+        class="block text-sm text-t-muted"
+      >
+        Tradazone
+      </span>
+      <span
+        class="block text-sm text-t-muted"
+      >
+        billing@tradazone.com
+      </span>
+    </div>
+    <div>
+      <span
+        class="block text-xs font-bold text-t-primary mb-1"
+      >
+        To
+      </span>
+      <span
+        class="block text-sm text-t-muted"
+      >
+        Bob Johnson
+      </span>
+      <span
+        class="block text-sm text-t-muted"
+      >
+        bob@example.com
+      </span>
+    </div>
+    <div>
+      <span
+        class="block text-xs font-bold text-t-primary mb-1"
+      >
+        Address
+      </span>
+      <span
+        class="block text-sm text-t-muted"
+      >
+        123 Fashion Avenue, London, W1F 7TY
+United Kingdom
+      </span>
+    </div>
+  </div>
+  <div
+    class="mb-8"
+  >
+    <div
+      class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-3"
+    >
+      <span
+        class="text-sm font-semibold text-t-primary"
+      >
+        Item Description
+      </span>
+      <span
+        class="text-sm font-semibold text-brand text-center"
+      >
+        Price
+      </span>
+      <span
+        class="text-sm font-semibold text-brand text-center"
+      >
+        Quantity
+      </span>
+      <span
+        class="text-sm font-semibold text-brand text-right"
+      >
+        Amount
+      </span>
+    </div>
+    <div
+      class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+    >
+      <span
+        class="text-sm text-t-primary"
+      >
+        Consulting
+      </span>
+      <span
+        class="text-sm text-brand text-center"
+      >
+        1000
+      </span>
+      <span
+        class="text-sm text-brand text-center"
+      >
+        1
+      </span>
+      <span
+        class="text-sm text-brand text-right"
+      >
+        1000
+      </span>
+    </div>
+    <div
+      class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+    >
+      <span
+        class="text-sm text-gray-300"
+      >
+        Item Description
+      </span>
+      <span
+        class="text-sm text-gray-300 text-center"
+      >
+        Price
+      </span>
+      <span
+        class="text-sm text-gray-300 text-center"
+      >
+        Quantity
+      </span>
+      <span
+        class="text-sm text-gray-300 text-right"
+      >
+        Amount
+      </span>
+    </div>
+    <div
+      class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+    >
+      <span
+        class="text-sm text-gray-300"
+      >
+        Item Description
+      </span>
+      <span
+        class="text-sm text-gray-300 text-center"
+      >
+        Price
+      </span>
+      <span
+        class="text-sm text-gray-300 text-center"
+      >
+        Quantity
+      </span>
+      <span
+        class="text-sm text-gray-300 text-right"
+      >
+        Amount
+      </span>
+    </div>
+    <div
+      class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+    >
+      <span
+        class="text-sm text-gray-300"
+      >
+        Item Description
+      </span>
+      <span
+        class="text-sm text-gray-300 text-center"
+      >
+        Price
+      </span>
+      <span
+        class="text-sm text-gray-300 text-center"
+      >
+        Quantity
+      </span>
+      <span
+        class="text-sm text-gray-300 text-right"
+      >
+        Amount
+      </span>
+    </div>
+  </div>
+  <div
+    class="flex justify-end mb-10"
+  >
+    <div
+      class="w-64"
+    >
+      <div
+        class="flex items-center justify-between py-3 border-t border-gray-200"
+      >
+        <span
+          class="text-sm text-t-secondary"
+        >
+          Sub total
+        </span>
+        <span
+          class="text-sm"
+        >
+          <span
+            class="font-semibold text-t-primary"
+          >
+            1000
+          </span>
+          <span
+            class="text-brand ml-0.5"
+          >
+            STRK
+          </span>
+        </span>
+      </div>
+      <div
+        class="flex items-center justify-between py-3"
+      >
+        <span
+          class="text-sm text-t-secondary"
+        >
+          Tax
+        </span>
+        <span
+          class="text-sm"
+        >
+          <span
+            class="font-semibold text-t-primary"
+          >
+            1000
+          </span>
+          <span
+            class="text-brand ml-0.5"
+          >
+            STRK
+          </span>
+        </span>
+      </div>
+      <div
+        class="flex items-center justify-between py-3 border-t border-gray-200"
+      >
+        <span
+          class="text-sm font-semibold text-t-primary"
+        >
+          Total Due
+        </span>
+        <span
+          class="text-sm"
+        >
+          <span
+            class="font-bold text-t-primary"
+          >
+            1000
+          </span>
+          <span
+            class="text-brand ml-0.5"
+          >
+            STRK
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div
+    class="mt-auto"
+  >
+    <div
+      class="flex justify-between items-start border-t border-gray-200 pt-6 pb-16"
+    >
+      <div>
+        <h3
+          class="text-sm font-bold text-t-primary mb-1"
+        >
+          Notes
+        </h3>
+        <p
+          class="text-sm text-t-muted"
+        >
+          Tradazone
+        </p>
+      </div>
+      <div
+        class="text-right"
+      >
+        <p
+          class="text-sm font-semibold text-t-primary mb-2"
+        >
+          Pay for the service
+        </p>
+        <a
+          class="inline-flex items-center justify-center gap-2 px-4 py-2.5 h-10 bg-brand text-white text-sm font-semibold no-underline"
+          href="https://pay.tradazone.com/INV-003"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <img
+            alt="Tradazone"
+            class="object-contain w-3 h-3"
+            src="/src/assets/logo-white.png"
+          />
+          Payment Checkout
+        </a>
+      </div>
+    </div>
+    <div
+      class="flex items-center justify-between mt-auto pt-8"
+    >
+      <div
+        class="flex items-center gap-2"
+      >
+        <div
+          class="w-8 h-8 bg-brand rounded flex items-center justify-center p-1"
+        >
+          <img
+            alt="Tradazone"
+            class="object-contain w-full object-contain"
+            src="/src/assets/logo-white.png"
+          />
+        </div>
+        <span
+          class="text-sm font-bold text-brand"
+        >
+          tradazone
+        </span>
+      </div>
+      <span
+        class="text-sm text-t-secondary"
+      >
+        Tradazone.com
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Invoice Components Snapshots > InvoiceSummary Component > should match snapshot for invoice summary with default values 1`] = `
+<div
+  class="flex justify-end mb-10"
+>
+  <div
+    class="w-64"
+  >
+    <div
+      class="flex items-center justify-between py-3 border-t border-gray-200"
+    >
+      <span
+        class="text-sm text-t-secondary"
+      >
+        Sub total
+      </span>
+      <span
+        class="text-sm"
+      >
+        <span
+          class="font-semibold text-t-primary"
+        >
+          0
+        </span>
+        <span
+          class="text-brand ml-0.5"
+        >
+          STRK
+        </span>
+      </span>
+    </div>
+    <div
+      class="flex items-center justify-between py-3"
+    >
+      <span
+        class="text-sm text-t-secondary"
+      >
+        Tax
+      </span>
+      <span
+        class="text-sm"
+      >
+        <span
+          class="font-semibold text-t-primary"
+        >
+          0
+        </span>
+        <span
+          class="text-brand ml-0.5"
+        >
+          STRK
+        </span>
+      </span>
+    </div>
+    <div
+      class="flex items-center justify-between py-3 border-t border-gray-200"
+    >
+      <span
+        class="text-sm font-semibold text-t-primary"
+      >
+        Total Due
+      </span>
+      <span
+        class="text-sm"
+      >
+        <span
+          class="font-bold text-t-primary"
+        >
+          0
+        </span>
+        <span
+          class="text-brand ml-0.5"
+        >
+          STRK
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Invoice Components Snapshots > InvoiceSummary Component > should match snapshot for invoice summary with different currency 1`] = `
+<div
+  class="flex justify-end mb-10"
+>
+  <div
+    class="w-64"
+  >
+    <div
+      class="flex items-center justify-between py-3 border-t border-gray-200"
+    >
+      <span
+        class="text-sm text-t-secondary"
+      >
+        Sub total
+      </span>
+      <span
+        class="text-sm"
+      >
+        <span
+          class="font-semibold text-t-primary"
+        >
+          500
+        </span>
+        <span
+          class="text-brand ml-0.5"
+        >
+          USD
+        </span>
+      </span>
+    </div>
+    <div
+      class="flex items-center justify-between py-3"
+    >
+      <span
+        class="text-sm text-t-secondary"
+      >
+        Tax
+      </span>
+      <span
+        class="text-sm"
+      >
+        <span
+          class="font-semibold text-t-primary"
+        >
+          50
+        </span>
+        <span
+          class="text-brand ml-0.5"
+        >
+          USD
+        </span>
+      </span>
+    </div>
+    <div
+      class="flex items-center justify-between py-3 border-t border-gray-200"
+    >
+      <span
+        class="text-sm font-semibold text-t-primary"
+      >
+        Total Due
+      </span>
+      <span
+        class="text-sm"
+      >
+        <span
+          class="font-bold text-t-primary"
+        >
+          550
+        </span>
+        <span
+          class="text-brand ml-0.5"
+        >
+          USD
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Invoice Components Snapshots > InvoiceSummary Component > should match snapshot for invoice summary with values 1`] = `
+<div
+  class="flex justify-end mb-10"
+>
+  <div
+    class="w-64"
+  >
+    <div
+      class="flex items-center justify-between py-3 border-t border-gray-200"
+    >
+      <span
+        class="text-sm text-t-secondary"
+      >
+        Sub total
+      </span>
+      <span
+        class="text-sm"
+      >
+        <span
+          class="font-semibold text-t-primary"
+        >
+          1000
+        </span>
+        <span
+          class="text-brand ml-0.5"
+        >
+          STRK
+        </span>
+      </span>
+    </div>
+    <div
+      class="flex items-center justify-between py-3"
+    >
+      <span
+        class="text-sm text-t-secondary"
+      >
+        Tax
+      </span>
+      <span
+        class="text-sm"
+      >
+        <span
+          class="font-semibold text-t-primary"
+        >
+          100
+        </span>
+        <span
+          class="text-brand ml-0.5"
+        >
+          STRK
+        </span>
+      </span>
+    </div>
+    <div
+      class="flex items-center justify-between py-3 border-t border-gray-200"
+    >
+      <span
+        class="text-sm font-semibold text-t-primary"
+      >
+        Total Due
+      </span>
+      <span
+        class="text-sm"
+      >
+        <span
+          class="font-bold text-t-primary"
+        >
+          1100
+        </span>
+        <span
+          class="text-brand ml-0.5"
+        >
+          STRK
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Invoice Components Snapshots > InvoiceTable Component > should match snapshot for empty invoice table 1`] = `
+<div
+  class="mb-8"
+>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-3"
+  >
+    <span
+      class="text-sm font-semibold text-t-primary"
+    >
+      Item Description
+    </span>
+    <span
+      class="text-sm font-semibold text-brand text-center"
+    >
+      Price
+    </span>
+    <span
+      class="text-sm font-semibold text-brand text-center"
+    >
+      Quantity
+    </span>
+    <span
+      class="text-sm font-semibold text-brand text-right"
+    >
+      Amount
+    </span>
+  </div>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+  >
+    <span
+      class="text-sm text-gray-300"
+    >
+      Item Description
+    </span>
+    <span
+      class="text-sm text-gray-300 text-center"
+    >
+      Price
+    </span>
+    <span
+      class="text-sm text-gray-300 text-center"
+    >
+      Quantity
+    </span>
+    <span
+      class="text-sm text-gray-300 text-right"
+    >
+      Amount
+    </span>
+  </div>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+  >
+    <span
+      class="text-sm text-gray-300"
+    >
+      Item Description
+    </span>
+    <span
+      class="text-sm text-gray-300 text-center"
+    >
+      Price
+    </span>
+    <span
+      class="text-sm text-gray-300 text-center"
+    >
+      Quantity
+    </span>
+    <span
+      class="text-sm text-gray-300 text-right"
+    >
+      Amount
+    </span>
+  </div>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+  >
+    <span
+      class="text-sm text-gray-300"
+    >
+      Item Description
+    </span>
+    <span
+      class="text-sm text-gray-300 text-center"
+    >
+      Price
+    </span>
+    <span
+      class="text-sm text-gray-300 text-center"
+    >
+      Quantity
+    </span>
+    <span
+      class="text-sm text-gray-300 text-right"
+    >
+      Amount
+    </span>
+  </div>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+  >
+    <span
+      class="text-sm text-gray-300"
+    >
+      Item Description
+    </span>
+    <span
+      class="text-sm text-gray-300 text-center"
+    >
+      Price
+    </span>
+    <span
+      class="text-sm text-gray-300 text-center"
+    >
+      Quantity
+    </span>
+    <span
+      class="text-sm text-gray-300 text-right"
+    >
+      Amount
+    </span>
+  </div>
+</div>
+`;
+
+exports[`Invoice Components Snapshots > InvoiceTable Component > should match snapshot for invoice table with four items 1`] = `
+<div
+  class="mb-8"
+>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-3"
+  >
+    <span
+      class="text-sm font-semibold text-t-primary"
+    >
+      Item Description
+    </span>
+    <span
+      class="text-sm font-semibold text-brand text-center"
+    >
+      Price
+    </span>
+    <span
+      class="text-sm font-semibold text-brand text-center"
+    >
+      Quantity
+    </span>
+    <span
+      class="text-sm font-semibold text-brand text-right"
+    >
+      Amount
+    </span>
+  </div>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+  >
+    <span
+      class="text-sm text-t-primary"
+    >
+      Item 1
+    </span>
+    <span
+      class="text-sm text-brand text-center"
+    >
+      100
+    </span>
+    <span
+      class="text-sm text-brand text-center"
+    >
+      1
+    </span>
+    <span
+      class="text-sm text-brand text-right"
+    >
+      100
+    </span>
+  </div>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+  >
+    <span
+      class="text-sm text-t-primary"
+    >
+      Item 2
+    </span>
+    <span
+      class="text-sm text-brand text-center"
+    >
+      200
+    </span>
+    <span
+      class="text-sm text-brand text-center"
+    >
+      2
+    </span>
+    <span
+      class="text-sm text-brand text-right"
+    >
+      400
+    </span>
+  </div>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+  >
+    <span
+      class="text-sm text-t-primary"
+    >
+      Item 3
+    </span>
+    <span
+      class="text-sm text-brand text-center"
+    >
+      300
+    </span>
+    <span
+      class="text-sm text-brand text-center"
+    >
+      3
+    </span>
+    <span
+      class="text-sm text-brand text-right"
+    >
+      900
+    </span>
+  </div>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+  >
+    <span
+      class="text-sm text-t-primary"
+    >
+      Item 4
+    </span>
+    <span
+      class="text-sm text-brand text-center"
+    >
+      400
+    </span>
+    <span
+      class="text-sm text-brand text-center"
+    >
+      4
+    </span>
+    <span
+      class="text-sm text-brand text-right"
+    >
+      1600
+    </span>
+  </div>
+</div>
+`;
+
+exports[`Invoice Components Snapshots > InvoiceTable Component > should match snapshot for invoice table with multiple items 1`] = `
+<div
+  class="mb-8"
+>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-3"
+  >
+    <span
+      class="text-sm font-semibold text-t-primary"
+    >
+      Item Description
+    </span>
+    <span
+      class="text-sm font-semibold text-brand text-center"
+    >
+      Price
+    </span>
+    <span
+      class="text-sm font-semibold text-brand text-center"
+    >
+      Quantity
+    </span>
+    <span
+      class="text-sm font-semibold text-brand text-right"
+    >
+      Amount
+    </span>
+  </div>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+  >
+    <span
+      class="text-sm text-t-primary"
+    >
+      Web Development
+    </span>
+    <span
+      class="text-sm text-brand text-center"
+    >
+      500
+    </span>
+    <span
+      class="text-sm text-brand text-center"
+    >
+      1
+    </span>
+    <span
+      class="text-sm text-brand text-right"
+    >
+      500
+    </span>
+  </div>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+  >
+    <span
+      class="text-sm text-t-primary"
+    >
+      Design Services
+    </span>
+    <span
+      class="text-sm text-brand text-center"
+    >
+      300
+    </span>
+    <span
+      class="text-sm text-brand text-center"
+    >
+      2
+    </span>
+    <span
+      class="text-sm text-brand text-right"
+    >
+      600
+    </span>
+  </div>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+  >
+    <span
+      class="text-sm text-t-primary"
+    >
+      Consulting
+    </span>
+    <span
+      class="text-sm text-brand text-center"
+    >
+      200
+    </span>
+    <span
+      class="text-sm text-brand text-center"
+    >
+      3
+    </span>
+    <span
+      class="text-sm text-brand text-right"
+    >
+      600
+    </span>
+  </div>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+  >
+    <span
+      class="text-sm text-gray-300"
+    >
+      Item Description
+    </span>
+    <span
+      class="text-sm text-gray-300 text-center"
+    >
+      Price
+    </span>
+    <span
+      class="text-sm text-gray-300 text-center"
+    >
+      Quantity
+    </span>
+    <span
+      class="text-sm text-gray-300 text-right"
+    >
+      Amount
+    </span>
+  </div>
+</div>
+`;
+
+exports[`Invoice Components Snapshots > InvoiceTable Component > should match snapshot for invoice table with one item 1`] = `
+<div
+  class="mb-8"
+>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-3"
+  >
+    <span
+      class="text-sm font-semibold text-t-primary"
+    >
+      Item Description
+    </span>
+    <span
+      class="text-sm font-semibold text-brand text-center"
+    >
+      Price
+    </span>
+    <span
+      class="text-sm font-semibold text-brand text-center"
+    >
+      Quantity
+    </span>
+    <span
+      class="text-sm font-semibold text-brand text-right"
+    >
+      Amount
+    </span>
+  </div>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+  >
+    <span
+      class="text-sm text-t-primary"
+    >
+      Web Development
+    </span>
+    <span
+      class="text-sm text-brand text-center"
+    >
+      500
+    </span>
+    <span
+      class="text-sm text-brand text-center"
+    >
+      1
+    </span>
+    <span
+      class="text-sm text-brand text-right"
+    >
+      500
+    </span>
+  </div>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+  >
+    <span
+      class="text-sm text-gray-300"
+    >
+      Item Description
+    </span>
+    <span
+      class="text-sm text-gray-300 text-center"
+    >
+      Price
+    </span>
+    <span
+      class="text-sm text-gray-300 text-center"
+    >
+      Quantity
+    </span>
+    <span
+      class="text-sm text-gray-300 text-right"
+    >
+      Amount
+    </span>
+  </div>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+  >
+    <span
+      class="text-sm text-gray-300"
+    >
+      Item Description
+    </span>
+    <span
+      class="text-sm text-gray-300 text-center"
+    >
+      Price
+    </span>
+    <span
+      class="text-sm text-gray-300 text-center"
+    >
+      Quantity
+    </span>
+    <span
+      class="text-sm text-gray-300 text-right"
+    >
+      Amount
+    </span>
+  </div>
+  <div
+    class="grid grid-cols-[2fr_1fr_1fr_1fr] border-t border-gray-200 py-4"
+  >
+    <span
+      class="text-sm text-gray-300"
+    >
+      Item Description
+    </span>
+    <span
+      class="text-sm text-gray-300 text-center"
+    >
+      Price
+    </span>
+    <span
+      class="text-sm text-gray-300 text-center"
+    >
+      Quantity
+    </span>
+    <span
+      class="text-sm text-gray-300 text-right"
+    >
+      Amount
+    </span>
+  </div>
+</div>
+`;
