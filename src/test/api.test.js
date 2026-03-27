@@ -76,6 +76,14 @@ describe("apiFetch", () => {
     });
   });
 
+  it("propagates network-level errors (DNS, CORS, timeout) to the caller", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValue(new Error("Network request failed"))
+    );
+    await expect(apiFetch("/api/customers")).rejects.toThrow("Network request failed");
+  });
+
   it("returns ERR_TOKEN_EXPIRED code on 401 for machine-readable UI handling", async () => {
     setUnauthorizedHandler(vi.fn());
 

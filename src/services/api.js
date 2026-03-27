@@ -159,15 +159,10 @@ const api = {
         },
         delete: async (id) => {
             await delay(500);
+            console.log("API Delete Customer:", id);
             return true;
-        }
+        },
     },
-    delete: async (id) => {
-      await delay(500);
-      console.log("API Delete Customer:", id);
-      return true;
-    },
-  },
 
     // Invoices
     invoices: {
@@ -182,9 +177,8 @@ const api = {
         create: async (data) => {
             await delay(800);
             return { id: `INV-${Date.now()}`, ...data };
-        }
+        },
     },
-  },
 
     // Checkouts
     checkouts: {
@@ -195,14 +189,8 @@ const api = {
         create: async (data) => {
             await delay(800);
             return { id: `CHK-${Date.now()}`, ...data };
-        }
+        },
     },
-    create: async (data) => {
-      await delay(800);
-      console.log("API Create Checkout:", data);
-      return { id: `CHK-${Date.now()}`, ...data };
-    },
-  },
 
     // Items
     items: {
@@ -213,8 +201,8 @@ const api = {
         create: async (data) => {
             await delay(800);
             return { id: Date.now().toString(), ...data };
-        }
-    }
+        },
+    },
 };
 
 export default api;
