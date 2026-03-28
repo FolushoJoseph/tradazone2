@@ -1,9 +1,17 @@
+/**
+ * CheckoutDetail
+ *
+ * Issue #138: Export to CSV on the checkout flow (detail view).
+ * Category: Feature / data portability
+ * Resolution: "Export to CSV" downloads a key-value summary for the active checkout.
+ */
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Copy, Link as LinkIcon, Edit, Trash2, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Copy, Link as LinkIcon, Edit, Trash2, ExternalLink, FileSpreadsheet } from 'lucide-react';
 import Button from '../../components/forms/Button';
 import StatusBadge from '../../components/tables/StatusBadge';
 import { useCheckoutData } from '../../context/DataContext';
 import { formatUtcDate } from '../../utils/date';
+import { buildCheckoutDetailCsv, downloadCsvFile } from '../../utils/checkoutCsv';
 import LazyChart from '../../components/ui/LazyChart';
 
 function CheckoutDetail() {
@@ -14,6 +22,11 @@ function CheckoutDetail() {
     if (!checkout) return <div className="p-8"><p className="text-t-muted">Checkout not found</p></div>;
 
     const copyLink = () => { navigator.clipboard.writeText(checkout.paymentLink); };
+
+    const handleExportCsv = () => {
+        const csv = buildCheckoutDetailCsv(checkout);
+        downloadCsvFile(`${checkout.id}.csv`, csv);
+    };
 
     const chartData = {
         labels: ['Views', 'Payments'],
@@ -52,7 +65,10 @@ function CheckoutDetail() {
                     <h1 className="text-xl font-semibold text-t-primary">{checkout.title}</h1>
                     <p className="text-sm text-t-muted">{checkout.id}</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
+                    <Button variant="secondary" icon={FileSpreadsheet} onClick={handleExportCsv}>
+                        Export to CSV
+                    </Button>
                     <Button variant="secondary" icon={Edit}>Edit</Button>
                     <Button variant="danger" icon={Trash2}>Delete</Button>
                 </div>
