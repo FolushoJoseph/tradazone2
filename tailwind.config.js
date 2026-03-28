@@ -1,5 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  // ISSUE: #134 (Support dark mode themes in CustomerList)
+  // Enabled class-based dark mode to work with ThemeContext.jsx
+  darkMode: 'class',
+
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",

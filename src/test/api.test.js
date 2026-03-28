@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { apiFetch, setUnauthorizedHandler, paginate } from '../services/api';
+import api, { apiFetch, setUnauthorizedHandler, paginate } from '../services/api';
 
 // ─── apiFetch ────────────────────────────────────────────────────────────────
 
@@ -194,5 +194,35 @@ describe("paginate", () => {
     const result = paginate(items);
     expect(result.page).toBe(1);
     expect(result.limit).toBe(10);
+  });
+});
+
+describe("api object - List methods with pagination", () => {
+  it("customers.list returns paginated results", async () => {
+    const result = await api.customers.list(1, 2);
+    expect(result.data).toHaveLength(2);
+    expect(result.page).toBe(1);
+    expect(result.total).toBeGreaterThan(2);
+  });
+
+  it("invoices.list returns paginated results", async () => {
+    const result = await api.invoices.list(1, 1);
+    expect(result.data).toHaveLength(1);
+    expect(result.page).toBe(1);
+    expect(result.total).toBeGreaterThan(1);
+  });
+
+  it("checkouts.list returns paginated results", async () => {
+    const result = await api.checkouts.list(2, 1);
+    expect(result.data).toHaveLength(1);
+    expect(result.page).toBe(2);
+    expect(result.total).toBeGreaterThan(1);
+  });
+
+  it("items.list returns paginated results", async () => {
+    const result = await api.items.list(1, 3);
+    expect(result.data).toHaveLength(3);
+    expect(result.page).toBe(1);
+    expect(result.total).toBeGreaterThan(3);
   });
 });

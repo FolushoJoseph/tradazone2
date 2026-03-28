@@ -99,10 +99,21 @@
  * - Current implementation is client-side only (localStorage-based)
  */
 
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { dispatchWebhook, setWebhookUrl, getWebhookUrl } from '../services/webhook';
-import { toUtcMidnightIso } from '../utils/date';
-import api from '../services/api';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
+import {
+  dispatchWebhook,
+  setWebhookUrl,
+  getWebhookUrl,
+} from "../services/webhook";
+import { toUtcMidnightIso } from "../utils/date";
+import api from "../services/api";
 
 // ISSUE #123: Added bulk-delete functionality for items.
 
@@ -120,13 +131,11 @@ const DataContext = createContext(null);
  * @enum {string}
  */
 const KEYS = {
-    customers: 'tradazone_customers',
-    invoices: 'tradazone_invoices',
-    checkouts: 'tradazone_checkouts',
-    items: 'tradazone_items',
+  customers: "tradazone_customers",
+  invoices: "tradazone_invoices",
+  checkouts: "tradazone_checkouts",
+  items: "tradazone_items",
 };
-
-
 
 /**
  * Saves data to localStorage as JSON
@@ -134,7 +143,7 @@ const KEYS = {
  * @param {*} data - Data to serialize and store
  */
 function save(key, data) {
-    localStorage.setItem(key, JSON.stringify(data));
+  localStorage.setItem(key, JSON.stringify(data));
 }
 
 /* ---------- Provider ---------- */
@@ -276,12 +285,17 @@ export function DataProvider({ children }) {
             save(KEYS.items, next);
             return next;
         });
+      }
 
-        // Trigger API bulk-delete (non-blocking in UI, handles errors via gateway)
-        api.items.bulkDelete(ids).catch((err) => {
-            console.error('[DataContext] Failed to bulk-delete items:', err);
-            // In a real app, we might want to rollback the local state here
-            // but for this task, the linkage is the primary goal.
+      // Fire checkout.paid webhook (non-blocking)
+      if (paidCheckout) {
+        dispatchWebhook("checkout.paid", {
+          id: paidCheckout.id,
+          title: paidCheckout.title,
+          amount: paidCheckout.amount,
+          currency: paidCheckout.currency,
+          customerId,
+          walletType,
         });
     }, []);
 
@@ -476,31 +490,19 @@ export function DataProvider({ children }) {
                 });
             }
         },
-        [checkouts]
-    );
-
-    return (
-        <DataContext.Provider
-            value={{
-                customers,
-                invoices,
-                checkouts,
-                items,
-                transactions: [],
-                dashboardStats: { walletBalance: '0', currency: 'STRK', receivables: '0', totalTransactions: 0, totalCustomers: 0 },
-                addCustomer,
-                addItem,
-                deleteItems,
-                addInvoice,
-                addCheckout,
-                markCheckoutPaid,
-                setWebhookUrl,
-                getWebhookUrl,
-            }}
-        >
-            {children}
-        </DataContext.Provider>
-    );
+        addCustomer,
+        addItem,
+        deleteItems,
+        addInvoice,
+        addCheckout,
+        markCheckoutPaid,
+        setWebhookUrl,
+        getWebhookUrl,
+      }}
+    >
+      {children}
+    </DataContext.Provider>
+  );
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -510,8 +512,167 @@ export function DataProvider({ children }) {
  * @throws {Error} If used outside of DataProvider
  * @returns {Object} Context value containing state and functions
  */
+import { useMemo, useCallback, useEffect, useState } from "react";
+import {
+  CUSTOMER_FILTER_CONFIG,
+  INVOICE_FILTER_CONFIG,
+  ITEM_FILTER_CONFIG,
+  CHECKOUT_FILTER_CONFIG,
+} from "./filterConfigs";
+
+/**
+ * Filter/Sort state management with localStorage persistence
+ * @param {string} type - Data type key ('customers', 'invoices', etc.)
+ * @returns {{ filters: Object, setFilters: Function, resetFilters: Function }}
+ */
+export function useDataFilters(type) {
+  const [filters, setFilters] = useState({
+    search: "",
+    sort: { field: "createdAt", dir: "desc" },
+    status: "all",
+    dateFrom: "",
+    dateTo: "",
+    amountMin: "",
+    amountMax: "",
+  });
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(`tradazone_filters_${type}`);
+      if (saved) {
+        setFilters(JSON.parse(saved));
+      }
+    } catch {
+      // Ignore parse errors
+    }
+  }, [type]);
+
+  const setFiltersWithSave = useCallback(
+    (newFilters) => {
+      setFilters(newFilters);
+      try {
+        localStorage.setItem(
+          `tradazone_filters_${type}`,
+          JSON.stringify(newFilters),
+        );
+      } catch {
+        // Ignore storage errors
+      }
+    },
+    [type],
+  );
+
+  const resetFilters = useCallback(() => {
+    const defaultFilters = {
+      search: "",
+      sort: { field: "createdAt", dir: "desc" },
+      status: "all",
+      dateFrom: "",
+      dateTo: "",
+      amountMin: "",
+      amountMax: "",
+    };
+    setFiltersWithSave(defaultFilters);
+  }, [setFiltersWithSave]);
+
+  return {
+    filters,
+    setFilters: setFiltersWithSave,
+    resetFilters,
+  };
+}
+
+/**
+ * Generic filtering and sorting for any data array
+ * @param {{ data: Array, filters: Object, config: Object }} params
+ * @returns {Array} Filtered and sorted data
+ */
+export function useFilteredData({ data = [], filters, config }) {
+  return useMemo(() => {
+    let result = [...data];
+
+    // 1. Search filter (multi-field fuzzy)
+    if (filters.search) {
+      const query = filters.search.toLowerCase().trim();
+      result = result.filter((item) =>
+        config.searchableFields.some((field) =>
+          String(item[field] || "")
+            .toLowerCase()
+            .includes(query),
+        ),
+      );
+    }
+
+    // 2. Status filter
+    if (config.statusField && filters.status !== "all") {
+      result = result.filter(
+        (item) => item[config.statusField] === filters.status,
+      );
+    }
+
+    // 3. Date range filter
+    if (config.dateFields) {
+      const fromDate = filters.dateFrom ? new Date(filters.dateFrom) : null;
+      const toDate = filters.dateTo ? new Date(filters.dateTo) : null;
+
+      result = result.filter((item) => {
+        const itemDate = new Date(item[config.dateFields.from]);
+        if (fromDate && itemDate < fromDate) return false;
+        if (toDate && itemDate > toDate) return false;
+        return true;
+      });
+    }
+
+    // 4. Amount range filter
+    if (config.amountField && (filters.amountMin || filters.amountMax)) {
+      const min = parseFloat(filters.amountMin) || 0;
+      const max = parseFloat(filters.amountMax) || Infinity;
+      result = result.filter((item) => {
+        const amount = parseFloat(
+          (item[config.amountField] || "0").replace(/,/g, ""),
+        );
+        return amount >= min && amount <= max;
+      });
+    }
+
+    // 5. Sorting
+    if (filters.sort.field) {
+      result.sort((a, b) => {
+        let aVal = a[filters.sort.field];
+        let bVal = b[filters.sort.field];
+
+        // Handle numbers (amount, totalSpent, invoiceCount)
+        if (!isNaN(parseFloat(aVal)) && !isNaN(parseFloat(bVal))) {
+          aVal = parseFloat(aVal);
+          bVal = parseFloat(bVal);
+        } else {
+          // Handle dates
+          aVal = new Date(aVal);
+          bVal = new Date(bVal);
+          if (isNaN(aVal.getTime())) aVal = String(aVal || "").toLowerCase();
+          if (isNaN(bVal.getTime())) bVal = String(bVal || "").toLowerCase();
+        }
+
+        if (aVal < bVal) return filters.sort.dir === "asc" ? -1 : 1;
+        if (aVal > bVal) return filters.sort.dir === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return result;
+  }, [data, filters, config]);
+}
+
+// Filter config presets
+export const FILTER_CONFIGS = {
+  customers: CUSTOMER_FILTER_CONFIG,
+  invoices: INVOICE_FILTER_CONFIG,
+  items: ITEM_FILTER_CONFIG,
+  checkouts: CHECKOUT_FILTER_CONFIG,
+};
+
 export function useData() {
-    const ctx = useContext(DataContext);
-    if (!ctx) throw new Error('useData must be used within a DataProvider');
-    return ctx;
+  const ctx = useContext(DataContext);
+  if (!ctx) throw new Error("useData must be used within a DataProvider");
+  return ctx;
 }

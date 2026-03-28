@@ -155,10 +155,10 @@ export { apiFetch };
 const api = {
     // Customers
     customers: {
-        list: async () => {
-            // TODO: Replace with fetch(`${API_BASE_URL}/customers`)
+        list: async (page = 1, limit = 10) => {
+            // TODO: Replace with fetch(`${API_BASE_URL}/customers?page=${page}&limit=${limit}`)
             await delay(500);
-            return mockCustomers;
+            return paginate(mockCustomers, page, limit);
         },
         get: async (id) => {
             await delay(300);
@@ -181,9 +181,9 @@ const api = {
 
     // Invoices
     invoices: {
-        list: async () => {
+        list: async (page = 1, limit = 10) => {
             await delay(500);
-            return mockInvoices;
+            return paginate(mockInvoices, page, limit);
         },
         get: async (id) => {
             await delay(300);
@@ -197,9 +197,9 @@ const api = {
 
     // Checkouts
     checkouts: {
-        list: async () => {
+        list: async (page = 1, limit = 10) => {
             await delay(500);
-            return mockCheckouts;
+            return paginate(mockCheckouts, page, limit);
         },
         create: async (data) => {
             await delay(800);
@@ -209,9 +209,9 @@ const api = {
 
     // Items
     items: {
-        list: async () => {
+        list: async (page = 1, limit = 10) => {
             await delay(500);
-            return mockItems;
+            return paginate(mockItems, page, limit);
         },
         create: async (data) => {
             await delay(800);

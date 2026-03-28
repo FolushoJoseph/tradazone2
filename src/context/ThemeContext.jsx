@@ -1,7 +1,9 @@
 /**
  * @fileoverview ThemeContext — application-wide dark/light mode state.
  *
- * Persists the user's theme preference to `localStorage` under the key
+ * ISSUE: #134 (Support dark mode themes in CustomerList & Global UI)
+ * Category: Feature Enhancement
+ * * Persists the user's theme preference to `localStorage` under the key
  * `tradazone_theme` and applies/removes the `dark` class on
  * `document.documentElement` so Tailwind's `dark:` variants work globally.
  *
@@ -37,14 +39,35 @@ const ThemeContext = createContext(null);
 export function ThemeProvider({ children }) {
     const [isDark, setIsDark] = useState(() => {
         const stored = localStorage.getItem(THEME_KEY);
+        // If user has a saved preference, use it.
         if (stored) return stored === "dark";
+        // Otherwise, fallback to system preference.
         return window.matchMedia("(prefers-color-scheme: dark)").matches;
     });
 
     useEffect(() => {
-        document.documentElement.classList.toggle("dark", isDark);
+        // Sync the DOM class with the state
+        const root = window.document.documentElement;
+        if (isDark) {
+            root.classList.add("dark");
+        } else {
+            root.classList.remove("dark");
+        }
         localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
     }, [isDark]);
+
+    // Optional: Sync with system changes if no manual override exists
+    useEffect(() => {
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        const handleChange = (e) => {
+            if (!localStorage.getItem(THEME_KEY)) {
+                setIsDark(e.matches);
+            }
+        };
+
+        mediaQuery.addEventListener("change", handleChange);
+        return () => mediaQuery.removeEventListener("change", handleChange);
+    }, []);
 
     const toggleTheme = () => setIsDark((prev) => !prev);
 
@@ -63,9 +86,6 @@ export function ThemeProvider({ children }) {
  *
  * @returns {ThemeContextValue}
  * @throws {Error} If called outside a `ThemeProvider`.
- *
- * @example
- * const { isDark, toggleTheme } = useTheme();
  */
 // eslint-disable-next-line react-refresh/only-export-components
 export function useTheme() {
