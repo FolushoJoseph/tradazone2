@@ -15,6 +15,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, ExternalLink, AlertCircle, ChevronLeft } from 'lucide-react';
+import { useDebounce } from '../../hooks/useDebounce';
 import Logo from './Logo';
 import { useLobstr } from '../../hooks/useLobstr';
 import {
@@ -40,7 +41,7 @@ function getSafeErrorMessage(msg) {
     return 'The connection was cancelled or failed. Please try again.';
 }
 
-function getSafeErrorDescription(msg) {
+function getSafeErrorDescription() {
     return 'Your transaction signature was declined or the provider timed out. No sensitive details were leaked.';
 }
 
@@ -105,7 +106,15 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
     const [connecting, setConnecting] = useState(null);
     const [error, setError] = useState(null);
     const [filterNetwork, setFilterNetwork] = useState('all');
+
+    /**
+     * Search query for filtering wallets by name.
+     * searchQuery updates immediately (keeps the input responsive);
+     * debouncedSearchQuery delays the filter by 300 ms — #64.
+     */
     const [searchQuery, setSearchQuery] = useState('');
+    const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
     const [view, setView] = useState('primary');
 
     const { completeWalletLogin, disconnectAll } = useAuthActions();
@@ -113,7 +122,6 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
     const { installed, availableWallets } = useAuthWalletCatalog();
     const lobstrHook = useLobstr();
 
-    // AuthContext issue #40: keep keyboard focus contained within the auth wallet dialog.
     const modalRef = useFocusTrap({ isOpen, onClose, initialFocus: true, restoreFocus: true });
 
     useEffect(() => {
@@ -126,12 +134,14 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
         }
     }, [isOpen]);
 
+    // #64: filter uses debouncedSearchQuery so rapid keystrokes don't trigger
+    // a re-render of the wallet list on every character.
     const filteredAndSortedWallets = availableWallets
         .filter(w => {
-            if (searchQuery && !w.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+            if (debouncedSearchQuery && !w.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase())) return false;
             if (filterNetwork !== 'all' && w.network !== filterNetwork) return false;
-            if (view === 'primary' && w.isSecondary && !searchQuery && filterNetwork === 'all') return false;
-            if (view === 'secondary' && !w.isSecondary && !searchQuery && filterNetwork === 'all') return false;
+            if (view === 'primary' && w.isSecondary && !debouncedSearchQuery && filterNetwork === 'all') return false;
+            if (view === 'secondary' && !w.isSecondary && !debouncedSearchQuery && filterNetwork === 'all') return false;
             return true;
         })
         .sort((a, b) => {
@@ -164,9 +174,6 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
         }
     };
 
-    /**
-     * Initiates a wallet connection.
-     */
     const handleConnect = async (w) => {
         if (connecting) return;
         if (w.id === 'stellar') {
@@ -252,10 +259,13 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                             </div>
                             {shouldVirtualize && <div style={{ height: bottomPadding }} aria-hidden="true" />}
                         </div>
+
                         {filteredAndSortedWallets.length === 0 && <div className="text-center py-8 text-t-muted text-sm italic">No wallets found matching your search.</div>}
-                        {view === 'primary' && !searchQuery && filterNetwork === 'all' && (
+
+                        {view === 'primary' && !debouncedSearchQuery && filterNetwork === 'all' && (
                             <button onClick={() => setView('secondary')} disabled={connecting !== null} className="w-full mt-2 text-center text-sm font-semibold text-t-secondary hover:text-brand transition-colors p-3 rounded-lg border border-transparent hover:border-border hover:bg-gray-50 disabled:opacity-50">View more options</button>
                         )}
+
                         {error?.code === 'not_installed' && (
                             <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2 text-sm text-red-800 animate-fade-in">
                                 <AlertCircle size={16} className="flex-shrink-0 mt-0.5 text-red-500" />
@@ -267,6 +277,7 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                                 </div>
                             </div>
                         )}
+
                         {error?.code === 'failed' && (
                             <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2 text-sm text-red-800 animate-fade-in">
                                 <AlertCircle size={16} className="flex-shrink-0 mt-0.5 text-red-500" />
@@ -276,6 +287,7 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                                 </div>
                             </div>
                         )}
+
                         {wallet.isConnected && (
                             <button onClick={async () => { await disconnectAll(); onClose(); }} disabled={connecting !== null} className="mt-5 w-full text-center text-sm font-semibold text-red-500 hover:text-red-700 transition-colors p-3 rounded-lg border border-transparent hover:border-red-100 hover:bg-red-50 disabled:opacity-50">Disconnect all wallets</button>
                         )}
