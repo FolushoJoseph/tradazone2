@@ -1,17 +1,27 @@
 /**
- * @fileoverview useFocusTrap — accessibility hook for modal focus management.
- * 
+ * @fileoverview useFocusTrap - accessibility hook for modal focus management.
+ *
  * ISSUE #36: Focus trap implementation for modal accessibility.
  * Category: UI/UX
  * Priority: Medium
  * Affected Area: Checkout flow (and all modals)
- * 
+ *
+ * ISSUE #40: Focus is not trapped correctly within the modal in AuthContext.
+ * Category: Accessibility
+ * Priority: High
+ * Affected Area: AuthContext
+ * Description: The auth wallet modal could lose focus to elements outside the
+ * dialog because the previous trap only listened on the modal container. This
+ * hook now enforces the trap at the document level so AuthContext-driven modals
+ * keep keyboard focus contained and restore it safely on close.
+ *
  * This hook implements proper focus management for modal dialogs:
  * - Traps focus within the modal (Tab/Shift+Tab cycle through focusable elements)
+ * - Redirects stray focus back into the modal when focus escapes
  * - Sets initial focus to the first focusable element
  * - Restores focus to the trigger element when modal closes
  * - Handles Escape key to close modal
- * 
+ *
  * @module useFocusTrap
  */
 
@@ -30,30 +40,25 @@ const FOCUSABLE_ELEMENTS = [
     '[tabindex]:not([tabindex="-1"])',
 ].join(', ');
 
+function getFocusableElements(container) {
+    return Array.from(container.querySelectorAll(FOCUSABLE_ELEMENTS)).filter((element) => {
+        if (!(element instanceof HTMLElement)) return false;
+        if (element.hidden) return false;
+        if (element.getAttribute('aria-hidden') === 'true') return false;
+        return true;
+    });
+}
+
 /**
- * useFocusTrap — manages focus within a modal dialog for accessibility.
- * 
+ * useFocusTrap - manages focus within a modal dialog for accessibility.
+ *
  * @param {Object} options
  * @param {boolean} options.isOpen - Whether the modal is currently open
  * @param {() => void} options.onClose - Callback to close the modal (triggered by Escape key)
  * @param {boolean} [options.initialFocus=true] - Whether to focus first element on mount
  * @param {boolean} [options.restoreFocus=true] - Whether to restore focus on unmount
- * 
+ *
  * @returns {React.RefObject} - Ref to attach to the modal container element
- * 
- * @example
- * function MyModal({ isOpen, onClose }) {
- *   const modalRef = useFocusTrap({ isOpen, onClose });
- *   
- *   if (!isOpen) return null;
- *   
- *   return (
- *     <div ref={modalRef} role="dialog" aria-modal="true">
- *       <button onClick={onClose}>Close</button>
- *       <input type="text" />
- *     </div>
- *   );
- * }
  */
 export function useFocusTrap({ isOpen, onClose, initialFocus = true, restoreFocus = true }) {
     const containerRef = useRef(null);
@@ -62,76 +67,91 @@ export function useFocusTrap({ isOpen, onClose, initialFocus = true, restoreFocu
     useEffect(() => {
         if (!isOpen) return;
 
-        // Store the element that had focus before the modal opened
         previousActiveElement.current = document.activeElement;
 
         const container = containerRef.current;
         if (!container) return;
 
-        // Get all focusable elements within the modal
-        const getFocusableElements = () => {
-            return Array.from(container.querySelectorAll(FOCUSABLE_ELEMENTS));
-        };
+        let initialFocusTimeoutId = null;
+        let restoreFocusTimeoutId = null;
 
-        // Set initial focus to the first focusable element
-        if (initialFocus) {
-            const focusableElements = getFocusableElements();
-            if (focusableElements.length > 0) {
-                // Small delay to ensure modal is fully rendered
-                setTimeout(() => {
-                    focusableElements[0]?.focus();
-                }, 10);
-            }
+        if (!container.hasAttribute('tabindex')) {
+            container.setAttribute('tabindex', '-1');
         }
 
-        /**
-         * Handle Tab key to trap focus within the modal.
-         * When Tab is pressed on the last element, focus moves to the first.
-         * When Shift+Tab is pressed on the first element, focus moves to the last.
-         */
+        const focusFirstElement = () => {
+            const focusableElements = getFocusableElements(container);
+            const target = focusableElements[0] || container;
+
+            if (target instanceof HTMLElement) {
+                target.focus();
+            }
+        };
+
+        if (initialFocus) {
+            initialFocusTimeoutId = window.setTimeout(() => {
+                focusFirstElement();
+            }, 10);
+        }
+
         const handleKeyDown = (event) => {
-            // Handle Escape key
             if (event.key === 'Escape') {
                 event.preventDefault();
                 onClose();
                 return;
             }
 
-            // Only handle Tab key
             if (event.key !== 'Tab') return;
 
-            const focusableElements = getFocusableElements();
-            if (focusableElements.length === 0) return;
+            const focusableElements = getFocusableElements(container);
+            if (focusableElements.length === 0) {
+                event.preventDefault();
+                focusFirstElement();
+                return;
+            }
 
             const firstElement = focusableElements[0];
             const lastElement = focusableElements[focusableElements.length - 1];
+            const activeElement = document.activeElement;
 
-            // Shift+Tab on first element: move to last
-            if (event.shiftKey && document.activeElement === firstElement) {
+            if (!container.contains(activeElement)) {
+                event.preventDefault();
+                (event.shiftKey ? lastElement : firstElement).focus();
+                return;
+            }
+
+            if (event.shiftKey && activeElement === firstElement) {
                 event.preventDefault();
                 lastElement.focus();
                 return;
             }
 
-            // Tab on last element: move to first
-            if (!event.shiftKey && document.activeElement === lastElement) {
+            if (!event.shiftKey && activeElement === lastElement) {
                 event.preventDefault();
                 firstElement.focus();
-                return;
             }
         };
 
-        // Attach keyboard event listener
-        container.addEventListener('keydown', handleKeyDown);
+        const handleFocusIn = (event) => {
+            const target = event.target;
+            if (!(target instanceof Node)) return;
+            if (container.contains(target)) return;
+            focusFirstElement();
+        };
 
-        // Cleanup function
+        document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('focusin', handleFocusIn);
+
         return () => {
-            container.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('focusin', handleFocusIn);
 
-            // Restore focus to the element that opened the modal
-            if (restoreFocus && previousActiveElement.current) {
-                // Use setTimeout to ensure the modal is fully removed from DOM
-                setTimeout(() => {
+            if (initialFocusTimeoutId !== null) {
+                window.clearTimeout(initialFocusTimeoutId);
+            }
+
+            if (restoreFocus && previousActiveElement.current instanceof HTMLElement) {
+                restoreFocusTimeoutId = window.setTimeout(() => {
                     previousActiveElement.current?.focus();
                 }, 10);
             }

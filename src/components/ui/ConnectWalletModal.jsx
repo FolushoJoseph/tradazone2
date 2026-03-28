@@ -113,6 +113,7 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
     const { installed, availableWallets } = useAuthWalletCatalog();
     const lobstrHook = useLobstr();
 
+    // AuthContext issue #40: keep keyboard focus contained within the auth wallet dialog.
     const modalRef = useFocusTrap({ isOpen, onClose, initialFocus: true, restoreFocus: true });
 
     useEffect(() => {
