@@ -1,12 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { DataProvider, useData } from '../context/DataContext';
+import { DataProvider, useData, useCheckoutData } from '../context/DataContext';
 import api from '../services/api';
 
 // localStorage is available in jsdom; clear it before each test
 beforeEach(() => localStorage.clear());
 
 const wrapper = ({ children }) => <DataProvider>{children}</DataProvider>;
+const flushOperations = () => Promise.resolve();
 
 // ─── addCustomer ────────────────────────────────────────────────────────────
 
@@ -24,20 +25,26 @@ describe('addCustomer', () => {
     expect(customer.invoiceCount).toBe(0);
   });
 
-  it('appends customer to the list', () => {
+  it('appends customer to the list', async () => {
     const { result } = renderHook(() => useData(), { wrapper });
-    act(() => {
+    await act(async () => {
       result.current.addCustomer({ name: 'Alice', email: 'alice@example.com' });
+    });
+    await flushOperations();
+    await act(async () => {
       result.current.addCustomer({ name: 'Bob', email: 'bob@example.com' });
     });
     expect(result.current.customers).toHaveLength(2);
   });
 
-  it('assigns unique ids to each customer', () => {
+  it('assigns unique ids to each customer', async () => {
     const { result } = renderHook(() => useData(), { wrapper });
     let c1, c2;
-    act(() => {
+    await act(async () => {
       c1 = result.current.addCustomer({ name: 'A', email: 'a@a.com' });
+    });
+    await flushOperations();
+    await act(async () => {
       c2 = result.current.addCustomer({ name: 'B', email: 'b@b.com' });
     });
     expect(c1.id).not.toBe(c2.id);
@@ -176,15 +183,18 @@ describe('addInvoice', () => {
         vi.useRealTimers();
     });
 
-  it('generates sequential INV-XXX ids', () => {
+  it('generates sequential INV-XXX ids', async () => {
     const { result } = renderHook(() => useData(), { wrapper });
     let c, it1, inv1, inv2;
-    act(() => {
+    await act(async () => {
       c = result.current.addCustomer({ name: 'Alice', email: 'a@a.com' });
       it1 = result.current.addItem({ name: 'X', price: '10' });
     });
-    act(() => {
+    await act(async () => {
       inv1 = result.current.addInvoice({ customerId: c.id, dueDate: '2025-01-01', items: [{ itemId: it1.id, quantity: 1, price: '10' }] });
+    });
+    await flushOperations();
+    await act(async () => {
       inv2 = result.current.addInvoice({ customerId: c.id, dueDate: '2025-01-02', items: [{ itemId: it1.id, quantity: 1, price: '10' }] });
     });
     expect(inv1.id).toBe('INV-001');
@@ -233,11 +243,14 @@ describe('addInvoice', () => {
 // ─── addCheckout ─────────────────────────────────────────────────────────────
 
 describe('addCheckout', () => {
-  it('generates sequential CHK-XXX ids', () => {
+  it('generates sequential CHK-XXX ids', async () => {
     const { result } = renderHook(() => useData(), { wrapper });
     let chk1, chk2;
-    act(() => {
+    await act(async () => {
       chk1 = result.current.addCheckout({ title: 'Plan A', amount: '100' });
+    });
+    await flushOperations();
+    await act(async () => {
       chk2 = result.current.addCheckout({ title: 'Plan B', amount: '200' });
     });
     expect(chk1.id).toBe('CHK-001');
@@ -322,12 +335,15 @@ describe('markCheckoutPaid', () => {
     expect(updated.totalSpent).toBe('200');
   });
 
-  it('accumulates totalSpent across multiple paid checkouts', () => {
+  it('accumulates totalSpent across multiple paid checkouts', async () => {
     const { result } = renderHook(() => useData(), { wrapper });
     let customer, chk1, chk2;
-    act(() => { customer = result.current.addCustomer({ name: 'Bob', email: 'bob@example.com' }); });
-    act(() => {
+    await act(async () => { customer = result.current.addCustomer({ name: 'Bob', email: 'bob@example.com' }); });
+    await act(async () => {
       chk1 = result.current.addCheckout({ title: 'Plan A', amount: '100' });
+    });
+    await flushOperations();
+    await act(async () => {
       chk2 = result.current.addCheckout({ title: 'Plan B', amount: '150' });
     });
     act(() => {

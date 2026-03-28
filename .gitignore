@@ -6,8 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-package-lock.json
-yarn.lock
+# package-lock.json and yarn.lock should be committed for CI installs
 
 node_modules
 dist

@@ -17,19 +17,26 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
 
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+        # This repo does not commit npm/yarn lockfiles, so npm ci and npm cache
+        # setup cannot run on GitHub Actions.
+        run: npm install --legacy-peer-deps
 
 
       - name: Build project
         run: npm run build
 
+ fix/issues-155-156-157-163-test-coverage
       # Issue #156: Auth module snapshot tests (AuthComponents.snapshot.test.jsx)
       # are picked up automatically by vitest alongside all other snapshot suites.
       - name: Run snapshot tests (includes Auth module — Issue #156)
         run: npm test -- --reporter=verbose
+
+      - name: Run snapshot tests
+        run: |
+          npm test -- --reporter=verbose $(find src/test -name "*.snapshot.test.*" -print)
+ main
 
 
       - name: Check for snapshot changes

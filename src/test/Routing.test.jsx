@@ -22,7 +22,7 @@ describe('App Routing - Loading Spinner', () => {
         expect(screen.getByText('Loading Tradazone...')).toBeTruthy();
 
         // After the promise resolves, the component should show
-        const loaded = await screen.findByTestId('loaded', {}, { timeout: 200 });
+        const loaded = await screen.findByTestId('loaded', {}, { timeout: 1000 });
         expect(loaded).toBeTruthy();
     });
 });

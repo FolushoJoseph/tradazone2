@@ -24,10 +24,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
 
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+        # This repo does not commit npm/yarn lockfiles, so npm ci and npm cache
+        # setup cannot run on GitHub Actions.
+        run: npm install --legacy-peer-deps
 
 
       - name: Build project
@@ -87,7 +88,7 @@ jobs:
             size-report.json
 
       - name: Report failing sizes to PR
-        if: failure() && github.event_name == 'pull_request'
+        if: failure() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/github-script@v7
         with:
           script: |

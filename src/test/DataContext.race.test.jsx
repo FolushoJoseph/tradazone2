@@ -38,6 +38,7 @@ vi.mock('../services/webhook', () => ({
 }));
 
 const wrapper = ({ children }) => <DataProvider>{children}</DataProvider>;
+const flushOperations = () => Promise.resolve();
 
 describe('DataContext Race Condition Prevention', () => {
     beforeEach(() => {
@@ -76,11 +77,11 @@ describe('DataContext Race Condition Prevention', () => {
             expect(result.current.customers[0].name).toMatch(/Customer [12]/);
         });
 
-        test('allows sequential addCustomer calls after operation completes', () => {
+        test('allows sequential addCustomer calls after operation completes', async () => {
             const { result } = renderHook(() => useData(), { wrapper });
             
             // First customer
-            act(() => {
+            await act(async () => {
                 result.current.addCustomer({
                     name: 'Customer 1',
                     email: 'customer1@test.com'
@@ -88,9 +89,10 @@ describe('DataContext Race Condition Prevention', () => {
             });
             
             expect(result.current.customers.length).toBe(1);
+            await flushOperations();
             
             // Second customer (should work since first operation is complete)
-            act(() => {
+            await act(async () => {
                 result.current.addCustomer({
                     name: 'Customer 2',
                     email: 'customer2@test.com'
@@ -133,11 +135,11 @@ describe('DataContext Race Condition Prevention', () => {
             expect(result.current.checkouts[0].title).toMatch(/Checkout [12]/);
         });
 
-        test('allows sequential addCheckout calls', () => {
+        test('allows sequential addCheckout calls', async () => {
             const { result } = renderHook(() => useData(), { wrapper });
             
             // First checkout
-            act(() => {
+            await act(async () => {
                 result.current.addCheckout({
                     title: 'Checkout 1',
                     amount: '100'
@@ -145,9 +147,10 @@ describe('DataContext Race Condition Prevention', () => {
             });
             
             expect(result.current.checkouts.length).toBe(1);
+            await flushOperations();
             
             // Second checkout
-            act(() => {
+            await act(async () => {
                 result.current.addCheckout({
                     title: 'Checkout 2',
                     amount: '200'
@@ -237,21 +240,31 @@ describe('DataContext Race Condition Prevention', () => {
     });
 
     describe('State Consistency Under Load', () => {
-        test('maintains consistent state during rapid operations', () => {
+        test('maintains consistent state during rapid operations', async () => {
             const { result } = renderHook(() => useData(), { wrapper });
             
-            // Rapid sequence of operations
-            act(() => {
-                // Add customers
+            // Sequential operations respecting guard cleanup
+            await act(async () => {
                 result.current.addCustomer({ name: 'C1', email: 'c1@test.com' });
+            });
+            await flushOperations();
+            await act(async () => {
                 result.current.addCustomer({ name: 'C2', email: 'c2@test.com' });
+            });
+            await flushOperations();
+            await act(async () => {
                 result.current.addCustomer({ name: 'C3', email: 'c3@test.com' });
-                
-                // Add checkouts
+            });
+            await flushOperations();
+            await act(async () => {
                 result.current.addCheckout({ title: 'CHK1', amount: '50' });
+            });
+            await flushOperations();
+            await act(async () => {
                 result.current.addCheckout({ title: 'CHK2', amount: '100' });
-                
-                // Add items
+            });
+            await flushOperations();
+            await act(async () => {
                 result.current.addItem({ name: 'Item1', price: '25' });
                 result.current.addItem({ name: 'Item2', price: '50' });
             });
@@ -293,11 +306,11 @@ describe('DataContext Race Condition Prevention', () => {
     });
 
     describe('Error Handling and Cleanup', () => {
-        test('operation ID is cleaned up after completion', () => {
+        test('operation ID is cleaned up after completion', async () => {
             const { result } = renderHook(() => useData(), { wrapper });
             
             // First operation
-            act(() => {
+            await act(async () => {
                 result.current.addCustomer({
                     name: 'Customer 1',
                     email: 'c1@test.com'
@@ -305,9 +318,10 @@ describe('DataContext Race Condition Prevention', () => {
             });
             
             expect(result.current.customers.length).toBe(1);
+            await flushOperations();
             
             // After operation completes, should be able to add another
-            act(() => {
+            await act(async () => {
                 result.current.addCustomer({
                     name: 'Customer 2',
                     email: 'c2@test.com'

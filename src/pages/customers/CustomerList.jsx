@@ -10,20 +10,26 @@
  * * ISSUE: #179 (Build size limits for CustomerList)
  * Category: DevOps & Infrastructure
  * Description: Implement production build size limits and monitoring.
+ * ISSUE: #125 (Rich text descriptions for CustomerList)
+ * Category: Feature Enhancement
+ * Description: Added a rich text editor to capture customer descriptions
+ * directly from the list view, with persisted updates in DataContext.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Search, Users } from "lucide-react";
 import DataTable from "../../components/tables/DataTable";
 import EmptyState from "../../components/ui/EmptyState";
+import RichTextEditor from "../../components/forms/RichTextEditor";
 import { useData } from "../../context/DataContext";
 import { formatUtcDate } from "../../utils/date";
 
 function CustomerList() {
   const navigate = useNavigate();
-  const { customers } = useData();
+  const { customers, updateCustomerDescription } = useData();
   const [query, setQuery] = useState("");
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
 
   const safeCustomers = customers ?? [];
 
@@ -34,6 +40,16 @@ function CustomerList() {
           c?.email?.toLowerCase().includes(query.toLowerCase()),
       )
     : safeCustomers;
+
+  useEffect(() => {
+    if (!selectedCustomerId && safeCustomers.length > 0) {
+      setSelectedCustomerId(safeCustomers[0].id);
+    }
+  }, [safeCustomers, selectedCustomerId]);
+
+  const selectedCustomer =
+    safeCustomers.find((customer) => customer.id === selectedCustomerId) ||
+    safeCustomers[0];
 
   const columns = [
     { key: "name", header: "Name" },
@@ -87,6 +103,48 @@ function CustomerList() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
+          </div>
+
+          <div className="mb-6 rounded-xl border border-border bg-white p-4 shadow-sm dark:bg-zinc-900 dark:border-zinc-800">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <h2 className="text-sm font-semibold text-t-primary dark:text-white">
+                  Customer description
+                </h2>
+                <p className="text-xs text-t-muted">
+                  Keep rich notes for proposals, preferences, and onboarding context.
+                </p>
+              </div>
+              <div className="w-full lg:w-64">
+                <label className="text-xs font-medium text-t-secondary uppercase tracking-wide">
+                  Active customer
+                </label>
+                <select
+                  className="mt-2 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-t-primary shadow-sm dark:bg-zinc-900 dark:text-zinc-200"
+                  value={selectedCustomerId}
+                  onChange={(event) => setSelectedCustomerId(event.target.value)}
+                >
+                  {safeCustomers.map((customer) => (
+                    <option key={customer.id} value={customer.id}>
+                      {customer.name || customer.email}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <RichTextEditor
+                label="Description"
+                value={selectedCustomer?.description || ""}
+                placeholder="Add a rich description for this customer..."
+                onChange={(value) => {
+                  if (selectedCustomer && updateCustomerDescription) {
+                    updateCustomerDescription(selectedCustomer.id, value);
+                  }
+                }}
+              />
+            </div>
           </div>
           
           <DataTable

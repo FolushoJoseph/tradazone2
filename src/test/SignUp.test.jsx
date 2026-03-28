@@ -110,30 +110,31 @@ describe('SignUp', () => {
 
     it('exports a csv snapshot of the current signup state', async () => {
         const user = userEvent.setup();
-        const clickSpy = vi.fn();
-        const setAttributeSpy = vi.fn();
+        const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+        let appendedLink = null;
+        const realAppendChild = document.body.appendChild.bind(document.body);
+        const realRemoveChild = document.body.removeChild.bind(document.body);
 
-        const createElementSpy = vi.spyOn(document, 'createElement').mockImplementation(() => {
-            return {
-                setAttribute: setAttributeSpy,
-                click: clickSpy,
-            };
+        const appendSpy = vi.spyOn(document.body, 'appendChild').mockImplementation((element) => {
+            appendedLink = element;
+            return realAppendChild(element);
         });
-
-        const appendSpy = vi.spyOn(document.body, 'appendChild').mockImplementation(() => {});
-        const removeSpy = vi.spyOn(document.body, 'removeChild').mockImplementation(() => {});
+        const removeSpy = vi.spyOn(document.body, 'removeChild').mockImplementation((element) => {
+            return realRemoveChild(element);
+        });
 
         mockUser = { isAuthenticated: false, walletAddress: null, walletType: null };
 
         await renderSignUp();
-        await user.click(screen.getByRole('button', { name: /export to csv/i }));
+        await user.click(screen.getByRole('button', { name: /export signup data to csv/i }));
 
-        expect(setAttributeSpy).toHaveBeenCalledWith('download', 'signup_snapshot.csv');
+        expect(appendedLink).toBeTruthy();
+        expect(appendedLink.getAttribute('download')).toBe('auth_data.csv');
         expect(clickSpy).toHaveBeenCalled();
 
-        createElementSpy.mockRestore();
         appendSpy.mockRestore();
         removeSpy.mockRestore();
+        clickSpy.mockRestore();
     });
 
     it('falls back to the auth user wallet metadata when modal data is missing', async () => {
@@ -142,7 +143,7 @@ describe('SignUp', () => {
         mockOnConnectArgs = { walletAddress: null, walletType: null };
 
         await renderSignUp();
-        await user.click(screen.getByText('Connect Wallet'));
+        await user.click(screen.getByRole('button', { name: /connect wallet/i }));
         await user.click(screen.getByTestId('mock-connect-success'));
 
         expect(mockDispatchWebhook).toHaveBeenCalledWith('user.signed_up', {

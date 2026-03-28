@@ -12,12 +12,18 @@ import AddCustomer from '../pages/customers/AddCustomer';
 import CreateCheckout from '../pages/checkouts/CreateCheckout';
 import PasswordSettings from '../pages/settings/PasswordSettings';
 
+const mockUseData = vi.fn(() => ({
+    addCustomer: vi.fn(),
+    addCheckout: vi.fn(() => ({ id: '123', title: 'Test', amount: '100', currency: 'STRK', paymentLink: 'test-link' })),
+}));
+const mockUseCheckoutData = vi.fn(() => ({
+    addCheckout: vi.fn(() => ({ id: '123', title: 'Test', amount: '100', currency: 'STRK', paymentLink: 'test-link' })),
+}));
+
 // Mock the context providers
 vi.mock('../context/DataContext', () => ({
-    useData: () => ({
-        addCustomer: vi.fn(),
-        addCheckout: vi.fn(() => ({ id: '123', title: 'Test', amount: '100', currency: 'STRK', paymentLink: 'test-link' }))
-    })
+    useData: (...args) => mockUseData(...args),
+    useCheckoutData: (...args) => mockUseCheckoutData(...args),
 }));
 
 vi.mock('../services/webhook', () => ({
@@ -33,17 +39,29 @@ const renderWithRouter = (component) => {
 };
 
 describe('Form Validation Fixes', () => {
+    beforeEach(() => {
+        mockUseData.mockReset();
+        mockUseData.mockReturnValue({
+            addCustomer: vi.fn(),
+            addCheckout: vi.fn(() => ({ id: '123', title: 'Test', amount: '100', currency: 'STRK', paymentLink: 'test-link' })),
+        });
+        mockUseCheckoutData.mockReset();
+        mockUseCheckoutData.mockReturnValue({
+            addCheckout: vi.fn(() => ({ id: '123', title: 'Test', amount: '100', currency: 'STRK', paymentLink: 'test-link' })),
+        });
+    });
+
     describe('AddCustomer Form', () => {
         test('prevents submission with empty required fields', async () => {
             const mockAddCustomer = vi.fn();
-            vi.mocked(require('../context/DataContext').useData).mockReturnValue({
+            mockUseData.mockReturnValue({
                 addCustomer: mockAddCustomer
             });
 
-            renderWithRouter(<AddCustomer />);
-            
-            const submitButton = screen.getByText('Add Customer');
-            fireEvent.click(submitButton);
+            const { container } = renderWithRouter(<AddCustomer />);
+
+            const form = container.querySelector('form');
+            fireEvent.submit(form);
 
             // Should show validation errors
             await waitFor(() => {
@@ -56,15 +74,15 @@ describe('Form Validation Fixes', () => {
         });
 
         test('validates email format', async () => {
-            renderWithRouter(<AddCustomer />);
+            const { container } = renderWithRouter(<AddCustomer />);
             
             const nameInput = screen.getByPlaceholderText('Enter customer name');
             const emailInput = screen.getByPlaceholderText('Enter email address');
-            const submitButton = screen.getByText('Add Customer');
+            const form = container.querySelector('form');
 
             fireEvent.change(nameInput, { target: { value: 'John Doe' } });
             fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
-            fireEvent.click(submitButton);
+            fireEvent.submit(form);
 
             await waitFor(() => {
                 expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
@@ -72,10 +90,10 @@ describe('Form Validation Fixes', () => {
         });
 
         test('clears errors when user starts typing', async () => {
-            renderWithRouter(<AddCustomer />);
-            
-            const submitButton = screen.getByText('Add Customer');
-            fireEvent.click(submitButton);
+            const { container } = renderWithRouter(<AddCustomer />);
+
+            const form = container.querySelector('form');
+            fireEvent.submit(form);
 
             await waitFor(() => {
                 expect(screen.getByText('Customer name is required')).toBeInTheDocument();
@@ -93,14 +111,14 @@ describe('Form Validation Fixes', () => {
     describe('CreateCheckout Form', () => {
         test('prevents submission with empty required fields', async () => {
             const mockAddCheckout = vi.fn();
-            vi.mocked(require('../context/DataContext').useData).mockReturnValue({
+            mockUseCheckoutData.mockReturnValue({
                 addCheckout: mockAddCheckout
             });
 
-            renderWithRouter(<CreateCheckout />);
-            
-            const submitButton = screen.getByText('Create Checkout');
-            fireEvent.click(submitButton);
+            const { container } = renderWithRouter(<CreateCheckout />);
+
+            const form = container.querySelector('form');
+            fireEvent.submit(form);
 
             await waitFor(() => {
                 expect(screen.getByText('Checkout title is required')).toBeInTheDocument();
@@ -111,15 +129,15 @@ describe('Form Validation Fixes', () => {
         });
 
         test('validates amount is a positive number', async () => {
-            renderWithRouter(<CreateCheckout />);
+            const { container } = renderWithRouter(<CreateCheckout />);
             
             const titleInput = screen.getByPlaceholderText('Enter checkout title');
             const amountInput = screen.getByPlaceholderText('0.00');
-            const submitButton = screen.getByText('Create Checkout');
+            const form = container.querySelector('form');
 
             fireEvent.change(titleInput, { target: { value: 'Test Checkout' } });
             fireEvent.change(amountInput, { target: { value: '-10' } });
-            fireEvent.click(submitButton);
+            fireEvent.submit(form);
 
             await waitFor(() => {
                 expect(screen.getByText('Please enter a valid amount greater than 0')).toBeInTheDocument();
@@ -129,10 +147,10 @@ describe('Form Validation Fixes', () => {
 
     describe('PasswordSettings Form', () => {
         test('prevents submission with empty current password', async () => {
-            render(<PasswordSettings />);
-            
-            const submitButton = screen.getByText('Update Password');
-            fireEvent.click(submitButton);
+            const { container } = render(<PasswordSettings />);
+
+            const form = container.querySelector('form');
+            fireEvent.submit(form);
 
             await waitFor(() => {
                 expect(screen.getByText('Current password is required')).toBeInTheDocument();
@@ -142,17 +160,17 @@ describe('Form Validation Fixes', () => {
         });
 
         test('validates password length and matching', async () => {
-            render(<PasswordSettings />);
+            const { container } = render(<PasswordSettings />);
             
             const currentPasswordInput = screen.getByPlaceholderText('Enter current password');
             const newPasswordInput = screen.getByPlaceholderText('Enter new password');
             const confirmPasswordInput = screen.getByPlaceholderText('Enter confirm new password');
-            const submitButton = screen.getByText('Update Password');
+            const form = container.querySelector('form');
 
             fireEvent.change(currentPasswordInput, { target: { value: 'oldpass' } });
             fireEvent.change(newPasswordInput, { target: { value: 'short' } });
             fireEvent.change(confirmPasswordInput, { target: { value: 'different' } });
-            fireEvent.click(submitButton);
+            fireEvent.submit(form);
 
             await waitFor(() => {
                 expect(screen.getByText('Password must be at least 8 characters')).toBeInTheDocument();

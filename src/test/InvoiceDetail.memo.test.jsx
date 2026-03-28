@@ -31,6 +31,7 @@ let invoiceLayoutRenderCount;
 vi.mock('../context/AuthContext', () => ({
     loadSession: () => mockSession,
     useAuthUser: () => mockUser,
+    useAuth: () => ({ user: mockUser }),
 }));
 
 vi.mock('../context/DataContext', () => ({
@@ -81,7 +82,7 @@ describe('InvoiceDetail memoization', () => {
 
         expect(invoiceLayoutRenderCount).toBe(1);
 
-        await user.type(screen.getByPlaceholderText('Filter items by name...'), 'Impl');
+        await user.type(screen.getByPlaceholderText('Filter items...'), 'Impl');
 
         expect(invoiceLayoutRenderCount).toBe(1);
     });
@@ -94,7 +95,7 @@ describe('InvoiceDetail memoization', () => {
         expect(within(table).getByText('Design Review')).toBeInTheDocument();
         expect(within(table).getByText('Implementation')).toBeInTheDocument();
 
-        await user.type(screen.getByPlaceholderText('Filter items by name...'), 'Design');
+        await user.type(screen.getByPlaceholderText('Filter items...'), 'Design');
 
         expect(within(table).getByText('Design Review')).toBeInTheDocument();
         expect(within(table).queryByText('Implementation')).toBeNull();

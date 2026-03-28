@@ -7,11 +7,13 @@ import { BrowserRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 import AddCustomer from '../pages/customers/AddCustomer';
 
+const mockUseData = vi.fn(() => ({
+    addCustomer: vi.fn()
+}));
+
 // Mock the context providers
 vi.mock('../context/DataContext', () => ({
-    useData: () => ({
-        addCustomer: vi.fn()
-    })
+    useData: (...args) => mockUseData(...args),
 }));
 
 const renderWithRouter = (component) => {
@@ -25,15 +27,14 @@ const renderWithRouter = (component) => {
 describe('Basic Validation Test', () => {
     test('AddCustomer shows validation errors', () => {
         const mockAddCustomer = vi.fn();
-        vi.mocked(require('../context/DataContext').useData).mockReturnValue({
+        mockUseData.mockReturnValue({
             addCustomer: mockAddCustomer
         });
 
-        renderWithRouter(<AddCustomer />);
-        
-        // Find and click submit button
-        const submitButton = screen.getByRole('button', { name: /add customer/i });
-        fireEvent.click(submitButton);
+        const { container } = renderWithRouter(<AddCustomer />);
+
+        const form = container.querySelector('form');
+        fireEvent.submit(form);
 
         // Check if validation errors appear
         expect(screen.getByText('Customer name is required')).toBeInTheDocument();

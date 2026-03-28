@@ -59,27 +59,39 @@ export function DataProvider({ children }) {
   const checkoutCountRef = useRef(0);
 
   const pendingOperations = useRef({
-    customers: new Set(),
-    invoices: new Set(),
-    checkouts: new Set(),
-    items: new Set(),
+    customers: false,
+    invoices: false,
+    checkouts: false,
+    items: false,
   });
 
+  const releaseOperation = useCallback((key) => {
+    const clear = () => {
+      pendingOperations.current[key] = false;
+    };
+
+    if (typeof queueMicrotask === "function") {
+      queueMicrotask(clear);
+    } else {
+      Promise.resolve().then(clear);
+    }
+  }, []);
+
   const addCustomer = useCallback((data) => {
-    const operationId = `customer-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    if (pendingOperations.current.customers.has(operationId)) {
-      console.warn('[DataContext] Duplicate addCustomer operation detected, ignoring:', operationId);
+    if (pendingOperations.current.customers) {
+      console.warn('[DataContext] Duplicate addCustomer operation detected, ignoring.');
       return null;
     }
 
     try {
-      pendingOperations.current.customers.add(operationId);
+      pendingOperations.current.customers = true;
       const newCustomer = {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         name: data.name,
         email: data.email,
         phone: data.phone || '',
         address: data.address || '',
+        description: data.description || '',
         totalSpent: '0',
         currency: 'STRK',
         invoiceCount: 0,
@@ -92,8 +104,18 @@ export function DataProvider({ children }) {
       });
       return newCustomer;
     } finally {
-      pendingOperations.current.customers.delete(operationId);
+      releaseOperation("customers");
     }
+  }, [releaseOperation]);
+
+  const updateCustomerDescription = useCallback((customerId, description) => {
+    setCustomers((prev) => {
+      const next = prev.map((customer) =>
+        customer.id === customerId ? { ...customer, description } : customer,
+      );
+      save(KEYS.customers, next);
+      return next;
+    });
   }, []);
 
   const addItem = useCallback((data) => {
@@ -129,14 +151,13 @@ export function DataProvider({ children }) {
 
   const addInvoice = useCallback(
     (data) => {
-      const operationId = `invoice-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-      if (pendingOperations.current.invoices.has(operationId)) {
-        console.warn('[DataContext] Duplicate addInvoice operation detected, ignoring:', operationId);
+      if (pendingOperations.current.invoices) {
+        console.warn('[DataContext] Duplicate addInvoice operation detected, ignoring.');
         return null;
       }
 
       try {
-        pendingOperations.current.invoices.add(operationId);
+        pendingOperations.current.invoices = true;
 
         const customer = customers.find((c) => c.id === data.customerId);
         const resolvedItems = (data.items || []).map((di) => {
@@ -171,22 +192,21 @@ export function DataProvider({ children }) {
 
         return newInvoice;
       } finally {
-        pendingOperations.current.invoices.delete(operationId);
+        releaseOperation("invoices");
       }
     },
-    [customers, items],
+    [customers, items, releaseOperation],
   );
 
   const addCheckout = useCallback(
     (data) => {
-      const operationId = `checkout-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-      if (pendingOperations.current.checkouts.has(operationId)) {
-        console.warn('[DataContext] Duplicate addCheckout operation detected, ignoring:', operationId);
+      if (pendingOperations.current.checkouts) {
+        console.warn('[DataContext] Duplicate addCheckout operation detected, ignoring.');
         return null;
       }
 
       try {
-        pendingOperations.current.checkouts.add(operationId);
+        pendingOperations.current.checkouts = true;
 
         const id = `CHK-${String(++checkoutCountRef.current).padStart(3, '0')}`;
         const newCheckout = {
@@ -218,10 +238,10 @@ export function DataProvider({ children }) {
 
         return newCheckout;
       } finally {
-        pendingOperations.current.checkouts.delete(operationId);
+        releaseOperation("checkouts");
       }
     },
-    [],
+    [releaseOperation],
   );
 
   const markCheckoutPaid = useCallback(
@@ -279,8 +299,21 @@ export function DataProvider({ children }) {
       addInvoice,
       addCheckout,
       markCheckoutPaid,
+      updateCustomerDescription,
     }),
-    [customers, invoices, checkouts, items, addCustomer, addItem, deleteItems, addInvoice, addCheckout, markCheckoutPaid],
+    [
+      customers,
+      invoices,
+      checkouts,
+      items,
+      addCustomer,
+      addItem,
+      deleteItems,
+      addInvoice,
+      addCheckout,
+      markCheckoutPaid,
+      updateCustomerDescription,
+    ],
   );
 
   const checkoutContextValue = useMemo(
