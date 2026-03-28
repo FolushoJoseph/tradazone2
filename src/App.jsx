@@ -42,7 +42,7 @@ import { AuthProvider } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
 import { ThemeProvider } from './context/ThemeContext';
 
- *
+ /** 
  * The following checkout lifecycle events are dispatched via
  * `src/services/webhook.js` (dispatchWebhook) at the route level:
  *
