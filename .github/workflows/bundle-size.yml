@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  issues: write
 
 jobs:
   size-check:
@@ -17,16 +18,17 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "20"
           cache: "npm"
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
+
 
       - name: Build project
         run: npm run build
@@ -40,7 +42,10 @@ jobs:
           echo "" >> bundle-report.md
           
           # Run size-limit and capture output for the report
-          npm run size -- --json > size-report.json || true
+          npx size-limit --json > size-report.json || true
+          echo "Raw size-report.json:"
+          cat size-report.json
+
           
           echo "### Individual Chunk Sizes" >> bundle-report.md
           echo "| Chunk Name | Size (gzip) | Limit | Status |" >> bundle-report.md
@@ -87,10 +92,15 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const report = fs.readFileSync('bundle-report.md', 'utf8');
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: "🚨 **Bundle size limits exceeded!**\n\n" + report
-            })
+            if (fs.existsSync('bundle-report.md')) {
+              const report = fs.readFileSync('bundle-report.md', 'utf8');
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: "🚨 **Bundle size limits exceeded!**\n\n" + report
+              });
+            } else {
+              console.log('No bundle-report.md found, skipping PR comment.');
+            }
+

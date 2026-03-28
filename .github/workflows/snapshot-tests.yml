@@ -13,22 +13,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "pnpm"
+          cache: "npm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci --legacy-peer-deps
+
+
+      - name: Build project
+        run: npm run build
 
       - name: Run snapshot tests
-        run: pnpm test -- --reporter=verbose
+        run: npm test -- --reporter=verbose
+
 
       - name: Check for snapshot changes
         run: |
@@ -40,8 +40,9 @@ jobs:
             git diff --name-only | grep "__snapshots__"
             echo ""
             echo "Please review the snapshot changes and commit them if they are intentional."
-            echo "To update snapshots locally, run: pnpm test -- --update"
+            echo "To update snapshots locally, run: npm test -- --update"
             exit 1
+
           else
             echo "✅ No snapshot changes detected"
           fi
