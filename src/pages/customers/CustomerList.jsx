@@ -14,9 +14,18 @@
  * Category: Feature Enhancement
  * Description: Added a rich text editor to capture customer descriptions
  * directly from the list view, with persisted updates in DataContext.
+ *
+ * ISSUE: #77 (N+1 redundant renders due to missing React.memo)
+ * Category: Performance & Scalability
+ * Priority: High
+ * Description: CustomerList re-rendered on every parent update because the
+ * component itself and its derived values (filtered, columns) were not
+ * memoized. Applied React.memo to the component export, useMemo to the
+ * filtered list, and useMemo to the columns definition so DataTable only
+ * re-renders when its inputs actually change.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Search, Users } from "lucide-react";
 import DataTable from "../../components/tables/DataTable";
@@ -25,7 +34,9 @@ import RichTextEditor from "../../components/forms/RichTextEditor";
 import { useData } from "../../context/DataContext";
 import { formatUtcDate } from "../../utils/date";
 
-function CustomerList() {
+// #77: wrap with memo so parent re-renders don't propagate into this page
+// when customers and query haven't changed.
+const CustomerList = memo(function CustomerList() {
   const navigate = useNavigate();
   const { customers, updateCustomerDescription } = useData();
   const [query, setQuery] = useState("");
@@ -33,13 +44,18 @@ function CustomerList() {
 
   const safeCustomers = customers ?? [];
 
-  const filtered = query.trim()
-    ? safeCustomers.filter(
-        (c) =>
-          c?.name?.toLowerCase().includes(query.toLowerCase()) ||
-          c?.email?.toLowerCase().includes(query.toLowerCase()),
-      )
-    : safeCustomers;
+  // #77: memoize filtered list — only recomputes when query or customers change.
+  const filtered = useMemo(
+    () =>
+      query.trim()
+        ? safeCustomers.filter(
+            (c) =>
+              c?.name?.toLowerCase().includes(query.toLowerCase()) ||
+              c?.email?.toLowerCase().includes(query.toLowerCase()),
+          )
+        : safeCustomers,
+    [query, safeCustomers],
+  );
 
   useEffect(() => {
     if (!selectedCustomerId && safeCustomers.length > 0) {
@@ -51,22 +67,27 @@ function CustomerList() {
     safeCustomers.find((customer) => customer.id === selectedCustomerId) ||
     safeCustomers[0];
 
-  const columns = [
-    { key: "name", header: "Name" },
-    { key: "email", header: "Email" },
-    { key: "phone", header: "Phone" },
-    {
-      key: "totalSpent",
-      header: "Total Spent",
-      render: (value, row) => `${value ?? "0"} ${row?.currency ?? "STRK"}`,
-    },
-    { key: "invoiceCount", header: "Invoices" },
-    {
-      key: "createdAt",
-      header: "Created",
-      render: (value) => formatUtcDate(value),
-    },
-  ];
+  // #77: memoize columns — definition is static; recreating it every render
+  // causes DataTable to see new prop references and re-render unnecessarily.
+  const columns = useMemo(
+    () => [
+      { key: "name", header: "Name" },
+      { key: "email", header: "Email" },
+      { key: "phone", header: "Phone" },
+      {
+        key: "totalSpent",
+        header: "Total Spent",
+        render: (value, row) => `${value ?? "0"} ${row?.currency ?? "STRK"}`,
+      },
+      { key: "invoiceCount", header: "Invoices" },
+      {
+        key: "createdAt",
+        header: "Created",
+        render: (value) => formatUtcDate(value),
+      },
+    ],
+    [],
+  );
 
   return (
     <div className="transition-colors duration-200">
@@ -161,6 +182,6 @@ function CustomerList() {
       )}
     </div>
   );
-}
+});
 
 export default CustomerList;
