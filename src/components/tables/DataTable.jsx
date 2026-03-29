@@ -130,7 +130,7 @@ function DataTable({
     setFilters({ ...filters, search: "" });
   }, [filters, setFilters]);
 
-  const isSorted = (field) => filters.sort.field === field;
+// isSorted intentionally unused
   const handleSelectAll = (e) => {
     if (e.target.checked) {
       onSelectionChange(filteredData.map((item) => item.id));

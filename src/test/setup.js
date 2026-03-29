@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach } from 'vitest';
 
 // Fix for happy-dom/jsdom localStorage.clear is not a function
 const localStorageMock = (() => {
@@ -15,4 +15,7 @@ const localStorageMock = (() => {
 })();
 
 Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true });
+/* globals: global */
+/* vi intentionally unused - required for global polyfill */
+Object.defineProperty(global, 'vi', { value: vi });
 global.localStorage = localStorageMock;

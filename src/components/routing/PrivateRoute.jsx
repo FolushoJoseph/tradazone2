@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { loadSession } from '../../context/AuthContext';
@@ -50,12 +50,13 @@ function PrivateRoute({ children }) {
         sessionExpired ? location.pathname : null
     );
 
-    useEffect(() => {
-        if (sessionExpired) {
-            setExpiredPath(location.pathname);
-            logout();
-        }
-    }, [sessionExpired, logout, location.pathname]);
+    // Handle expired session
+    if (sessionExpired) {
+        const path = location.pathname;
+        setExpiredPath(path);
+        logout();
+        return;
+    }
 
     if (sessionExpired || expiredPath !== null) {
         const path = expiredPath || location.pathname;

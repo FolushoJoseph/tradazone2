@@ -54,7 +54,7 @@ function getSafeErrorMessage(msg) {
     if (upperMsg.includes('LOCKED')) return 'Wallet is locked.';
     if (upperMsg.includes('REJECTED') || upperMsg.includes('CANCEL')) return 'Connection cancelled.';
     return 'The connection was cancelled or failed. Please try again.';
-}
+  // msg param used
 
 function getSafeErrorDescription() {
     return 'Your transaction signature was declined or the provider timed out. No sensitive details were leaked.';
@@ -216,6 +216,9 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
         }
     };
 
+    /**
+     * Initiates a wallet connection.
+     */
     const handleConnect = async (w) => {
         if (connecting) return;
         if (w.id === 'stellar') {

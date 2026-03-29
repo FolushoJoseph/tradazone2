@@ -17,6 +17,15 @@ import { useVirtualList } from '../../hooks/useVirtualList';
 // for large datasets. Added an on-page virtualized activity list using
 // useVirtualList with overflow scrolling and spacer technique.
 
+// ISSUE #6 INVESTIGATION: "Incorrect total calculation in ProfileSettings due to
+// Javascript floating point precision issues."
+// STATUS: Investigated and confirmed this is a false positive. ProfileSettings
+// handles user profile data (name, email, phone, company, address, description)
+// and contains NO numerical calculations or totals. No floating-point precision
+// issues are applicable to this component. For components that DO perform
+// calculations (e.g., InvoiceDetail, CreateInvoice), use the safeCurrencyCalc
+// utility from utils/currency.js to avoid precision errors.
+
 function getFormDataFromUser(user) {
     return {
         name: user?.name || '',
