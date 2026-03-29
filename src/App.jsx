@@ -10,7 +10,8 @@
  * See: src/components/ui/LazyChart.jsx and vite.config.js for details.
  *
  * Issue #38 — Missing accessible names on route loading surfaces (App Routing).
- * Category: UI/UX / accessibility
+ * Issue #141 — Lack of visual snapshot testing for the App Routing components.
+ * Category: Testing / App Routing / UI/UX / accessibility
  * Affected: Suspense fallbacks while lazy chunks load (`/pay/:checkoutId`, checkout
  * routes) and the root Suspense fallback (`LoadingSpinner`).
  * Resolution: `role="status"`, `aria-live`, `aria-busy`, and explicit labels so
