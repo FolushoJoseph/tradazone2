@@ -8,8 +8,16 @@
  * This has been remediated by updating package.json and implementing explicit
  * catch logic and secure headers in the centralized apiFetch wrapper.
  *
+ * ISSUE: #XSS (Input text not sanitized before rendering in API gateway)
+ * Category: Security & Compliance
+ * Affected Area: API gateway
+ * Description: Error message strings sourced from API responses were used
+ * unsanitized in thrown Error objects. If rendered via innerHTML or similar,
+ * this could lead to XSS. Fixed by stripping HTML tags from all API-sourced
+ * message strings via sanitizeText() before use.
+ *
  * ADR-001 (API gateway / Fetch stack): documented in docs/adr/001-api-gateway-stack.md
- * Issue Reference: #201, #99, #122 (Bulk-delete functionality for items in API gateway)
+ * Issue Reference: #201, #99, #122, #XSS
  */
 
 import {
@@ -26,6 +34,18 @@ const API_BASE_URL =
 
 // Helper to simulate API delay
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * SECURITY FIX #XSS: Strip HTML tags from API-sourced strings before use in
+ * Error messages to prevent XSS if the message is ever rendered as markup.
+ *
+ * @param {unknown} value
+ * @returns {string}
+ */
+export function sanitizeText(value) {
+    if (typeof value !== 'string') return String(value ?? '');
+    return value.replace(/<[^>]*>/g, '');
+}
 
 /**
  * Slice an array into a single page of results.
@@ -144,8 +164,10 @@ async function apiFetch(url, options = {}) {
             return { message: `API error ${response.status}` };
         });
 
+        // SECURITY FIX #XSS: sanitize message before use to prevent XSS via rendered error strings
+        const safeMessage = sanitizeText(body.message) || `API error ${response.status}`;
         throw Object.assign(
-            new Error(body.message || `API error ${response.status}`),
+            new Error(safeMessage),
             { status: response.status, body }
         );
     }

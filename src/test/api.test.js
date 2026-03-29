@@ -1,5 +1,42 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import api, { apiFetch, setUnauthorizedHandler, paginate } from '../services/api';
+import api, { apiFetch, setUnauthorizedHandler, paginate, sanitizeText } from '../services/api';
+
+// ─── sanitizeText ────────────────────────────────────────────────────────────
+
+describe("sanitizeText", () => {
+  it("strips HTML tags from a string", () => {
+    expect(sanitizeText("<script>alert(1)</script>hello")).toBe("hello");
+  });
+
+  it("returns plain strings unchanged", () => {
+    expect(sanitizeText("Internal Server Error")).toBe("Internal Server Error");
+  });
+
+  it("handles non-string values gracefully", () => {
+    expect(sanitizeText(null)).toBe("");
+    expect(sanitizeText(undefined)).toBe("");
+    expect(sanitizeText(42)).toBe("42");
+  });
+});
+
+describe("apiFetch XSS sanitization", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("strips HTML tags from API error messages before throwing", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+        json: async () => ({ message: "<img src=x onerror=alert(1)>Bad Request" }),
+      })
+    );
+    await expect(apiFetch("/api/items")).rejects.toMatchObject({
+      message: "Bad Request",
+      status: 400,
+    });
+  });
+});
 
 // ─── apiFetch ────────────────────────────────────────────────────────────────
 
