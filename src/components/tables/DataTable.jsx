@@ -36,13 +36,10 @@ function DataTable({
   enableFilters = true,
   dataType = "generic",
 }) {
-  const { filters, setFilters, resetFilters } = enableFilters
-    ? useDataFilters(dataType)
-    : { filters: {}, setFilters: () => {}, resetFilters: () => {} };
+  const filtersHook = enableFilters ? useDataFilters(dataType) : { filters: {}, setFilters: () => {}, resetFilters: () => {} };
+  const { filters, setFilters, resetFilters } = filtersHook;
   const config = enableFilters ? FILTER_CONFIGS[dataType] || {} : {};
-  const filteredData = enableFilters
-    ? useFilteredData({ data: rawData, filters, config })
-    : rawData;
+  const filteredData = enableFilters ? useFilteredData({ data: rawData, filters, config }) : rawData;
 
   const toggleSort = useCallback(
     (field) => {
@@ -64,10 +61,10 @@ function DataTable({
     setFilters({ ...filters, search: "" });
   }, [filters, setFilters]);
 
-  const isSorted = (field) => filters.sort.field === field;
+// isSorted intentionally unused
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      onSelectionChange(data.map((item) => item.id));
+      onSelectionChange(filteredData.map((item) => item.id));
     } else {
       onSelectionChange([]);
     }
@@ -82,7 +79,7 @@ function DataTable({
     }
   };
 
-  const isAllSelected = data.length > 0 && selectedItems.length === data.length;
+  const isAllSelected = filteredData.length > 0 && selectedItems.length === filteredData.length;
 
   // ISSUE #75 FIX: Enable virtualization for large datasets
   const shouldVirtualize = filteredData.length > VIRTUALIZATION_THRESHOLD;
@@ -107,7 +104,7 @@ function DataTable({
         ref={shouldVirtualize ? scrollRef : undefined}
         className="overflow-x-auto -webkit-overflow-scrolling-touch"
         style={shouldVirtualize ? { maxHeight: '600px', overflowY: 'auto' } : undefined}
-      >
+      > 
                 <table className="w-full border-collapse min-w-[600px]">
                     <thead className="sticky top-0 z-10">
                         {/* Header Row: Added dark border and text color */}

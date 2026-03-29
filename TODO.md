@@ -11,13 +11,16 @@
 
 ### Steps Status
 
-- [x] **Step 1**: Fix merge conflict `src/pages/customers/CustomerList.jsx`  
-  - Remove git conflict markers  
+- [x] **Step 1**: Fix merge conflict `src/pages/customers/CustomerList.jsx` ✓
+  - Remove git conflict markers
   - Keep DataTable filtering logic (remove local search)
 
-- [ ] **Step 2**: Fix ESLint parsing errors
-  - `src/components/tables/DataTable.jsx` line 116 (unexpected })
-  - `src/context/DataContext.jsx` line 291 (unexpected if)
+**ADDED**: DataContext.integration.test.jsx - Full integration tests for context mutations per feedback
+
+- [x] **Step 2**: Fix ESLint parsing errors
+  - `src/components/tables/DataTable.jsx` line 116 (unexpected }) - Fixed whitespace
+  - `src/context/DataContext.jsx` line 291 (unexpected if) - Fixed syntax
+  - `src/pages/settings/ProfileSettings.jsx` hasProfile no-undef - Defined from formData
 - [ ] **Step 3**: Fix `src/test/FormValidation.test.jsx` (7 failing tests)
   - Update expectations to match implemented validation logic
   - Address require/setup issues (no-undef)

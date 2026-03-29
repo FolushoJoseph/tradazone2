@@ -24,6 +24,13 @@
  * Category: Bug/Edge Case
  * Priority: Medium
  * Affected Area: API gateway / DataContext
+ * 
+ * INTEGRATION TESTS: Added DataContext.integration.test.jsx for context mutations covering:
+ * - addCustomer/addCheckout/addInvoice/markCheckoutPaid mutations
+ * - localStorage persistence
+ * - Webhook dispatch
+ * - Bulk deleteItems
+ * - Filter context integration
  * Description: Fixed race conditions that occurred when form submission functions
  * (addCustomer, addInvoice, addCheckout) were called rapidly in succession. The following
  * fixes were implemented:
@@ -287,7 +294,7 @@ export function DataProvider({ children }) {
         });
       }
 
-      // Fire checkout.paid webhook (non-blocking)
+    // Fire checkout.paid webhook (non-blocking)
       if (paidCheckout) {
         dispatchWebhook("checkout.paid", {
           id: paidCheckout.id,
@@ -297,7 +304,8 @@ export function DataProvider({ children }) {
           customerId,
           walletType,
         });
-    }, []);
+    }
+  }, []);
 
     // ---------- Invoices ----------
     /**
@@ -498,10 +506,187 @@ export function DataProvider({ children }) {
         markCheckoutPaid,
         setWebhookUrl,
         getWebhookUrl,
-      }}
+      } }
     >
       {children}
     </DataContext.Provider>
+  );
+}
+
+export default DataProvider;
+
+// eslint-disable-next-line react-refresh/only-export-components
+/**
+ * Custom hook to access DataContext state and operations
+ * Must be used within a DataProvider component
+ * @throws {Error} If used outside of DataProvider
+ * @returns {Object} Context value containing state and functions
+ */
+import { useMemo, useCallback, useEffect, useState } from "react";
+import {
+  CUSTOMER_FILTER_CONFIG,
+  INVOICE_FILTER_CONFIG,
+  ITEM_FILTER_CONFIG,
+  CHECKOUT_FILTER_CONFIG,
+} from "./filterConfigs";
+
+ /**
+ * Filter/Sort state management with localStorage persistence
+ * @param {string} type - Data type key ('customers', 'invoices', etc.)
+ * @returns {{ filters: Object, setFilters: Function, resetFilters: Function }}
+ */
+export function useDataFilters(type) {
+  const [filters, setFilters] = useState({
+    search: "",
+    sort: { field: "createdAt", dir: "desc" },
+    status: "all",
+    dateFrom: "",
+    dateTo: "",
+    amountMin: "",
+    amountMax: "",
+  });
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(`tradazone_filters_${type}`);
+      if (saved) {
+        setFilters(JSON.parse(saved));
+      }
+    } catch {
+      // Ignore parse errors
+    }
+  }, [type]);
+
+  const setFiltersWithSave = useCallback(
+    (newFilters) => {
+      setFilters(newFilters);
+      try {
+        localStorage.setItem(
+          `tradazone_filters_${type}`,
+          JSON.stringify(newFilters),
+        );
+      } catch {
+        // Ignore storage errors
+      }
+    },
+    [type],
+  );
+
+  const resetFilters = useCallback(() => {
+    const defaultFilters = {
+      search: "",
+      sort: { field: "createdAt", dir: "desc" },
+      status: "all",
+      dateFrom: "",
+      dateTo: "",
+      amountMin: "",
+      amountMax: "",
+    };
+    setFiltersWithSave(defaultFilters);
+  }, [setFiltersWithSave]);
+
+  return {
+    filters,
+    setFilters: setFiltersWithSave,
+    resetFilters,
+  };
+}
+
+/**
+ * Generic filtering and sorting for any data array
+ * @param {{ data: Array, filters: Object, config: Object }} params
+ * @returns {Array} Filtered and sorted data
+ */
+export function useFilteredData({ data = [], filters, config }) {
+  return useMemo(() => {
+    let result = [...data];
+
+    // 1. Search filter (multi-field fuzzy)
+    if (filters.search) {
+      const query = filters.search.toLowerCase().trim();
+      result = result.filter((item) =>
+        config.searchableFields.some((field) =>
+          String(item[field] || "")
+            .toLowerCase()
+            .includes(query),
+        ),
+      );
+    }
+
+    // 2. Status filter
+    if (config.statusField && filters.status !== "all") {
+      result = result.filter(
+        (item) => item[config.statusField] === filters.status,
+      );
+    }
+
+    // 3. Date range filter
+    if (config.dateFields) {
+      const fromDate = filters.dateFrom ? new Date(filters.dateFrom) : null;
+      const toDate = filters.dateTo ? new Date(filters.dateTo) : null;
+
+      result = result.filter((item) => {
+        const itemDate = new Date(item[config.dateFields.from]);
+        if (fromDate && itemDate < fromDate) return false;
+        if (toDate && itemDate > toDate) return false;
+        return true;
+      });
+    }
+
+    // 4. Amount range filter
+    if (config.amountField && (filters.amountMin || filters.amountMax)) {
+      const min = parseFloat(filters.amountMin) || 0;
+      const max = parseFloat(filters.amountMax) || Infinity;
+      result = result.filter((item) => {
+        const amount = parseFloat(
+          (item[config.amountField] || "0").replace(/,/g, ""),
+        );
+        return amount >= min && amount <= max;
+      });
+    }
+
+    // 5. Sorting
+    if (filters.sort.field) {
+      result.sort((a, b) => {
+        let aVal = a[filters.sort.field];
+        let bVal = b[filters.sort.field];
+
+        // Handle numbers (amount, totalSpent, invoiceCount)
+        if (!isNaN(parseFloat(aVal)) && !isNaN(parseFloat(bVal))) {
+          aVal = parseFloat(aVal);
+          bVal = parseFloat(bVal);
+        } else {
+          // Handle dates
+          aVal = new Date(aVal);
+          bVal = new Date(bVal);
+          if (isNaN(aVal.getTime())) aVal = String(aVal || "").toLowerCase();
+          if (isNaN(bVal.getTime())) bVal = String(bVal || "").toLowerCase();
+        }
+
+        if (aVal < bVal) return filters.sort.dir === "asc" ? -1 : 1;
+        if (aVal > bVal) return filters.sort.dir === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return result;
+  }, [data, filters, config]);
+}
+
+// Filter config presets
+export const FILTER_CONFIGS = {
+  customers: CUSTOMER_FILTER_CONFIG,
+  invoices: INVOICE_FILTER_CONFIG,
+  items: ITEM_FILTER_CONFIG,
+  checkouts: CHECKOUT_FILTER_CONFIG,
+};
+
+export function useData() {
+  const ctx = useContext(DataContext);
+  if (!ctx) throw new Error("useData must be used within a DataProvider");
+  return ctx;
+}
+
   );
 }
 

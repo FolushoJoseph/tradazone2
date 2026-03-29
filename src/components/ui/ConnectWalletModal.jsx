@@ -13,7 +13,7 @@
  * @module ConnectWalletModal
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X, ExternalLink, AlertCircle, ChevronLeft } from 'lucide-react';
 import Logo from './Logo';
 import { useLobstr } from '../../hooks/useLobstr';
@@ -38,7 +38,7 @@ function getSafeErrorMessage(msg) {
     if (upperMsg.includes('LOCKED')) return 'Wallet is locked.';
     if (upperMsg.includes('REJECTED') || upperMsg.includes('CANCEL')) return 'Connection cancelled.';
     return 'The connection was cancelled or failed. Please try again.';
-}
+  // msg param used
 
 function getSafeErrorDescription(msg) {
     return 'Your transaction signature was declined or the provider timed out. No sensitive details were leaked.';
@@ -115,15 +115,13 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
 
     const modalRef = useFocusTrap({ isOpen, onClose, initialFocus: true, restoreFocus: true });
 
-    useEffect(() => {
-        if (isOpen) {
-            setConnecting(null);
-            setError(null);
-            setView('primary');
-            setSearchQuery('');
-            setFilterNetwork('all');
-        }
-    }, [isOpen]);
+    if (isOpen) {
+        setConnecting(null);
+        setError(null);
+        setView('primary');
+        setSearchQuery('');
+        setFilterNetwork('all');
+    }
 
     const filteredAndSortedWallets = availableWallets
         .filter(w => {

@@ -76,6 +76,8 @@ function ProfileSettings() {
         setSaveMessage('');
     };
 
+    const hasProfile = formData.name.trim() || formData.email.trim() || formData.phone.trim() || formData.company.trim() || formData.address.trim() || formData.profileDescription.trim();
+
     return (
         <div>
             <h2 className="text-lg font-semibold mb-6">Profile Settings</h2>

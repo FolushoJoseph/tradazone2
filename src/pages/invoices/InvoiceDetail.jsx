@@ -66,7 +66,7 @@ function InvoiceDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const invoiceRef = useRef(null);
-  const { user } = useAuth();
+// user not used - removed to fix ESLint no-unused-vars
   const { invoices, customers } = useData();
 
   const invoice = invoices.find((inv) => inv.id === id);
