@@ -113,6 +113,56 @@ describe('ConnectWalletModal search debounce (Issue #64)', () => {
     });
 });
 
+describe('ConnectWalletModal error sanitization (Issue #SEC-01)', () => {
+    it('does not expose raw error message when connection fails', async () => {
+        const rawError = 'MetaMask RPC Error: Internal JSON-RPC error. {code: -32603, data: {stack: "Error: ..."}}';
+        const connectWalletFn = vi.fn().mockResolvedValue({ success: false, error: rawError });
+
+        const { default: ConnectWalletModal } = await import('../components/ui/ConnectWalletModal');
+        render(
+            <MemoryRouter>
+                <ConnectWalletModal
+                    isOpen={true}
+                    onClose={vi.fn()}
+                    onConnect={vi.fn()}
+                    connectWalletFn={connectWalletFn}
+                />
+            </MemoryRouter>
+        );
+
+        await act(async () => {
+            fireEvent.click(screen.getByText('MetaMask'));
+            vi.advanceTimersByTime(300);
+        });
+
+        expect(screen.queryByText(rawError)).toBeNull();
+        expect(screen.getByText('The connection was cancelled or failed. Please try again.')).toBeTruthy();
+    });
+
+    it('shows a safe message when user rejects the connection', async () => {
+        const connectWalletFn = vi.fn().mockResolvedValue({ success: false, error: 'User rejected the request.' });
+
+        const { default: ConnectWalletModal } = await import('../components/ui/ConnectWalletModal');
+        render(
+            <MemoryRouter>
+                <ConnectWalletModal
+                    isOpen={true}
+                    onClose={vi.fn()}
+                    onConnect={vi.fn()}
+                    connectWalletFn={connectWalletFn}
+                />
+            </MemoryRouter>
+        );
+
+        await act(async () => {
+            fireEvent.click(screen.getByText('MetaMask'));
+            vi.advanceTimersByTime(300);
+        });
+
+        expect(screen.getByText('Connection cancelled.')).toBeTruthy();
+    });
+});
+
 describe('ConnectWalletModal advanced filters and sorting (Issue #124)', () => {
     it('filters the list to installed wallets only', async () => {
         await act(async () => { await renderModal(); });

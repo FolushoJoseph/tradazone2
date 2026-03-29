@@ -1,4 +1,16 @@
 /**
+ * ISSUE: #SEC-01 (Sensitive data exposure via raw error messages)
+ * Category: Security & Compliance
+ * Priority: Low
+ * Affected Area: ConnectWalletModal
+ * Description: Raw wallet provider error messages (e.g. e.message, result.error)
+ * were being stored in component state and rendered directly in the UI, potentially
+ * leaking sensitive internal details. All error paths now route through
+ * getSafeErrorMessage() before being stored in state.
+ * Fix: Sanitize error messages at the point of setError() in handleConnect.
+ */
+
+/**
  * @fileoverview ConnectWalletModal — multi-network wallet connection modal.
  *
  * Supports the following wallet providers:
@@ -64,7 +76,7 @@ function getSafeErrorMessage(msg) {
     if (upperMsg.includes('LOCKED')) return 'Wallet is locked.';
     if (upperMsg.includes('REJECTED') || upperMsg.includes('CANCEL')) return 'Connection cancelled.';
     return 'The connection was cancelled or failed. Please try again.';
-  // msg param used
+}
 
 function getSafeErrorDescription() {
     return 'Your transaction signature was declined or the provider timed out. No sensitive details were leaked.';
@@ -265,7 +277,7 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                 await syncDescriptionOnConnect();
                 if (onConnect) onConnect('stellar');
             } else if (result?.error) {
-                setError({ type: 'stellar', code: result.error === 'NOT_INSTALLED' ? 'not_installed' : 'failed', message: result.error });
+                setError({ type: 'stellar', code: result.error === 'NOT_INSTALLED' ? 'not_installed' : 'failed', message: getSafeErrorMessage(result.error) });
             }
             return;
         }
@@ -284,11 +296,11 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                 setError({ type: w.network, code: 'not_installed' });
                 setConnecting(null);
             } else {
-                setError({ type: w.network, code: 'failed', message: result.error });
+                setError({ type: w.network, code: 'failed', message: getSafeErrorMessage(result.error) });
                 setConnecting(null);
             }
         } catch (e) {
-            setError({ type: w.network, code: 'failed', message: e.message });
+            setError({ type: w.network, code: 'failed', message: getSafeErrorMessage(e.message) });
             setConnecting(null);
         }
     };
