@@ -1,29 +1,52 @@
 /**
- * @fileoverview Visual snapshot tests for Auth module components — Issue #156
+ * @fileoverview Visual snapshot tests for the auth entry-point pages.
  *
- * ISSUE: #156 — Add visual snapshot testing for the Auth module components.
+ * ISSUE: #156 - Add visual snapshot testing for the Auth module components.
  * Category: Testing / Auth module
- * Affected Area: Auth module (SignIn, SignUp pages)
+ * Affected Area: SignIn, SignUp
  *
- * Captures stable render snapshots for the two auth entry-point pages so that
- * unintentional UI regressions are caught in CI. The ConnectWalletModal and
- * context dependencies are mocked to keep snapshots deterministic and fast.
+ * SignIn now consumes selector-style AuthContext hooks
+ * (`useAuthIsAuthenticated`, `useAuthWalletState`, `useAuthActions`) instead of
+ * the older monolithic context shape. These snapshots pin the main auth page
+ * states so AuthContext refactors do not silently change the UI.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import SignIn from '../pages/auth/SignIn';
+import SignUp from '../pages/auth/SignUp';
 
-// ─── Shared mocks ─────────────────────────────────────────────────────────────
+const mockAuthState = {
+    isAuthenticated: false,
+    lastWallet: null,
+    loadSession: null,
+    user: {
+        isAuthenticated: false,
+        walletAddress: null,
+        walletType: null,
+        profileDescription: '',
+    },
+    connectWallet: vi.fn(),
+    updateProfile: vi.fn(),
+};
 
 vi.mock('../context/AuthContext', () => ({
+    loadSession: () => mockAuthState.loadSession,
     useAuth: () => ({
-        connectWallet: vi.fn(),
-        user: { isAuthenticated: false, walletAddress: null },
-        lastWallet: null,
+        connectWallet: mockAuthState.connectWallet,
+        user: mockAuthState.user,
+        lastWallet: mockAuthState.lastWallet,
     }),
-    useAuthUser: () => ({ isAuthenticated: false, walletAddress: null }),
-    useAuthActions: () => ({ connectWallet: vi.fn() }),
+    useAuthUser: () => mockAuthState.user,
+    useAuthActions: () => ({
+        connectWallet: mockAuthState.connectWallet,
+        updateProfile: mockAuthState.updateProfile,
+    }),
+    useAuthIsAuthenticated: () => mockAuthState.isAuthenticated,
+    useAuthWalletState: () => ({
+        lastWallet: mockAuthState.lastWallet,
+    }),
 }));
 
 vi.mock('../components/ui/ConnectWalletModal', () => ({
@@ -34,67 +57,74 @@ vi.mock('../components/ui/StagingBanner', () => ({
     default: () => null,
 }));
 
-// Stub SVG / image imports so snapshots stay portable
 vi.mock('../assets/auth-splash.svg', () => ({ default: 'auth-splash.svg' }));
-vi.mock('../assets/logo-blue.png',   () => ({ default: 'logo-blue.png' }));
-vi.mock('../assets/logo-white.png',  () => ({ default: 'logo-white.png' }));
-vi.mock('../assets/logo.png',        () => ({ default: 'logo.png' }));
-vi.mock('../assets/logo-blue.svg',   () => ({ default: 'logo-blue.svg' }));
+vi.mock('../assets/logo-blue.png', () => ({ default: 'logo-blue.png' }));
+vi.mock('../assets/logo-white.png', () => ({ default: 'logo-white.png' }));
+vi.mock('../assets/logo.png', () => ({ default: 'logo.png' }));
+vi.mock('../assets/logo-blue.svg', () => ({ default: 'logo-blue.svg' }));
 
-// ─── SignIn snapshots ─────────────────────────────────────────────────────────
+function renderWithRouter(ui, initialEntry) {
+    return render(
+        <MemoryRouter initialEntries={[initialEntry]}>
+            {ui}
+        </MemoryRouter>,
+    );
+}
 
-describe('Auth module snapshots — SignIn', () => {
-    let SignIn;
+function resetAuthState() {
+    mockAuthState.isAuthenticated = false;
+    mockAuthState.lastWallet = null;
+    mockAuthState.loadSession = null;
+    mockAuthState.user = {
+        isAuthenticated: false,
+        walletAddress: null,
+        walletType: null,
+        profileDescription: '',
+    };
+    mockAuthState.connectWallet = vi.fn();
+    mockAuthState.updateProfile = vi.fn();
+}
 
-    beforeEach(async () => {
-        vi.resetModules();
-        ({ default: SignIn } = await import('../pages/auth/SignIn'));
-    });
+beforeEach(() => {
+    resetAuthState();
+    localStorage.clear();
+    sessionStorage.clear();
+});
 
-    it('matches snapshot for unauthenticated state (no last wallet)', () => {
-        const { container } = render(
-            <MemoryRouter initialEntries={['/signin']}>
-                <SignIn />
-            </MemoryRouter>
-        );
+describe('Auth module snapshots - SignIn', () => {
+    it('matches snapshot for unauthenticated state with no recent wallet', () => {
+        const { container } = renderWithRouter(<SignIn />, '/signin');
         expect(container.firstChild).toMatchSnapshot();
     });
 
-    it('matches snapshot when session-expired query param is present', () => {
-        const { container } = render(
-            <MemoryRouter initialEntries={['/signin?reason=expired']}>
-                <SignIn />
-            </MemoryRouter>
-        );
+    it('matches snapshot when a returning wallet hint is available', () => {
+        mockAuthState.lastWallet = '0x1234567890abcdef1234567890abcdef12345678';
+
+        const { container } = renderWithRouter(<SignIn />, '/signin');
+        expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches snapshot when the session-expired banner is shown', () => {
+        const { container } = renderWithRouter(<SignIn />, '/signin?reason=expired');
         expect(container.firstChild).toMatchSnapshot();
     });
 });
 
-// ─── SignUp snapshots ─────────────────────────────────────────────────────────
-
-describe('Auth module snapshots — SignUp', () => {
-    let SignUp;
-
-    beforeEach(async () => {
-        vi.resetModules();
-        ({ default: SignUp } = await import('../pages/auth/SignUp'));
-    });
-
+describe('Auth module snapshots - SignUp', () => {
     it('matches snapshot for unauthenticated state', () => {
-        const { container } = render(
-            <MemoryRouter initialEntries={['/signup']}>
-                <SignUp />
-            </MemoryRouter>
-        );
+        const { container } = renderWithRouter(<SignUp />, '/signup');
         expect(container.firstChild).toMatchSnapshot();
     });
 
-    it('matches snapshot with redirect query param', () => {
-        const { container } = render(
-            <MemoryRouter initialEntries={['/signup?redirect=%2Fdashboard']}>
-                <SignUp />
-            </MemoryRouter>
-        );
+    it('matches snapshot when a profile description draft is already present', () => {
+        mockAuthState.user = {
+            isAuthenticated: false,
+            walletAddress: null,
+            walletType: null,
+            profileDescription: '<p>Crypto invoicing for subscription teams.</p>',
+        };
+
+        const { container } = renderWithRouter(<SignUp />, '/signup');
         expect(container.firstChild).toMatchSnapshot();
     });
 });
