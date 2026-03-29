@@ -5,6 +5,7 @@
  * Category: Feature / data portability
  * Resolution: "Export to CSV" downloads a key-value summary for the active checkout.
  */
+import { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Copy, Link as LinkIcon, Edit, Trash2, ExternalLink, FileSpreadsheet } from 'lucide-react';
 import Button from '../../components/forms/Button';
@@ -16,8 +17,14 @@ import LazyChart from '../../components/ui/LazyChart';
 
 function CheckoutDetail() {
     const { id } = useParams();
-    const { checkouts } = useCheckoutData();
+    const { checkouts, recordCheckoutView } = useCheckoutData();
     const checkout = checkouts.find(c => c.id === id);
+
+    useEffect(() => {
+        if (id) {
+            recordCheckoutView(id);
+        }
+    }, [id, recordCheckoutView]);
 
     if (!checkout) return <div className="p-8"><p className="text-t-muted">Checkout not found</p></div>;
 

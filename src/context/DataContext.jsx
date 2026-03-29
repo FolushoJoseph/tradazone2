@@ -308,8 +308,27 @@ export function DataProvider({ children }) {
         });
       }
     },
-    [checkouts],
-  );
+  const recordCheckoutView = useCallback((checkoutId) => {
+    const target = checkouts.find(c => c.id === checkoutId);
+    if (!target) return;
+
+    const nextViews = (target.views || 0) + 1;
+    setCheckouts((prev) => {
+      const next = prev.map((c) =>
+        c.id === checkoutId ? { ...c, views: nextViews } : c,
+      );
+      save(KEYS.checkouts, next);
+      return next;
+    });
+
+    dispatchWebhook('checkout.viewed', {
+      id: target.id,
+      title: target.title,
+      amount: target.amount,
+      currency: target.currency,
+      views: nextViews,
+    });
+  }, [checkouts]);
 
   const dataContextValue = useMemo(
     () => ({
@@ -322,7 +341,9 @@ export function DataProvider({ children }) {
       deleteItems,
       addInvoice,
       addCheckout,
+      addCheckout,
       markCheckoutPaid,
+      recordCheckoutView,
       updateCustomerDescription,
     }),
     [
@@ -335,14 +356,16 @@ export function DataProvider({ children }) {
       deleteItems,
       addInvoice,
       addCheckout,
+      addCheckout,
       markCheckoutPaid,
+      recordCheckoutView,
       updateCustomerDescription,
     ],
   );
 
   const checkoutContextValue = useMemo(
-    () => ({ checkouts, addCheckout, markCheckoutPaid }),
-    [checkouts, addCheckout, markCheckoutPaid],
+    () => ({ checkouts, addCheckout, markCheckoutPaid, recordCheckoutView }),
+    [checkouts, addCheckout, markCheckoutPaid, recordCheckoutView],
   );
 
   return (
@@ -355,9 +378,9 @@ export function DataProvider({ children }) {
 }
 
 export function useData() {
-    const ctx = useContext(DataContext);
-    if (!ctx) throw new Error('useData must be used within a DataProvider');
-    return ctx;
+  const context = useContext(DataContext);
+  if (!context) throw new Error('useData must be used within a DataProvider');
+  return context;
 }
 
 export function useCheckoutData() {
