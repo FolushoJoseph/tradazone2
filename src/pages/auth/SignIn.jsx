@@ -35,7 +35,7 @@
  * One-time description draft hydration uses {@link loadSession} instead of subscribing to
  * the full user snapshot via {@link useAuthUser}.
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   useAuthActions,
@@ -71,7 +71,9 @@ function SignIn() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const redirectTo = searchParams.get("redirect") || "/";
+  // Memoize redirectTo to prevent effect re-run on every render
+  // (searchParams.get() creates new reference each time even if value is same)
+  const redirectTo = useMemo(() => searchParams.get("redirect") || "/", [searchParams]);
   const sessionExpired = searchParams.get("reason") === "expired";
 
   useEffect(() => {

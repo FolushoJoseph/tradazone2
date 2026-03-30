@@ -20,7 +20,7 @@
  * auth illustrations.)
  */
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import PrivateRoute from './components/routing/PrivateRoute';
 import LoadingSpinner from './components/ui/LoadingSpinner';
@@ -72,7 +72,7 @@ function App() {
     <ThemeProvider>
     <AuthProvider>
       <DataProvider>
-        <BrowserRouter basename="/Tradazone">
+        <BrowserRouter basename={import.meta.env.DEV ? '/' : '/Tradazone'}>
           <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             {/* Public routes — checkout payment page is lazy-loaded */}
@@ -113,22 +113,28 @@ function App() {
               <Route path="customers/:id" element={<CustomerDetail />} />
               {/* Checkout routes — wrapped in Suspense so the lazy chunks
                   resolve gracefully while the user navigates */}
-              <Suspense
-                fallback={
-                  <div
-                    className="p-8 text-center text-sm text-gray-400"
-                    role="status"
-                    aria-live="polite"
-                    aria-busy="true"
+              <Route
+                element={
+                  <Suspense
+                    fallback={
+                      <div
+                        className="p-8 text-center text-sm text-gray-400"
+                        role="status"
+                        aria-live="polite"
+                        aria-busy="true"
+                      >
+                        Loading…
+                      </div>
+                    }
                   >
-                    Loading…
-                  </div>
+                    <Outlet />
+                  </Suspense>
                 }
               >
                 <Route path="checkout" element={<CheckoutList />} />
                 <Route path="checkout/create" element={<CreateCheckout />} />
                 <Route path="checkout/:id" element={<CheckoutDetail />} />
-              </Suspense>
+              </Route>
               <Route path="invoices" element={<InvoiceList />} />
               <Route path="invoices/create" element={<CreateInvoice />} />
               <Route path="invoices/:id" element={<InvoiceDetail />} />

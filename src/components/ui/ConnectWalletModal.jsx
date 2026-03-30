@@ -30,6 +30,7 @@ import Logo from './Logo';
 import { useLobstr } from '../../hooks/useLobstr';
 import {
     useAuthActions,
+    useAuthUser,
     useAuthWalletCatalog,
     useAuthWalletState,
 } from '../../context/AuthContext';
@@ -134,7 +135,7 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
 
     const { completeWalletLogin, disconnectAll, updateProfile } = useAuthActions();
     const { wallet } = useAuthWalletState();
-    const { user } = useAuthUser();
+    const user = useAuthUser();
     const { installed, availableWallets } = useAuthWalletCatalog();
     const lobstrHook = useLobstr();
 

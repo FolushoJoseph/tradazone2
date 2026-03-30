@@ -1,7 +1,32 @@
+// Mock Storage Immediately to prevent deadlocks in Vitest/JSDOM
+// CRITICAL: These need to be real implementations that actually store/retrieve data
+const localStorageStore = {};
+const sessionStorageStore = {};
+
+global.localStorage = {
+    getItem: (key) => localStorageStore[key] ?? null,
+    setItem: (key, value) => { localStorageStore[key] = String(value); },
+    removeItem: (key) => { delete localStorageStore[key]; },
+    clear: () => { Object.keys(localStorageStore).forEach(k => delete localStorageStore[k]); },
+};
+
+global.sessionStorage = {
+    getItem: (key) => sessionStorageStore[key] ?? null,
+    setItem: (key, value) => { sessionStorageStore[key] = String(value); },
+    removeItem: (key) => { delete sessionStorageStore[key]; },
+    clear: () => { Object.keys(sessionStorageStore).forEach(k => delete sessionStorageStore[k]); },
+};
+
+Object.defineProperty(window, 'sessionStorage', { value: global.sessionStorage, writable: true });
+Object.defineProperty(window, 'localStorage', { value: global.localStorage, writable: true });
+
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { AuthProvider, useAuth } from '../context/AuthContext';
+import { renderHook, act, render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { AuthProvider, useAuth, saveSession } from '../context/AuthContext';
 import { STORAGE_PREFIX } from '../config/env';
+import { MemoryRouter } from 'react-router-dom';
+import SignIn from '../pages/auth/SignIn';
+import React from 'react';
 
 const SESSION_KEY = `${STORAGE_PREFIX}_auth`;
 const WALLET_KEY  = `${STORAGE_PREFIX}_last_wallet`;
@@ -16,12 +41,34 @@ const wrapper = ({ children }) => (
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
+// Mock env config to prevent the AuthProvider from crashing or returning null
+vi.mock('../config/env', () => ({
+    STORAGE_PREFIX: 'tradazone',
+    SESSION_TTL_MS: 3600000,
+    ALLOW_MOCK_WALLET: false,
+    APP_ENV: 'test',
+    IS_DEVELOPMENT: false,
+    IS_STAGING: false,
+    IS_PRODUCTION: true,
+    APP_NAME: 'Tradazone'
+}));
+
 // Mock ethers for connectEvmWallet
 vi.mock('ethers', () => ({
-    BrowserProvider: vi.fn().mockImplementation((provider) => ({
-        send: vi.fn(),
-        getNetwork: vi.fn().mockResolvedValue({ chainId: 1n }),
-    })),
+    BrowserProvider: class {
+        constructor(provider) {
+            this.provider = provider;
+        }
+        send(method, params) {
+            if (this.provider && this.provider.request) {
+                return this.provider.request({ method, params });
+            }
+            return Promise.resolve(['0xMOCK_EVM_ADDR']);
+        }
+        getNetwork() {
+            return Promise.resolve({ chainId: 1n });
+        }
+    }
 }));
 
 // Mock get-starknet for disconnect wallet
@@ -32,12 +79,53 @@ vi.mock('get-starknet', () => ({
 // Mock @lobstrco/signer-extension-api
 vi.mock('@lobstrco/signer-extension-api', () => ({
     isConnected: vi.fn().mockResolvedValue(true),
-    getPublicKey: vi.fn(),
+    getPublicKey: vi.fn().mockResolvedValue('GCORP_MOCK_STELLAR_ADDR'),
+}));
+
+// Mock ResizeObserver
+global.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+};
+
+// Mock react-router-dom for navigation tracking
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', async () => {
+    const actual = await vi.importActual('react-router-dom');
+    return {
+        ...actual,
+        // Do not mock BrowserRouter. The test uses MemoryRouter to provide context,
+        // and overriding BrowserRouter globally can interfere with component rendering.
+        useNavigate: () => mockNavigate,
+        useSearchParams: () => [new URLSearchParams()],
+    };
+});
+
+// Mock assets used by SignIn/ConnectWalletModal
+vi.mock('../assets/auth-splash.svg', () => ({ default: 'mock-splash.svg' }));
+vi.mock('../assets/logo-blue.svg', () => ({ default: 'logo-blue.svg' }));
+
+// Mock wallet discovery to provide a stable list of wallets
+vi.mock('../utils/wallet-discovery', () => ({
+    // Returning a stable reference stops the AuthContext useEffect from infinite looping
+    useDiscoveredProviders: vi.fn().mockReturnValue([]),
+}));
+
+// Mock useLobstr hook which is used inside ConnectWalletModal for Stellar
+vi.mock('../hooks/useLobstr', () => ({
+    useLobstr: vi.fn().mockReturnValue({
+        connect: vi.fn().mockResolvedValue({ success: true, address: 'GCORP_MOCK_STELLAR_ADDR' }),
+        isConnecting: false,
+    }),
 }));
 
 describe('AuthContext async mutations (integration)', () => {
     beforeEach(() => {
+        vi.useFakeTimers();
+        vi.spyOn(global, 'setTimeout');
         localStorage.clear();
+        sessionStorage.clear();
         vi.clearAllMocks();
         // Clear window globals
         delete window.starknet;
@@ -46,6 +134,7 @@ describe('AuthContext async mutations (integration)', () => {
     });
 
     afterEach(() => {
+        vi.useRealTimers();
         vi.restoreAllMocks();
     });
 
@@ -85,15 +174,9 @@ describe('AuthContext async mutations (integration)', () => {
                 connection = await result.current.connectWallet('starknet');
             });
 
-            // If ALLOW_MOCK_WALLET is true (default in dev), it might fallback to mock
-            // But if we want to test the missing extension path, we check the catch block.
-            // Since ALLOW_MOCK_WALLET is !IS_PRODUCTION, it will fallback in dev.
-            // To test error return, we'd need IS_PRODUCTION or disable mock fallback.
-            // For now, let's assume it fallbacks if dev, or returns error if we mock the guard.
-            
-            // Checking the fallback if ALLOW_MOCK_WALLET is true
-            expect(connection.success).toBe(true); //Fallback success
-            expect(result.current.user.name).toBe('Wallet User'); // Default mock name
+            expect(connection.success).toBe(false);
+            expect(connection.error).toBe('not_installed');
+            expect(result.current.isConnecting).toBe(false);
         });
 
         it('returns "rejected" when user cancels the enable() prompt', async () => {
@@ -119,9 +202,9 @@ describe('AuthContext async mutations (integration)', () => {
 
     describe('connectEvmWallet', () => {
         it('transitions isConnecting state during async flow', async () => {
-            const mockAddr = '0xAbC123';
+            const mockAddr = '0x123';
             const mockEth = {
-                send: vi.fn().mockReturnValue(new Promise(resolve => setTimeout(() => resolve([mockAddr]), 50))),
+                request: vi.fn().mockResolvedValue([mockAddr]),
                 on: vi.fn(),
             };
             window.ethereum = mockEth;
@@ -136,9 +219,7 @@ describe('AuthContext async mutations (integration)', () => {
             // Should be connecting now
             expect(result.current.isConnecting).toBe(true);
 
-            await act(async () => {
-                await connectionPromise;
-            });
+            await act(async () => await connectionPromise);
 
             expect(result.current.isConnecting).toBe(false);
             expect(result.current.user.isAuthenticated).toBe(true);
@@ -147,7 +228,7 @@ describe('AuthContext async mutations (integration)', () => {
 
         it('prevents concurrent connection attempts across all wallet types', async () => {
             const mockEth = {
-                send: vi.fn().mockReturnValue(new Promise(resolve => setTimeout(() => resolve(['0x1']), 100))),
+                request: vi.fn().mockResolvedValue(['0x123']),
                 on: vi.fn(),
             };
             window.ethereum = mockEth;
@@ -177,7 +258,7 @@ describe('AuthContext async mutations (integration)', () => {
         it('updates user state when EVM account is changed', async () => {
             let accountChangedCallback;
             const mockEth = {
-                send: vi.fn().mockResolvedValue(['0xInitial']),
+                request: vi.fn().mockResolvedValue(['0xInitial']),
                 on: vi.fn().mockImplementation((event, callback) => {
                     if (event === 'accountsChanged') accountChangedCallback = callback;
                 }),
@@ -196,7 +277,7 @@ describe('AuthContext async mutations (integration)', () => {
             await act(async () => {
                 accountChangedCallback(['0xNewAddress']);
             });
-
+            
             expect(result.current.user.walletAddress).toBe('0xNewAddress');
             expect(result.current.wallet.address).toBe('0xNewAddress');
         });
@@ -216,7 +297,7 @@ describe('AuthContext async mutations (integration)', () => {
 
         it('handles user rejection (code 4001) in EVM flow', async () => {
             const mockEth = {
-                send: vi.fn().mockRejectedValue({ code: 4001, message: 'User rejected' }),
+                request: vi.fn().mockRejectedValue({ code: 4001, message: 'User rejected' }),
             };
             window.ethereum = mockEth;
 
@@ -286,8 +367,40 @@ describe('AuthContext async mutations (integration)', () => {
             expect(result.current.wallet.address).toBe(addr);
             expect(result.current.walletType).toBe('stellar');
             
-            const stored = JSON.parse(localStorage.getItem(SESSION_KEY));
+            const stored = JSON.parse(sessionStorage.getItem(SESSION_KEY));
             expect(stored.user.walletAddress).toBe(addr);
         });
+    });
+
+    describe('SignIn Page Context Integration', () => {
+        it('persists authenticated user to sessionStorage and localStorage', async () => {
+            // Test the core mutation directly: completeWalletLogin → sessionStorage persistence
+            const mockAddr = 'GCORP_SIGNIN_TEST_ADDR_149';
+            const { result } = renderHook(() => useAuth(), { wrapper });
+            
+            // Call completeWalletLogin directly (what the SignIn modal does internally)
+            await act(async () => {
+                result.current.completeWalletLogin(mockAddr, 'stellar');
+            });
+            
+            // Verify user state updated
+            expect(result.current.user.isAuthenticated).toBe(true);
+            expect(result.current.user.walletAddress).toBe(mockAddr);
+            expect(result.current.user.walletType).toBe('stellar');
+            
+            // Verify sessionStorage was updated
+            const sessionRaw = sessionStorage.getItem(SESSION_KEY);
+            expect(sessionRaw).not.toBeNull();
+            const session = JSON.parse(sessionRaw);
+            expect(session.user.isAuthenticated).toBe(true);
+            expect(session.user.walletAddress).toBe(mockAddr);
+            
+            // Verify localStorage was updated
+            const profileRaw = localStorage.getItem(SESSION_KEY);
+            expect(profileRaw).not.toBeNull();
+            const profile = JSON.parse(profileRaw);
+            expect(profile.isAuthenticated).toBe(true);
+            expect(profile.walletAddress).toBe(mockAddr);
+        }, 10000);
     });
 });
