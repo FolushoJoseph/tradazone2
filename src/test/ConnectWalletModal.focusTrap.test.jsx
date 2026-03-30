@@ -26,10 +26,12 @@ vi.mock('../context/AuthContext', () => ({
     useAuthActions: () => ({
         completeWalletLogin: mockCompleteWalletLogin,
         disconnectAll: mockDisconnectAll,
+        updateProfile: vi.fn(),
     }),
     useAuthWalletState: () => ({
         wallet: { isConnected: false },
     }),
+    useAuthUser: () => ({ profileDescription: '' }),
     useAuthWalletCatalog: () => ({
         installed: { discovered: [] },
         availableWallets: [

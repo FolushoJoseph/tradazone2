@@ -54,7 +54,6 @@ import {
     useAuthUser,
     useAuthWalletCatalog,
     useAuthWalletState,
-    useAuthUser,
 } from '../../context/AuthContext';
 import { useVirtualList } from '../../hooks/useVirtualList';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
@@ -144,6 +143,7 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
     const [connecting, setConnecting] = useState(null);
     const [error, setError] = useState(null);
     const [filterNetwork, setFilterNetwork] = useState('all');
+    const [filterWalletType, setFilterWalletType] = useState('all');
     const [showInstalledOnly, setShowInstalledOnly] = useState(false);
     const [showRecommendedOnly, setShowRecommendedOnly] = useState(false);
     const [sortBy, setSortBy] = useState('recommended');
@@ -178,6 +178,7 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
             setView('primary');
             setSearchQuery('');
             setFilterNetwork('all');
+            setFilterWalletType('all');
             setShowInstalledOnly(false);
             setShowRecommendedOnly(false);
             setSortBy('recommended');
@@ -207,8 +208,14 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
 
     // #64: filter uses debouncedSearchQuery so rapid keystrokes don't trigger
     // a re-render of the wallet list on every character.
+    // #120: derive filtering/sorting from source metadata (no mutation) so
+    // search, network/type filters, and sort mode compose predictably.
     const filteredAndSortedWallets = useMemo(() => availableWallets
         .filter((w) => {
+            const isDiscoveredWallet = w.id.startsWith('discovered_');
+            if (filterWalletType === 'curated' && (w.isSecondary || isDiscoveredWallet)) return false;
+            if (filterWalletType === 'discovered' && !isDiscoveredWallet) return false;
+            if (filterWalletType === 'fallback' && !w.isSecondary) return false;
             if (debouncedSearchQuery && !w.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase())) return false;
             if (filterNetwork !== 'all' && w.network !== filterNetwork) return false;
             if (showInstalledOnly && !w.isInstalled) return false;
@@ -232,17 +239,31 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                 const networkSort = a.network.localeCompare(b.network);
                 return networkSort !== 0 ? networkSort : a.name.localeCompare(b.name);
             }
+            if (sortBy === 'installed') {
+                if (a.isInstalled && !b.isInstalled) return -1;
+                if (!a.isInstalled && b.isInstalled) return 1;
+                return a.name.localeCompare(b.name);
+            }
 
             return defaultPrioritySort();
         }), [
         availableWallets,
         debouncedSearchQuery,
         filterNetwork,
+        filterWalletType,
         showInstalledOnly,
         showRecommendedOnly,
         sortBy,
         view,
     ]);
+
+    const hasActiveFilters = Boolean(
+        searchQuery ||
+        filterNetwork !== 'all' ||
+        filterWalletType !== 'all' ||
+        showInstalledOnly ||
+        showRecommendedOnly
+    );
 
     const shouldVirtualize = filteredAndSortedWallets.length > VIRTUALIZATION_THRESHOLD;
     const { scrollRef, virtualItems, topPadding, bottomPadding } = useVirtualList({
@@ -349,9 +370,27 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                                         className="rounded-lg border border-border bg-white px-3 py-2 text-sm text-t-primary outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
                                     >
                                         <option value="recommended">Recommended first</option>
+                                        <option value="installed">Installed first</option>
                                         <option value="alphabetical">Name A-Z</option>
                                         <option value="alphabetical_desc">Name Z-A</option>
                                         <option value="network">Network</option>
+                                    </select>
+                                </div>
+                                <div className="flex items-center justify-between gap-3">
+                                    <label htmlFor="wallet-type" className="text-xs font-semibold uppercase tracking-wide text-t-muted">
+                                        Wallet type
+                                    </label>
+                                    <select
+                                        id="wallet-type"
+                                        aria-label="Wallet type"
+                                        value={filterWalletType}
+                                        onChange={(e) => setFilterWalletType(e.target.value)}
+                                        className="rounded-lg border border-border bg-white px-3 py-2 text-sm text-t-primary outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
+                                    >
+                                        <option value="all">All wallets</option>
+                                        <option value="curated">Curated wallets</option>
+                                        <option value="discovered">Discovered wallets</option>
+                                        <option value="fallback">Fallback options</option>
                                     </select>
                                 </div>
                                 <div className="flex flex-wrap gap-3 text-sm text-t-primary">
@@ -372,6 +411,21 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                                         Recommended only
                                     </label>
                                 </div>
+                                {hasActiveFilters && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setSearchQuery('');
+                                            setFilterNetwork('all');
+                                            setFilterWalletType('all');
+                                            setShowInstalledOnly(false);
+                                            setShowRecommendedOnly(false);
+                                        }}
+                                        className="text-xs font-semibold text-brand hover:text-brand/80 transition-colors"
+                                    >
+                                        Clear filters
+                                    </button>
+                                )}
                             </div>
                         </div>
 
@@ -399,7 +453,7 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                             {shouldVirtualize && <div style={{ height: topPadding }} aria-hidden="true" />}
                             <div className="flex flex-col gap-3">
                                 {walletsToRender.map((w) => (
-                                    <button key={w.id} onClick={() => handleConnect(w)} disabled={connecting !== null || (w.id === 'stellar' && lobstrHook.isConnecting)} className={`w-full text-left p-4 rounded-xl border flex items-center justify-between transition-all outline-none ${connecting === w.id || (w.id === 'stellar' && lobstrHook.isConnecting) ? 'border-brand/40 bg-brand/5' : connecting !== null ? 'border-border/50 opacity-50' : 'border-border hover:border-brand/30 hover:bg-brand/5'}`}>
+                                    <button data-testid={`wallet-option-${w.id}`} key={w.id} onClick={() => handleConnect(w)} disabled={connecting !== null || (w.id === 'stellar' && lobstrHook.isConnecting)} className={`w-full text-left p-4 rounded-xl border flex items-center justify-between transition-all outline-none ${connecting === w.id || (w.id === 'stellar' && lobstrHook.isConnecting) ? 'border-brand/40 bg-brand/5' : connecting !== null ? 'border-border/50 opacity-50' : 'border-border hover:border-brand/30 hover:bg-brand/5'}`}>
                                         <div className="flex items-center gap-4">
                                             <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${w.network === 'stellar' ? 'bg-blue-50' : w.network === 'starknet' ? 'bg-[#FF875B]/10' : 'bg-gray-100'}`}>{getWalletIcon(w)}</div>
                                             <div>
