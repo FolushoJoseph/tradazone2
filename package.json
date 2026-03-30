@@ -80,7 +80,13 @@
     "deploy": "gh-pages -d dist",
     "build:analyze": "npm run build && npx vite-bundle-analyzer dist",
     "size": "size-limit",
-    "build:size": "npm run build && npm run size"
+    "build:size": "npm run build && npm run size",
+    "ci:discover": "node scripts/ci-pipeline-utils.js discover",
+    "ci:select": "node scripts/ci-pipeline-utils.js smart-select main --verbose",
+    "ci:filter": "node scripts/ci-pipeline-utils.js filter",
+    "ci:sort": "node scripts/ci-pipeline-utils.js sort",
+    "ci:report": "node scripts/ci-pipeline-utils.js report markdown",
+    "ci:changed": "node scripts/ci-pipeline-utils.js changed main"
   },
   "dependencies": {
     "@lobstrco/signer-extension-api": "^2.0.0",
