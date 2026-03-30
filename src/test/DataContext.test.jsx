@@ -447,10 +447,8 @@ describe('useCheckoutData', () => {
 
 describe('duplicate-operation guard — no console.warn in production', () => {
   it('does not call console.warn when import.meta.env.DEV is false', async () => {
+    vi.stubEnv('DEV', false);
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    // Simulate production: DEV flag is false
-    const originalDev = import.meta.env.DEV;
-    import.meta.env.DEV = false;
 
     const { result } = renderHook(() => useData(), { wrapper });
 
@@ -463,7 +461,26 @@ describe('duplicate-operation guard — no console.warn in production', () => {
 
     expect(warnSpy).not.toHaveBeenCalled();
 
-    import.meta.env.DEV = originalDev;
     warnSpy.mockRestore();
+    vi.unstubAllEnvs();
+  });
+
+  it('calls console.warn in development when duplicate operation is detected', () => {
+    vi.stubEnv('DEV', true);
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const { result } = renderHook(() => useData(), { wrapper });
+
+    act(() => {
+      result.current.addCustomer({ name: 'Alice', email: 'alice@example.com' });
+      result.current.addCustomer({ name: 'Bob', email: 'bob@example.com' });
+    });
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('[DataContext] Duplicate addCustomer operation detected, ignoring.')
+    );
+
+    warnSpy.mockRestore();
+    vi.unstubAllEnvs();
   });
 });

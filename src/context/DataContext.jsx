@@ -298,58 +298,9 @@ export function DataProvider({ children }) {
               totalSpent: (prevSpent + added).toLocaleString(),
               invoiceCount: c.invoiceCount + 1,
             };
-            setCustomers((prev) => {
-                const next = [...prev, newCustomer];
-                save(KEYS.customers, next);
-                return next;
-            });
-            return newCustomer;
-        } finally {
-            // Always remove operation ID on completion (success or error)
-            pendingOperations.current.customers.delete(operationId);
-        }
-    }, []);
-
-    // ---------- Items ----------
-    /**
-     * Adds a new item/service to the catalog
-     * @param {Object} data - Item data
-     * @param {string} data.name - Item name
-     * @param {string} [data.description] - Item description (optional)
-     * @param {string} [data.type] - Item type: 'service' or 'product' (default: 'service')
-     * @param {string|number} data.price - Item price
-     * @param {string} [data.unit] - Unit of measurement (default: 'unit')
-     * @returns {Object} The created item object with generated ID
-     */
-    const addItem = useCallback((data) => {
-        const newItem = {
-            id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-            name: data.name,
-            description: data.description || '',
-            type: data.type || 'service',
-            price: data.price,
-            currency: 'STRK',
-            unit: data.unit || 'unit',
-        };
-        setItems((prev) => {
-            const next = [...prev, newItem];
-            save(KEYS.items, next);
-            return next;
-        });
-        return newItem;
-    }, []);
-
-    /**
-     * deleteItems — Bulk deletes multiple items/services by their IDs
-     * @param {string[]} ids - Array of item IDs to delete
-     * @returns {void}
-     */
-    const deleteItems = useCallback((ids) => {
-        // Optimistically update local state and localStorage
-        setItems((prev) => {
-            const next = prev.filter((item) => !ids.includes(item.id));
-            save(KEYS.items, next);
-            return next;
+          });
+          save(KEYS.customers, next);
+          return next;
         });
       }
 
@@ -362,8 +313,10 @@ export function DataProvider({ children }) {
           customerId,
           walletType,
         });
-    }
-  }, []);
+      }
+    },
+    [checkouts],
+  );
 
   const recordCheckoutView = useCallback(
     (checkoutId) => {
