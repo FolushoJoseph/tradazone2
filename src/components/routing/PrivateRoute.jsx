@@ -39,9 +39,20 @@ function PrivateRoute({ children }) {
     const { user, logout } = useAuth();
     const location = useLocation();
 
-    // Live check — reads and re-validates localStorage on every render.
-    const liveSession    = loadSession();
-    const sessionExpired = user.isAuthenticated && liveSession === null;
+    // Cache loadSession result to avoid calling it on every render
+    // This is expensive and prevents redirect loops from repeated session checks
+    const [cachedSession, setCachedSession] = useState(null);
+    const [sessionChecked, setSessionChecked] = useState(false);
+
+    // Only run expensive loadSession check once on mount and when pathname changes
+    useEffect(() => {
+        const liveSession = loadSession();
+        setCachedSession(liveSession);
+        setSessionChecked(true);
+    }, [location.pathname]);
+
+    // Only mark session as expired after initial check and if session became null
+    const sessionExpired = sessionChecked && user.isAuthenticated && cachedSession === null;
 
     // Latch the path at the moment of mid-session expiry so reason=expired
     // survives the logout() re-render (after logout, sessionExpired becomes

@@ -89,7 +89,7 @@ function App() {
     <ThemeProvider>
     <AuthProvider>
       <DataProvider>
-        <BrowserRouter basename="/Tradazone">
+        <BrowserRouter basename={import.meta.env.DEV ? '/' : '/Tradazone'}>
           <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             {/* Public routes — checkout payment page is lazy-loaded */}

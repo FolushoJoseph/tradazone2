@@ -12,13 +12,11 @@ const SIZE_LIMITS = {
   maxTotalSize: 1200,
 };
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   return {
     plugins: [react()],
-    // Base path is driven by VITE_BASE_PATH so staging and production
-    // can deploy to different sub-paths without code changes.
-    base: env.VITE_BASE_PATH || '/Tradazone/',
+    base: command === 'serve' ? '/' : '/Tradazone/',
     build: {
       // Enable compressed size reporting for monitoring bundle sizes (Issue #162)
       reportCompressedSize: true,
@@ -31,13 +29,13 @@ export default defineConfig(({ mode }) => {
             // Context chunks
             if (id.includes('DataContext')) return 'data-context';
             if (id.includes('AuthContext')) return 'auth-context';
-            
+
             // Critical feature chunks for size monitoring
             if (id.includes('SignIn')) return 'sign-in';
             if (id.includes('CustomerList')) return 'customer-list';
             if (id.includes('InvoiceDetail')) return 'invoice-detail';
             if (id.includes('ConnectWalletModal')) return 'connect-wallet';
-            
+
             // Vendor/Library chunks
             if (id.includes('@lobstrco/signer-extension-api') || id.includes('get-starknet') || id.includes('ethers')) {
               return 'wallet';

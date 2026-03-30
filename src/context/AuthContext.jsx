@@ -282,31 +282,79 @@ const WALLET_KEY  = `${STORAGE_PREFIX}_last_wallet`;
 // ---------------------------------------------------------------------------
 
 /**
- * Loads a valid (non-expired) session from sessionStorage (sensitive)
- * and merges with persisted profile data from localStorage (non-sensitive).
+ * Loads a valid (non-expired) session from sessionStorage (sensitive).
  *
  * ISSUE #109: Split storage to prevent session token leakage in CI/XSS.
+ *
+ * Session structure in sessionStorage: { user: UserData, expiresAt: number }
+ * localStorage is used separately for profile persistence (not merged here).
  *
  * @returns {UserData | null} The stored user data, or `null` if absent/expired.
  */
 export function loadSession() {
+    if (typeof window === 'undefined' || typeof sessionStorage === 'undefined') return null;
     try {
-        // 1. Check sensitive ephemeral session
+        // 1. Check sensitive ephemeral session in sessionStorage
         const rawSession = sessionStorage.getItem(SESSION_KEY);
-        if (!rawSession) return null;
-
-        const session = JSON.parse(rawSession);
-        if (Date.now() > session.expiresAt) {
-            sessionStorage.removeItem(SESSION_KEY);
+        if (!rawSession) {
+            // No active session in sessionStorage — clear localStorage profile to avoid stale data
+            try {
+                localStorage.removeItem(SESSION_KEY);
+            } catch (e) {
+                // Ignore cleanup errors
+            }
             return null;
         }
 
-        // 2. Merge with non-sensitive persistent profile
-        const rawProfile = localStorage.getItem(SESSION_KEY);
-        const profile = rawProfile ? JSON.parse(rawProfile) : {};
+        const session = JSON.parse(rawSession);
+        
+        // 2. Validate session structure
+        if (!session.expiresAt) {
+            console.warn('[Auth] Session missing expiresAt timestamp');
+            sessionStorage.removeItem(SESSION_KEY);
+            try {
+                localStorage.removeItem(SESSION_KEY);
+            } catch (e) {
+                // Ignore cleanup errors
+            }
+            return null;
+        }
 
-        return normalizeUserData({ ...profile, ...session.user });
-    } catch {
+        // 3. Check expiration
+        if (Date.now() > session.expiresAt) {
+            // Session has expired
+            sessionStorage.removeItem(SESSION_KEY);
+            try {
+                localStorage.removeItem(SESSION_KEY);
+            } catch (e) {
+                // Ignore cleanup errors
+            }
+            return null;
+        }
+
+        // 4. Validate user object exists
+        if (!session.user) {
+            console.warn('[Auth] Session missing user object');
+            sessionStorage.removeItem(SESSION_KEY);
+            try {
+                localStorage.removeItem(SESSION_KEY);
+            } catch (e) {
+                // Ignore cleanup errors
+            }
+            return null;
+        }
+
+        // Return user from sessionStorage (source of truth for active sessions)
+        return normalizeUserData(session.user);
+    } catch (error) {
+        console.error('[Auth] Failed to load session:', error);
+        // Clean up corrupted data
+        try {
+            sessionStorage.removeItem(SESSION_KEY);
+            localStorage.removeItem(SESSION_KEY);
+        } catch (cleanupError) {
+            console.error('[Auth] Failed to cleanup corrupted session:', cleanupError);
+        }
         return null;
     }
 }
@@ -314,25 +362,33 @@ export function loadSession() {
 /**
  * Persists a user session.
  * - Sensitive data (user object/tokens) goes to sessionStorage.
- * - Non-sensitive profile fields go to localStorage.
+ * - Non-sensitive profile fields go to localStorage (backup only, not merged on load).
  *
  * @param {UserData} userData - The user data to persist.
  * @returns {void}
  */
-function saveSession(userData) {
+export function saveSession(userData) {
+    if (typeof window === 'undefined' || typeof sessionStorage === 'undefined') return;
     const normalizedUserData = normalizeUserData(userData);
     
-    // 1. Ephemeral sensitive session
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify({
-        user: normalizedUserData,
-        expiresAt: Date.now() + SESSION_TTL_MS,
-    }));
+    try {
+        // 1. Ephemeral sensitive session to sessionStorage
+        // This is the source of truth for active sessions
+        const sessionPayload = {
+            user: normalizedUserData,
+            expiresAt: Date.now() + SESSION_TTL_MS,
+        };
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionPayload));
 
-    // 2. Persistent non-sensitive profile (name, avatar, address etc.)
-    // We explicitly strip sensitive fields like tokens that should only live 
-    // in sessionStorage to prevent leakage.
-    const { token, jwt, ...profile } = normalizedUserData;
-    localStorage.setItem(SESSION_KEY, JSON.stringify(profile));
+        // 2. Persistent non-sensitive profile to localStorage
+        // Strip sensitive fields like tokens that should only live in sessionStorage.
+        // This is separate from sessionStorage to avoid merge complexity in loadSession.
+        const { token, jwt, ...profile } = normalizedUserData;
+        localStorage.setItem(SESSION_KEY, JSON.stringify(profile));
+    } catch (error) {
+        console.error('[Auth] Failed to save session:', error);
+        throw error; // Let caller handle storage quota exceeded, etc.
+    }
 }
 
 /**
@@ -340,6 +396,7 @@ function saveSession(userData) {
  * @returns {void}
  */
 function clearSession() {
+    if (typeof window === 'undefined' || typeof sessionStorage === 'undefined') return;
     sessionStorage.removeItem(SESSION_KEY);
     localStorage.removeItem(SESSION_KEY);
 }
@@ -409,10 +466,7 @@ const EMPTY_WALLET = {
  */
 export function AuthProvider({ children }) {
     /** @type {[UserData, React.Dispatch<React.SetStateAction<UserData>>]} */
-    const [user, setUser] = useState(() => {
-        const saved = loadSession();
-        return saved ?? { ...EMPTY_USER };
-    });
+    const [user, setUser] = useState({ ...EMPTY_USER });
 
     /**
      * Guards against concurrent wallet connection attempts across all wallet types.
@@ -432,16 +486,30 @@ export function AuthProvider({ children }) {
      * Runtime wallet connection state.
      * @type {[WalletState, React.Dispatch<React.SetStateAction<WalletState>>]}
      */
-    const [wallet, setWallet] = useState({
-        ...EMPTY_WALLET,
-        address: user.walletAddress || "",
-        currency: user.walletType === "stellar" ? "XLM" : "STRK",
-        isConnected: !!user.walletAddress,
-        chainId: user.walletType === "stellar" ? "stellar" : "",
-    });
+    const [wallet, setWallet] = useState({ ...EMPTY_WALLET });
 
     /** @type {[WalletType | null, React.Dispatch<React.SetStateAction<WalletType | null>>]} */
-    const [walletType, setWalletType] = useState(user.walletType || null);
+    const [walletType, setWalletType] = useState(null);
+
+    /** @type {[string | null, React.Dispatch<React.SetStateAction<string | null>>]} */
+    const [lastWallet, setLastWallet] = useState(null);
+
+    useEffect(() => {
+        const saved = loadSession();
+        if (saved) {
+            setUser(saved);
+            setWallet({
+                ...EMPTY_WALLET,
+                address: saved.walletAddress || "",
+                currency: saved.walletType === "stellar" ? "XLM" : "STRK",
+                isConnected: !!saved.walletAddress,
+                chainId: saved.walletType === "stellar" ? "stellar" : "",
+            });
+            setWalletType(saved.walletType || null);
+        }
+        const storedLastWallet = localStorage.getItem(WALLET_KEY);
+        if (storedLastWallet) setLastWallet(storedLastWallet);
+    }, []);
 
     // ── Wallet Detection ─────────────────────────────────────────────────────
 
@@ -584,14 +652,12 @@ export function AuthProvider({ children }) {
             setWallet(walletState);
             setWalletType(type);
             localStorage.setItem(WALLET_KEY, address);
+            setLastWallet(address);
             saveSession(userData);
 
             return userData;
         });
     }, []);
-
-    // Last-connected wallet address for "welcome back" hint
-    const lastWallet = localStorage.getItem(WALLET_KEY);
 
     // ── Standard auth ────────────────────────────────────────────────────────
 
@@ -727,7 +793,15 @@ export function AuthProvider({ children }) {
                         if (!accounts || accounts.length === 0) {
                             logout();
                         } else {
-                            setWallet((prev) => ({ ...prev, address: accounts[0] }));
+                            const newAddress = accounts[0];
+                            setWallet((prev) => ({ ...prev, address: newAddress }));
+                            setUser((prev) => {
+                                const updated = normalizeUserData({ ...prev, walletAddress: newAddress, id: newAddress });
+                                saveSession(updated);
+                                return updated;
+                            });
+                            localStorage.setItem(WALLET_KEY, newAddress);
+                            setLastWallet(newAddress);
                         }
                     });
                 }
@@ -948,7 +1022,15 @@ export function AuthProvider({ children }) {
                     if (newAccounts.length === 0) {
                         logout();
                     } else {
-                        setWallet((prev) => ({ ...prev, address: newAccounts[0] }));
+                        const newAddress = newAccounts[0];
+                        setWallet((prev) => ({ ...prev, address: newAddress }));
+                        setUser((prev) => {
+                            const updated = normalizeUserData({ ...prev, walletAddress: newAddress, id: newAddress });
+                            saveSession(updated);
+                            return updated;
+                        });
+                        localStorage.setItem(WALLET_KEY, newAddress);
+                        setLastWallet(newAddress);
                     }
                 });
             }
@@ -1048,6 +1130,7 @@ export function AuthProvider({ children }) {
             }
         }
         localStorage.removeItem(WALLET_KEY);
+    setLastWallet(null);
         logout();
     }, [logout, walletType]);
 

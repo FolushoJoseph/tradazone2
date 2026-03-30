@@ -68,7 +68,9 @@ function SignIn() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const redirectTo = searchParams.get("redirect") || "/";
+  // Memoize redirectTo to prevent effect re-run on every render
+  // (searchParams.get() creates new reference each time even if value is same)
+  const redirectTo = useMemo(() => searchParams.get("redirect") || "/", [searchParams]);
   const sessionExpired = searchParams.get("reason") === "expired";
 
   /**

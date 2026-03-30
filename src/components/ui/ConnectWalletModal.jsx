@@ -51,6 +51,7 @@ import Logo from './Logo';
 import { useLobstr } from '../../hooks/useLobstr';
 import {
     useAuthActions,
+    useAuthUser,
     useAuthWalletCatalog,
     useAuthWalletState,
     useAuthUser,
