@@ -25,6 +25,12 @@
  * Description: Added a rich text editor to capture customer descriptions
  * directly from the list view, with persisted updates in DataContext.
  *
+ * ISSUE: #### (Incorrect total calculation due to floating-point precision)
+ * Category: Bug/Edge Case
+ * Description: `totalSpent` arithmetic in customer summary had floating-point
+ * precision drift (0.1 + 0.2 => 0.30000000000000004). Switched DataContext
+ * bookkeeping to safe decimal math and fixed display formatting accordingly.
+ *
  * ISSUE: #77 (N+1 redundant renders due to missing React.memo)
  * Category: Performance & Scalability
  * Priority: High

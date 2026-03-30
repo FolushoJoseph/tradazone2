@@ -361,6 +361,34 @@ describe('markCheckoutPaid', () => {
     expect(updated.totalSpent).toBe('250');
   });
 
+  it('handles decimal checkout amounts without floating-point artifacts', async () => {
+    const { result } = renderHook(() => useData(), { wrapper });
+    let customer, chk1, chk2;
+
+    await act(async () => {
+      customer = result.current.addCustomer({ name: 'Decimal', email: 'decimal@example.com' });
+    });
+
+    await act(async () => {
+      chk1 = result.current.addCheckout({ title: 'Plan A', amount: '0.1' });
+    });
+    await flushOperations();
+
+    await act(async () => {
+      chk2 = result.current.addCheckout({ title: 'Plan B', amount: '0.2' });
+    });
+    await flushOperations();
+
+    act(() => {
+      result.current.markCheckoutPaid(chk1.id, customer.id);
+      result.current.markCheckoutPaid(chk2.id, customer.id);
+    });
+
+    const updated = result.current.customers.find((c) => c.id === customer.id);
+    expect(updated.invoiceCount).toBe(2);
+    expect(updated.totalSpent).toBe('0.3');
+  });
+
   it('fires checkout.paid webhook with correct payload', async () => {
     const mockFetch = vi.fn().mockResolvedValue({ ok: true, status: 200 });
     vi.stubGlobal('fetch', mockFetch);

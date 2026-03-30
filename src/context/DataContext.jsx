@@ -54,6 +54,7 @@ import {
   getWebhookUrl,
 } from "../services/webhook";
 import { toUtcMidnightIso } from "../utils/date";
+import { safeAdd, calculateItemsTotal } from "../utils/currency";
 import api from "../services/api";
 import {
   CUSTOMER_FILTER_CONFIG,
@@ -202,10 +203,7 @@ export function DataProvider({ children }) {
             price: di.price || (found ? found.price : '0'),
           };
         });
-        const total = resolvedItems.reduce(
-          (sum, it) => sum + parseFloat(it.price) * it.quantity,
-          0,
-        );
+        const total = calculateItemsTotal(resolvedItems, 2);
         const newInvoice = {
           id: `INV-${String(++invoiceCountRef.current).padStart(3, '0')}`,
           customer: customer ? customer.name : 'Unknown',
@@ -296,9 +294,13 @@ export function DataProvider({ children }) {
           const next = prev.map((c) => {
             if (c.id !== customerId) return c;
             const prevSpent = parseFloat(c.totalSpent.replace(/,/g, '')) || 0;
+            const updatedTotal = safeAdd(prevSpent, added, 2);
             return {
               ...c,
-              totalSpent: (prevSpent + added).toLocaleString(),
+              totalSpent: updatedTotal.toLocaleString(undefined, {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              }),
               invoiceCount: c.invoiceCount + 1,
             };
           });
