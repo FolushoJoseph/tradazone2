@@ -12,7 +12,56 @@ permissions:
   issues: write
 
 jobs:
+  detect-affected-tests:
+    name: Detect affected tests for bundle changes
+    runs-on: ubuntu-latest
+    outputs:
+      affected-tests: ${{ steps.affected.outputs.affected-tests }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Identify affected tests
+        id: affected
+        run: |
+          # Use CI utilities to identify tests related to bundle changes
+          node -e "
+            const Utils = require('./scripts/ci-pipeline-utils.js');
+            const utils = new Utils();
+            
+            const allTests = utils.discoverTestFiles();
+            const changed = utils.getChangedFiles('main');
+            
+            // Filter tests related to changed files
+            const affected = utils.filterByChangedFiles(allTests, changed);
+            
+            // Also include performance-related tests
+            const perfTests = utils.filterByTestType(allTests, ['async-test', 'memo-test']);
+            
+            const combined = [...new Set([...affected, ...perfTests])];
+            
+            console.log('📊 Bundle Size Impact Analysis:');
+            console.log('  Total tests: ' + allTests.length);
+            console.log('  Changed files: ' + changed.length);
+            console.log('  Potentially affected tests: ' + combined.length);
+            console.log('  Performance-related tests: ' + perfTests.length);
+          "
+          
+          AFFECTED_TESTS=$(node -e "const Utils = require('./scripts/ci-pipeline-utils.js'); const utils = new Utils(); const all = utils.discoverTestFiles(); const ch = utils.getChanged Files('main'); const aff = utils.filterByChangedFiles(all, ch); console.log(aff.join(' '))")
+          echo "affected-tests=${AFFECTED_TESTS}" >> $GITHUB_OUTPUT
+
   size-check:
+    needs: detect-affected-tests
     name: Check bundle size limits (Issue #162)
     runs-on: ubuntu-latest
 
@@ -76,6 +125,16 @@ jobs:
           # Now run it for real to fail the job if needed
           npm run size
         shell: bash
+
+      - name: Generate size impact analysis
+        if: always()
+        run: |
+          echo "" >> bundle-report.md
+          echo "### Potential Impact on Tests" >> bundle-report.md
+          echo "" >> bundle-report.md
+          echo "Affected test categories (based on smart analysis):" >> bundle-report.md
+          
+          npm run ci:report markdown | tail -30 >> bundle-report.md
 
       - name: Upload bundle report
         uses: actions/upload-artifact@v4

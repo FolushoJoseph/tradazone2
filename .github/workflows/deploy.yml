@@ -15,7 +15,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  smart-test-selection:
+    runs-on: ubuntu-latest
+    outputs:
+      test-files: ${{ steps.test-selection.outputs.test-files }}
+      test-count: ${{ steps.test-selection.outputs.test-count }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate smart test selection
+        id: test-selection
+        run: |
+          # Use CI filtering utilities to select relevant tests
+          npm run ci:select > ci-selection.json || echo '{"tests": [], "count": 0}' > ci-selection.json
+          
+          # Extract test files and count
+          TEST_FILES=$(node -e "const data = require('./ci-selection.json'); console.log(data.tests.join(' ') || '')")
+          TEST_COUNT=$(node -e "const data = require('./ci-selection.json'); console.log(data.count || 0)")
+          
+          echo "test-files=${TEST_FILES}" >> $GITHUB_OUTPUT
+          echo "test-count=${TEST_COUNT}" >> $GITHUB_OUTPUT
+          
+          echo "📊 Test Selection Summary:"
+          echo "  Selected: ${TEST_COUNT} tests"
+          cat ci-selection.json | node -e "const d=require('fs').readFileSync(0,'utf8'); const j=JSON.parse(d); console.log('  Metadata:', JSON.stringify(j.metadata || {}, null, 2));"
+
   test:
+    needs: smart-test-selection
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,8 +65,6 @@ jobs:
         # setup cannot run on GitHub Actions.
         run: npm install --legacy-peer-deps
 
-
-
       - name: Lint
         run: npm run lint
 
@@ -41,6 +73,14 @@ jobs:
       # step is needed — vitest picks them up automatically via the glob pattern.
       - name: Run unit and integration tests with coverage
         run: npm run test:coverage
+
+      - name: Generate test report
+        if: always()
+        run: |
+          npm run ci:report markdown > test-report.md
+          echo "## Test Execution Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cat test-report.md >> $GITHUB_STEP_SUMMARY
 
   deploy:
     needs: test
