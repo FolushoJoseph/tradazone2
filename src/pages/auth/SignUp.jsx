@@ -23,6 +23,15 @@
  * Critical visual elements in the SignUp page lacked proper alternative text,
  * reducing accessibility for screen reader users and failing WCAG standards.
  *
+ * ISSUE #172 (Excessive context API updates in SignUp)
+ * Category: Performance & Scalability
+ * Priority: Low
+ * Affected Area: SignUp
+ * Description:
+ * SignUp was subscribing to the full user context (`useAuthUser`), causing
+ * unnecessary re-renders on unrelated profile changes. This update uses
+ * `useAuthIsAuthenticated` + `useAuthWalletState` to reduce context churn.
+ *
  * Fix:
  * - Added meaningful, context-aware `alt` text to the authentication illustration.
  * - Ensured the alt text conveys the purpose of the image (not just appearance).
@@ -49,7 +58,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useAuthActions, useAuthUser } from "../../context/AuthContext";
+import { useAuthActions, useAuthIsAuthenticated, useAuthWalletState } from "../../context/AuthContext";
 import { dispatchWebhook } from "../../services/webhook";
 import { IS_STAGING, APP_NAME } from "../../config/env";
 import { getPlainTextFromRichText } from "../../utils/richText";
@@ -67,7 +76,8 @@ import ConnectWalletModal from "../../components/ui/ConnectWalletModal";
 function SignUp() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const user = useAuthUser();
+  const isAuthenticated = useAuthIsAuthenticated();
+  const { wallet, walletType } = useAuthWalletState();
   const { connectWallet } = useAuthActions();
 
   /** Modal state for wallet connection */
@@ -80,26 +90,26 @@ function SignUp() {
    * Redirect authenticated users immediately
    */
   useEffect(() => {
-    if (user.isAuthenticated) {
+    if (isAuthenticated) {
       navigate(redirectTo, { replace: true });
     }
-  }, [user.isAuthenticated, navigate, redirectTo]);
+  }, [isAuthenticated, navigate, redirectTo]);
 
   /**
    * Handle successful wallet connection
    */
   const handleConnectSuccess = useCallback(
-    (walletAddress, walletType) => {
+    (walletAddress, walletTypeOverride) => {
       localStorage.setItem("tradazone_onboarded", "false");
 
       dispatchWebhook("user.signed_up", {
-        walletAddress: walletAddress || user.walletAddress,
-        walletType: walletType || user.walletType,
+        walletAddress: walletAddress || wallet.walletAddress || wallet.address || "", 
+        walletType: walletTypeOverride || walletType || "",
       });
 
       navigate(redirectTo, { replace: true });
     },
-    [navigate, redirectTo, user.walletAddress, user.walletType],
+    [navigate, redirectTo, wallet.address, walletType],
   );
 
   /**
@@ -107,9 +117,8 @@ function SignUp() {
    * Includes wallet state and description
    */
   const handleExportToCSV = () => {
-    const isAuthenticated = user?.isAuthenticated ?? false;
     const status = isAuthenticated ? "Connected" : "Disconnected";
-    const walletAddress = user?.walletAddress || "None";
+    const walletAddress = wallet?.address || "None";
 
     // NOTE: descriptionDraft assumed from broader state (safe fallback applied)
     const description = getPlainTextFromRichText("") || "None";

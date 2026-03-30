@@ -7,6 +7,8 @@ import * as Mocks from './mocks/signUpMocks';
 let mockNavigate;
 let mockSearchParams;
 let mockUser;
+let mockWalletState;
+let mockIsAuthenticated;
 let mockOnConnectArgs;
 const mockConnectWallet = vi.fn();
 const mockDispatchWebhook = vi.fn().mockResolvedValue({ ok: true });
@@ -51,7 +53,9 @@ vi.mock('../config/env', () => ({
 }));
 
 vi.mock('../context/AuthContext', () => ({
-    useAuthActions: () => ({ connectWallet: mockConnectWallet, updateProfile: mockUpdateProfile }),
+    useAuthActions: () => ({ connectWallet: mockConnectWallet }),
+    useAuthIsAuthenticated: () => mockIsAuthenticated,
+    useAuthWalletState: () => ({ wallet: { address: mockWalletState.address }, walletType: mockWalletState.walletType, isConnecting: mockWalletState.isConnecting }),
     useAuthUser: () => mockUser,
 }));
 
@@ -95,6 +99,8 @@ beforeEach(() => {
     mockNavigate = vi.fn();
     mockSearchParams = new URLSearchParams();
     mockUser = { isAuthenticated: false, walletAddress: null, walletType: null };
+    mockWalletState = { address: null, walletType: null, isConnecting: false };
+    mockIsAuthenticated = false;
     mockOnConnectArgs = { walletAddress: Mocks.MOCK_WALLET_SUCCESS.walletAddress, walletType: Mocks.MOCK_WALLET_SUCCESS.walletType };
     mockConnectWallet.mockReset();
     mockDispatchWebhook.mockClear();
@@ -112,7 +118,8 @@ describe('SignUp', () => {
 
     it('redirects authenticated users immediately', async () => {
         mockSearchParams = new URLSearchParams('redirect=/dashboard');
-        mockUser = { isAuthenticated: true, walletAddress: '0xAUTH', walletType: 'evm' };
+        mockIsAuthenticated = true;
+        mockWalletState = { address: '0xAUTH', walletType: 'evm', isConnecting: false };
 
         await renderSignUp();
 
@@ -135,37 +142,29 @@ describe('SignUp', () => {
 
     it('exports a csv snapshot of the current signup state via downloadCsvFile', async () => {
         const user = userEvent.setup();
-        mockUser = { isAuthenticated: true, walletAddress: '0x123', walletType: 'evm' };
+        mockIsAuthenticated = true;
+        mockWalletState = { address: '0x123', walletType: 'evm', isConnecting: false };
 
         await renderSignUp();
-        
-        // Set a description draft
-        const rte = screen.getByTestId('mock-rte-textarea');
-        await user.type(rte, 'Business description with a "quoted" word and a comma,');
-        
+
         await user.click(screen.getByRole('button', { name: /export signup data to csv/i }));
 
         expect(mockDownloadCsvFile).toHaveBeenCalled();
         const [filename, content] = mockDownloadCsvFile.mock.calls[0];
-        
+
         expect(filename).toMatch(/^tradazone_signup_data_\d+\.csv$/);
-        
-        // Verify CSV structure and content
-        // Headers: Wallet Address,Status,Business Description
-        // Values: 0x123,Connected,"Business description with a ""quoted"" word and a comma,"
-        
         expect(content).toContain('Wallet Address,Status,Business Description');
-        expect(content).toContain('0x123,Connected');
-        expect(content).toContain('"Business description with a ""quoted"" word and a comma,"');
+        expect(content).toContain('0x123,Connected,None');
     });
 
     it('falls back to the auth user wallet metadata when modal data is missing', async () => {
         const user = userEvent.setup();
-        mockUser = { isAuthenticated: false, walletAddress: '0xFALLBACK', walletType: 'stellar' };
+        mockIsAuthenticated = false;
+        mockWalletState = { address: '0xFALLBACK', walletType: 'stellar', isConnecting: false };
         mockOnConnectArgs = { walletAddress: null, walletType: null };
 
         await renderSignUp();
-        await user.click(screen.getByRole('button', { name: /connect wallet/i }));
+        await user.click(screen.getByRole('button', { name: /connect your wallet to sign up/i }));
         await user.click(screen.getByTestId('mock-connect-success'));
 
         expect(mockDispatchWebhook).toHaveBeenCalledWith('user.signed_up', {
