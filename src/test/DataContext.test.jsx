@@ -442,3 +442,28 @@ describe('useCheckoutData', () => {
     expect(typeof result.current.markCheckoutPaid).toBe('function');
   });
 });
+
+// ─── Security: no console.warn in production (issue: console-leak) ───────────
+
+describe('duplicate-operation guard — no console.warn in production', () => {
+  it('does not call console.warn when import.meta.env.DEV is false', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    // Simulate production: DEV flag is false
+    const originalDev = import.meta.env.DEV;
+    import.meta.env.DEV = false;
+
+    const { result } = renderHook(() => useData(), { wrapper });
+
+    // Trigger duplicate-operation paths by calling while lock is held
+    act(() => {
+      // First call acquires the lock; second fires before microtask releases it
+      result.current.addCustomer({ name: 'Alice', email: 'alice@example.com' });
+      result.current.addCustomer({ name: 'Bob', email: 'bob@example.com' });
+    });
+
+    expect(warnSpy).not.toHaveBeenCalled();
+
+    import.meta.env.DEV = originalDev;
+    warnSpy.mockRestore();
+  });
+});

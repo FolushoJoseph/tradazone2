@@ -25,6 +25,13 @@
  * checkouts, items). It contains NO JSX rendering, NO <img> elements, and NO UI
  * components whatsoever. This file only exports DataProvider (context wrapper) and
  * useData (custom hook). Alt tag accessibility issues are not applicable here.
+ *
+ * SECURITY FIX #(console-leak): Duplicate-operation console.warn calls were
+ * unconditionally logging operation names in production, which could expose
+ * sensitive user data (customer PII, invoice details) via browser DevTools or
+ * log-aggregation pipelines. Warnings are now gated to development builds only
+ * via `import.meta.env.DEV`.
+ *
  * Central data and operation provider for customers, invoices, checkouts, and items.
  * Contains performance-related context split for checkout flow (#61) and
  * avoids excessive rerenders by memoizing operations and context values.
@@ -103,7 +110,7 @@ export function DataProvider({ children }) {
 
   const addCustomer = useCallback((data) => {
     if (pendingOperations.current.customers) {
-      console.warn('[DataContext] Duplicate addCustomer operation detected, ignoring.');
+      if (import.meta.env.DEV) console.warn('[DataContext] Duplicate addCustomer operation detected, ignoring.');
       return null;
     }
 
@@ -176,7 +183,7 @@ export function DataProvider({ children }) {
   const addInvoice = useCallback(
     (data) => {
       if (pendingOperations.current.invoices) {
-        console.warn('[DataContext] Duplicate addInvoice operation detected, ignoring.');
+        if (import.meta.env.DEV) console.warn('[DataContext] Duplicate addInvoice operation detected, ignoring.');
         return null;
       }
 
@@ -225,7 +232,7 @@ export function DataProvider({ children }) {
   const addCheckout = useCallback(
     (data) => {
       if (pendingOperations.current.checkouts) {
-        console.warn('[DataContext] Duplicate addCheckout operation detected, ignoring.');
+        if (import.meta.env.DEV) console.warn('[DataContext] Duplicate addCheckout operation detected, ignoring.');
         return null;
       }
 
