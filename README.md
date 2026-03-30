@@ -25,6 +25,7 @@
     - [ADR-002: API Gateway Stack Selection (Implementation Reference)](#adr-002-api-gateway-stack-selection-implementation-reference)
   - [🔧 Developer Setup Notes](#-developer-setup-notes)
     - [Pagination Boundary Contract (`paginate`)](#pagination-boundary-contract-paginate)
+    - [Context mutations — integration tests (#145)](#context-mutations--integration-tests-145)
     - [Modifying `ProfileSettings`](#modifying-profilesettings)
   - [🔐 Dependency Security](#-dependency-security)
   - [🔄 Dependency Management](#-dependency-management)
@@ -325,6 +326,20 @@ export function paginate(items, page = 1, limit = 10) {
 ```
 
 Regression coverage lives in `src/test/api.test.js` (see the `paginate` suite).
+
+### Context mutations — integration tests (#145)
+
+<!-- ISSUE #145: Integration tests for AuthContext + DataContext mutations, documented for contributors -->
+
+**Issue:** Global app state is mutated through `AuthContext` and `DataContext`. Without integration coverage, regressions in session persistence, checkout payout logic, or cross-context isolation are easy to miss.
+
+- **Test file:** [`src/test/ContextMutations.integration.test.jsx`](./src/test/ContextMutations.integration.test.jsx) — exercises auth mutations (`login`, `updateProfile`, `completeWalletLogin`, `disconnectAll`) and data mutations (customers, invoices, checkouts, items), plus checks that auth changes do not wipe `DataContext` state.
+- **Source:** [`src/context/AuthContext.jsx`](./src/context/AuthContext.jsx), [`src/context/DataContext.jsx`](./src/context/DataContext.jsx)
+- **localStorage vs sessionStorage:** After Issue #109, the sensitive session envelope is stored in `sessionStorage`; `localStorage` under the env-scoped auth key holds a **flat profile object** (fields like `name`, `company`, `walletAddress`), not a nested `{ user: ... }` blob. Integration assertions must use that shape.
+
+```bash
+npm test -- src/test/ContextMutations.integration.test.jsx
+```
 
 ### Modifying `ProfileSettings`
 

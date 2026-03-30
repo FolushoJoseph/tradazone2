@@ -1,15 +1,15 @@
 /**
- * @fileoverview Integration tests for Context mutations — Issue #155
+ * @fileoverview Integration tests for Context mutations — Issue #145
  *
- * ISSUE: #155 — Introduce integration tests for the Context mutations in CI pipeline.
- * Category: Testing / CI pipeline
- * Affected Area: CI pipeline (AuthContext + DataContext mutations)
+ * ISSUE: #145 — Introduce integration tests for the Context mutations (documented in README).
+ * Category: Testing & QA
+ * Affected Area: AuthContext (`src/context/AuthContext.jsx`) + DataContext (`src/context/DataContext.jsx`)
  *
- * These tests exercise the full mutation surface of AuthContext and DataContext
- * together, verifying that cross-context state changes remain consistent and
- * that localStorage is kept in sync after every mutation. They run as part of
- * the standard `npm test` / `npm run test:coverage` step in deploy.yml and
- * staging.yml so the CI pipeline catches regressions automatically.
+ * These tests exercise AuthContext and DataContext mutations together. Auth session
+ * splits storage per #109: sensitive envelope lives in sessionStorage; localStorage
+ * holds a flat profile object (not `{ user: ... }`), so assertions use that shape.
+ *
+ * Run: `npm test` — file is included in the default Vitest suite / CI.
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
@@ -47,8 +47,8 @@ describe('AuthContext mutation integration', () => {
             result.current.updateProfile({ name: 'Alice Updated', company: 'ACME' });
         });
         const mid = JSON.parse(localStorage.getItem(SESSION_KEY));
-        expect(mid.user.name).toBe('Alice Updated');
-        expect(mid.user.company).toBe('ACME');
+        expect(mid.name).toBe('Alice Updated');
+        expect(mid.company).toBe('ACME');
 
         act(() => {
             result.current.logout();
@@ -70,8 +70,8 @@ describe('AuthContext mutation integration', () => {
         expect(result.current.user.walletAddress).toBe('GADDR_INTEG');
         expect(result.current.user.name).toBe('Merchant');
         const stored = JSON.parse(localStorage.getItem(SESSION_KEY));
-        expect(stored.user.walletAddress).toBe('GADDR_INTEG');
-        expect(stored.user.company).toBe('MerchCo');
+        expect(stored.walletAddress).toBe('GADDR_INTEG');
+        expect(stored.company).toBe('MerchCo');
     });
 
     it('completeWalletLogin strips XSS from profileDescription via normalizeUserData', () => {
@@ -88,7 +88,7 @@ describe('AuthContext mutation integration', () => {
 
         expect(result.current.user.profileDescription).toBe('<p>Safe</p>');
         const stored = JSON.parse(localStorage.getItem(SESSION_KEY));
-        expect(stored.user.profileDescription).toBe('<p>Safe</p>');
+        expect(stored.profileDescription).toBe('<p>Safe</p>');
     });
 
     it('wallet state and user state stay consistent after completeWalletLogin', () => {
@@ -178,7 +178,6 @@ describe('DataContext mutation integration', () => {
         });
 
         act(() => {
-            vi.spyOn(result.current, 'deleteItems');
             result.current.deleteItems([i1.id]);
         });
 
@@ -187,14 +186,21 @@ describe('DataContext mutation integration', () => {
         expect(result.current.customers).toHaveLength(1);
     });
 
-    it('sequential checkouts accumulate customer spend correctly', () => {
+    it('sequential checkouts accumulate customer spend correctly', async () => {
         const { result } = renderHook(() => useData(), { wrapper });
 
         let customer, chk1, chk2;
         act(() => {
             customer = result.current.addCustomer({ name: 'Eve', email: 'eve@example.com' });
-            chk1     = result.current.addCheckout({ title: 'P1', amount: '100' });
-            chk2     = result.current.addCheckout({ title: 'P2', amount: '250' });
+        });
+        act(() => {
+            chk1 = result.current.addCheckout({ title: 'P1', amount: '100' });
+        });
+        await act(async () => {
+            await Promise.resolve();
+        });
+        act(() => {
+            chk2 = result.current.addCheckout({ title: 'P2', amount: '250' });
         });
         act(() => {
             result.current.markCheckoutPaid(chk1.id, customer.id);
