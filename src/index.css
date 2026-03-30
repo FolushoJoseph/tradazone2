@@ -12,6 +12,19 @@
 @tailwind utilities;
 
 @layer base {
+    html, body {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+    
+    *::before, *::after {
+        box-sizing: border-box;
+    }
+
     body {
         @apply font-sans text-sm text-t-primary bg-page antialiased;
     }

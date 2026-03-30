@@ -162,7 +162,7 @@ function DataTable({
             : undefined
         }
       >
-        <table className="w-full border-collapse min-w-[600px]">
+        <table className="w-full border-collapse min-w-[500px] sm:min-w-[600px]">
           <thead className="sticky top-0 z-10">
             {/* Header Row: Added dark border and text color */}
             <tr className="border-b border-border dark:border-zinc-800">

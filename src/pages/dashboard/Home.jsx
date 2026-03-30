@@ -17,10 +17,11 @@ import WelcomeModal from '../../components/ui/WelcomeModal';
 function Home() {
     const { wallet } = useAuth();
     const { transactions, dashboardStats } = useData();
-    const recentTransactions = transactions.slice(0, 5);
+    const recentTransactions = transactions?.slice(0, 5) || [];
+    const stats = dashboardStats || {};
 
     return (
-        <div className="max-w-[1100px]">
+        <div className="w-full max-w-none lg:max-w-[1100px]">
             <WelcomeModal />
 
             {/* Page Heading */}
@@ -44,7 +45,7 @@ function Home() {
                     </div>
                     <div className="flex items-baseline gap-2 mb-2">
                         <span className="text-[48px] font-bold leading-none tracking-tight">
-                            {dashboardStats.walletBalance || '0.00'}
+                            {stats.walletBalance || '0.00'}
                         </span>
                         <span className="text-xl text-white/50 font-normal">STRK</span>
                     </div>
@@ -65,8 +66,8 @@ function Home() {
                             className="h-full bg-brand"
                             style={{
                                 width: (() => {
-                                    const bal = parseFloat(dashboardStats.walletBalance) || 0;
-                                    const rec = parseFloat(String(dashboardStats.receivables).replace(',', '')) || 0;
+                                    const bal = parseFloat(stats.walletBalance) || 0;
+                                    const rec = parseFloat(String(stats.receivables).replace(',', '')) || 0;
                                     const total = bal + rec;
                                     return total > 0 ? `${(bal / total) * 100}%` : '0%';
                                 })()
@@ -79,13 +80,13 @@ function Home() {
                         <div className="flex flex-col gap-1">
                             <span className="text-xs text-t-muted font-medium">Current</span>
                             <span className="text-base font-bold text-t-primary">
-                                {dashboardStats.walletBalance || '0'} <span className="text-brand font-semibold">STRK</span>
+                                {stats.walletBalance || '0'} <span className="text-brand font-semibold">STRK</span>
                             </span>
                         </div>
                         <div className="flex flex-col gap-1">
                             <span className="text-xs text-t-muted font-medium">Unpaid</span>
                             <span className="text-base font-bold text-t-primary">
-                                {dashboardStats.receivables || '0'} <span className="text-brand font-semibold">STRK</span>
+                                {stats.receivables || '0'} <span className="text-brand font-semibold">STRK</span>
                             </span>
                         </div>
                     </div>

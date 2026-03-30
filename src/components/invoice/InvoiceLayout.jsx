@@ -23,7 +23,7 @@ const InvoiceLayout = memo(forwardRef(function InvoiceLayout({ invoice, customer
     return (
         <div
             ref={ref}
-            className="w-[794px] min-h-[1123px] bg-white mx-auto flex flex-col"
+            className="w-full max-w-[794px] min-h-[1123px] bg-white mx-auto flex flex-col print:w-[794px]"
             style={{ padding: '48px 56px' }}
         >
             {/* Header */}

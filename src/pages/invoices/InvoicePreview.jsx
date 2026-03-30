@@ -60,7 +60,7 @@ function InvoicePreview() {
         <div className="min-h-screen bg-gray-100 print:bg-white">
             {/* Toolbar – hidden when printing */}
             <div className="print:hidden sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-3">
-                <div className="max-w-[794px] mx-auto flex items-center justify-between">
+                <div className="w-full max-w-none lg:max-w-[794px] mx-auto flex items-center justify-between">
                     <Link
                         to={`/invoices/${id}`}
                         className="inline-flex items-center gap-1.5 text-sm text-t-muted hover:text-brand transition-colors"

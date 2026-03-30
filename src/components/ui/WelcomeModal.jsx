@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Users, ShoppingCart, X } from 'lucide-react';
 import Logo from './Logo';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 const ONBOARDED_KEY = 'tradazone_onboarded';
 
@@ -16,6 +17,13 @@ function WelcomeModal() {
         localStorage.setItem(ONBOARDED_KEY, 'true');
         setVisible(false);
     };
+
+    const modalRef = useFocusTrap({ 
+        isOpen: visible, 
+        onClose: dismiss, 
+        initialFocus: true, 
+        restoreFocus: true 
+    });
 
     const goTo = (path) => {
         dismiss();
@@ -36,7 +44,12 @@ function WelcomeModal() {
              * Mobile: slides up from bottom (bottom-sheet pattern)
              * Desktop: centred modal
              */}
-            <div className="
+            <div 
+                ref={modalRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="welcome-modal-title"
+                className="
                 fixed z-50
                 /* Mobile — bottom sheet */
                 bottom-0 left-0 right-0
@@ -62,7 +75,7 @@ function WelcomeModal() {
                     <div className="w-12 h-12 bg-brand/10 rounded-full flex items-center justify-center mx-auto mb-3 lg:mb-4">
                         <Logo variant="light" className="h-5" />
                     </div>
-                    <h2 className="text-lg lg:text-xl font-bold text-t-primary mb-1">You're all set!</h2>
+                    <h2 id="welcome-modal-title" className="text-lg lg:text-xl font-bold text-t-primary mb-1">You're all set!</h2>
                     <p className="text-sm text-t-muted">What would you like to do first?</p>
                 </div>
 
