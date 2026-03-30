@@ -65,9 +65,16 @@ export default defineConfig(({ mode }) => {
     test: {
       environment: 'happy-dom',
       globals: true,
+      pool: 'vmThreads',
       setupFiles: './src/test/setup.js',
       snapshotFormat: {
         printBasicPrototype: false,
+      },
+      env: {
+        VITE_APP_ENV: 'development',
+        VITE_APP_NAME: 'Tradazone',
+        VITE_BASE_PATH: '/Tradazone/',
+        VITE_API_URL: 'http://localhost:3000/api',
       },
     },
   }

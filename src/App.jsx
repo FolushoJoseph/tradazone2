@@ -19,6 +19,22 @@
  * assistive tech users get parity with visual loading states. (Purely decorative
  * spinners use `aria-hidden`; informative images elsewhere use `alt` — see Logo,
  * auth illustrations.)
+ *
+ * ISSUE: #CSP-APP (No CSP headers defined for App Routing)
+ * Category: Security & Compliance
+ * Priority: Low
+ * Affected Area: App Routing
+ * Description: No Content Security Policy was enforced at the app-routing level,
+ * leaving all routes unprotected against XSS and clickjacking on first paint and
+ * during SPA navigation. Resolved by:
+ *   1. Shipping the CSP baseline in `index.html` as a `<meta http-equiv>` tag so
+ *      every route is protected from the very first byte served.
+ *   2. Calling `ensureContentSecurityPolicyMeta()` (from `src/security/csp.js`) in
+ *      `AuthProvider` on mount so the policy is re-asserted after any SPA navigation
+ *      that might strip or replace the document head.
+ * The shared policy constant `AUTH_CONTENT_SECURITY_POLICY` in `src/security/csp.js`
+ * is the single source of truth for the CSP directive string used in both locations.
+ * Tests: `src/test/AuthContext.csp.test.jsx`
  */
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
