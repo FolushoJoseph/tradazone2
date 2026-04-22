@@ -9,7 +9,7 @@ const navItems = [
     { path: '/invoices', icon: FileText, label: 'Invoice' },
     { path: '/checkout', icon: ShoppingCart, label: 'Checkout' },
     { path: '/customers', icon: Users, label: 'Customer' },
-    { path: '/items', icon: Package, label: 'Items & Services' },
+    { path: '/items', icon: Package, label: 'Item and Services' },
     { path: '/settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -23,87 +23,60 @@ function Sidebar({ open, onClose }) {
     };
 
     return (
-        <>
-            {/* Overlay — mobile */}
-            {open && (
-                <div
-                    className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[90] lg:hidden"
+        <aside className={`
+            fixed top-header left-0 z-[95]
+            h-[calc(100vh-theme(spacing.header))]
+            w-sidebar bg-[#F8FAFC] border-r border-border
+            flex flex-col justify-between overflow-y-auto
+            transition-transform duration-300 ease-in-out
+            ${open ? 'translate-x-0' : '-translate-x-full'}
+            lg:translate-x-0
+        `}>
+            {/* Close button — mobile only */}
+            <div>
+                <button
+                    className="lg:hidden flex items-center gap-2 px-5 py-3 text-t-muted text-sm hover:text-t-primary transition-colors"
                     onClick={onClose}
-                />
-            )}
+                >
+                    <X size={18} /> Close
+                </button>
 
-            <aside className={`
-                fixed top-header left-0 z-[95]
-                h-[calc(100vh-theme(spacing.header))]
-                w-sidebar bg-white border-r border-border
-                flex flex-col justify-between overflow-y-auto
-                transition-transform duration-300 ease-in-out
-                ${open ? 'translate-x-0' : '-translate-x-full'}
-                lg:translate-x-0
-            `}>
-                {/* Top: Close + Nav */}
-                <div className="pt-3 pb-4">
-                    {/* Close — mobile only */}
-                    <button
-                        className="lg:hidden flex items-center gap-2 mx-3 mb-2 px-3 py-2 rounded-lg text-t-muted text-sm hover:bg-coin-gray hover:text-t-primary transition-colors"
-                        onClick={onClose}
-                    >
-                        <X size={16} />
-                        <span>Close</span>
-                    </button>
-
-                    {/* Section label */}
-                    <p className="px-5 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-t-muted/60">
-                        Navigation
-                    </p>
-
-                    <nav className="flex flex-col gap-0.5 px-2">
-                        {navItems.map((item) => (
+                <nav className="flex flex-col">
+                    {navItems.map((item, index) => (
+                        <div key={item.path}>
                             <NavLink
-                                key={item.path}
                                 to={item.path}
                                 onClick={onClose}
                                 className={({ isActive }) =>
-                                    `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
-                                        isActive
-                                            ? 'bg-brand-bg text-brand font-semibold'
-                                            : 'text-t-secondary hover:bg-coin-gray hover:text-t-primary'
+                                    `flex items-center gap-3 px-6 py-4 text-sm font-medium border-l-[3px] transition-all ${isActive
+                                        ? 'text-brand bg-brand-bg border-l-brand font-semibold'
+                                        : 'text-t-secondary border-l-transparent hover:text-brand hover:bg-brand-bg/50'
                                     }`
                                 }
                                 end={item.path === '/'}
                             >
-                                {({ isActive }) => (
-                                    <>
-                                        <item.icon
-                                            size={18}
-                                            strokeWidth={isActive ? 2.2 : 1.8}
-                                            className={isActive ? 'text-brand' : 'text-t-muted'}
-                                        />
-                                        <span className="whitespace-nowrap overflow-hidden text-ellipsis">
-                                            {item.label}
-                                        </span>
-                                        {isActive && (
-                                            <span className="ml-auto w-1.5 h-1.5 rounded-full bg-brand flex-shrink-0" />
-                                        )}
-                                    </>
-                                )}
+                                <item.icon size={20} strokeWidth={1.8} />
+                                <span className="whitespace-nowrap overflow-hidden text-ellipsis">{item.label}</span>
                             </NavLink>
-                        ))}
-                    </nav>
-                </div>
+                            {index < navItems.length - 1 && (
+                                <div className="mx-5 border-b border-border" />
+                            )}
+                        </div>
+                    ))}
+                </nav>
+            </div>
 
-                {/* Bottom: Logout */}
-                <div className="p-2 pb-5 border-t border-border mt-2">
-                    <button
-                        className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-t-muted hover:bg-error/5 hover:text-error transition-all duration-150"
-                        onClick={handleLogout}
-                    >
-                        <LogOut size={18} strokeWidth={1.8} />
-                        <span>Sign out</span>
-                    </button>
-                </div>
-            </aside>
-        </>
+            <div>
+                <div className="mx-5 border-b border-border" />
+                <button
+                    className="flex items-center gap-3 px-6 py-4 text-sm font-medium text-t-muted border-l-[3px] border-l-transparent hover:text-error hover:bg-error-bg transition-all w-full"
+                    onClick={handleLogout}
+                >
+                    <LogOut size={20} strokeWidth={1.8} />
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
     );
 }
 

@@ -17,7 +17,7 @@ function BottomNav() {
     return (
         <nav className="
             lg:hidden fixed bottom-0 left-0 right-0 z-[95]
-            bg-white/95 backdrop-blur-md border-t border-border
+            bg-white border-t border-border
             flex items-center justify-around
             h-16 px-1 safe-bottom
         ">
@@ -27,19 +27,13 @@ function BottomNav() {
                     to={item.path}
                     end={item.path === '/'}
                     className={({ isActive }) =>
-                        `flex flex-col items-center justify-center gap-0.5 flex-1 h-full min-w-0 transition-colors ${
-                            isActive ? 'text-brand' : 'text-t-muted'
-                        }`
+                        `flex flex-col items-center justify-center gap-1 flex-1 h-full min-w-0 transition-colors ${isActive ? 'text-brand' : 'text-t-muted'}`
                     }
                 >
                     {({ isActive }) => (
                         <>
-                            <div className={`flex items-center justify-center w-10 h-7 rounded-full transition-colors duration-150 ${isActive ? 'bg-brand-bg' : ''}`}>
-                                <item.icon size={20} strokeWidth={isActive ? 2.2 : 1.7} />
-                            </div>
-                            <span className={`text-[10px] font-medium truncate transition-all ${isActive ? 'font-semibold' : ''}`}>
-                                {item.label}
-                            </span>
+                            <item.icon size={22} strokeWidth={isActive ? 2.2 : 1.8} />
+                            <span className="text-[10px] font-medium truncate">{item.label}</span>
                         </>
                     )}
                 </NavLink>

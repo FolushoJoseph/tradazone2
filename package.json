@@ -2,130 +2,42 @@
   "name": "tradazone",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://Blockora-dex.github.io/Tradazone",
+  "homepage": "https://FolushoJoseph.github.io/Tradazone",
   "type": "module",
-  "size-limit": [
-    {
-      "name": "Core Bundle (index)",
-      "path": "dist/assets/index-*.js",
-      "limit": "500 kB",
-      "gzip": true
-    },
-    {
-      "name": "Auth Context",
-      "path": "dist/assets/auth-context-*.js",
-      "limit": "10 kB",
-      "gzip": true
-    },
-    {
-      "name": "SignIn (Issue #174)",
-      "path": "dist/assets/sign-in-*.js",
-      "limit": "20 kB",
-      "gzip": true
-    },
-    {
-      "name": "CustomerList (Issue #179)",
-      "path": "dist/assets/customer-list-*.js",
-      "limit": "50 kB",
-      "gzip": true
-    },
-    {
-      "name": "InvoiceDetail (Issue #165)",
-      "path": "dist/assets/invoice-detail-*.js",
-      "limit": "50 kB",
-      "gzip": true
-    },
-    {
-      "name": "ConnectWalletModal (Issue #161)",
-      "path": "dist/assets/connect-wallet-*.js",
-      "limit": "20 kB",
-      "gzip": true
-    },
-    {
-      "name": "Wallet Libraries (Ethers/Starknet)",
-      "path": "dist/assets/wallet-*.js",
-      "limit": "500 kB",
-      "gzip": true
-    },
-    {
-      "name": "UI Icons (Lucide)",
-      "path": "dist/assets/ui-icons-*.js",
-      "limit": "100 kB",
-      "gzip": true
-    },
-    {
-      "name": "Chart Libraries",
-      "path": "dist/assets/charts-*.js",
-      "limit": "200 kB",
-      "gzip": true
-    },
-    {
-      "name": "Document Export (html2pdf)",
-      "path": "dist/assets/document-export-*.js",
-      "limit": "600 kB",
-      "gzip": true
-    }
-  ],
   "scripts": {
     "dev": "vite",
-    "optimize:svg": "svgo -f src/assets --recursive",
-    "build": "npm run optimize:svg && vite build",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
+    "build": "vite build",
     "lint": "eslint .",
-    "lint:readme": "doctoc README.md",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist",
-    "build:analyze": "npm run build && npx vite-bundle-analyzer dist",
-    "size": "size-limit",
-    "build:size": "npm run build && npm run size",
-    "ci:discover": "node scripts/ci-pipeline-utils.js discover",
-    "ci:select": "node scripts/ci-pipeline-utils.js smart-select main",
-    "ci:filter": "node scripts/ci-pipeline-utils.js filter",
-    "ci:sort": "node scripts/ci-pipeline-utils.js sort",
-    "ci:report": "node scripts/ci-pipeline-utils.js report markdown",
-    "ci:changed": "node scripts/ci-pipeline-utils.js changed main"
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
-    "@lobstrco/signer-extension-api": "^2.0.0",
+    "@stellar/freighter-api": "^6.0.1",
     "chart.js": "^4.5.1",
     "ethers": "^6.16.0",
     "get-starknet": "^4.0.0",
-    "html2pdf.js": "0.14.0",
-    "lucide-react": "^1.7.0",
+    "html2pdf.js": "^0.14.0",
+    "lucide-react": "^0.563.0",
     "react": "^19.2.0",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.2.0",
-    "react-router-dom": "^7.13.2",
+    "react-router-dom": "^7.13.0",
     "starknet": "^9.2.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
-    "@size-limit/preset-app": "^12.0.1",
-    "@testing-library/dom": "^10.4.1",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^14.6.1",
-    "@types/react": "^19.2.14",
+    "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
-    "@vitest/coverage-v8": "^4.1.1",
+    "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "^10.4.24",
-    "doctoc": "^2.3.0",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.5.2",
+    "eslint-plugin-react-refresh": "^0.4.24",
     "gh-pages": "^6.3.0",
-    "globals": "^17.4.0",
-    "happy-dom": "^20.8.9",
-    "jsdom": "^29.0.1",
+    "globals": "^16.5.0",
     "postcss": "^8.5.6",
-    "size-limit": "^11.1.6",
-    "svgo": "^4.0.1",
-    "tailwindcss": "^4.2.2",
-    "vite": "^8.0.3",
-    "vitest": "^4.1.2"
+    "tailwindcss": "^3.4.19",
+    "vite": "^7.2.4"
   }
 }

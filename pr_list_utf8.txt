@@ -1,6 +1,0 @@
-﻿214	docs: add ADR for tech stack selection	Calebux:docs/adr-tech-stack	OPEN	2026-03-24T17:38:33Z
-213	Docs/signup setup instructions	Calebux:docs/signup-setup-instructions	OPEN	2026-03-24T17:31:42Z
-212	docs: add CONTRIBUTING.md and improve CI pipeline	Calebux:docs/ci-onboarding-guide	OPEN	2026-03-24T17:22:38Z
-211	Missing staging environment configuration for Auth module deployments.	kaynaomi-oss:feat/auth-staging-environment-config	OPEN	2026-03-24T16:01:47Z
-208	Zero unit tests coverage found for the critical logic in CI pipeline.	kaynaomi-oss:feat/ci-unit-test-coverage	OPEN	2026-03-24T15:37:10Z
-207	docs: add contributor onboarding and ADRs for SignUp, API gateway, and ProfileSettings	Jagadeeshftw:dev-branch	OPEN	2026-03-24T14:57:31Z

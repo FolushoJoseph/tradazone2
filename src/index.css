@@ -1,59 +1,51 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+@font-face {
+  font-family: 'Stack_Sans_Headline';
+  src: local('Plus Jakarta Sans');
+  font-weight: normal;
+}
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-    html, body {
-        max-width: 100%;
-        overflow-x: hidden;
-    }
-
-    * {
-        box-sizing: border-box;
-    }
-    
-    *::before, *::after {
-        box-sizing: border-box;
-    }
-
     body {
         @apply font-sans text-sm text-t-primary bg-page antialiased;
-        font-feature-settings: 'cv11', 'ss01';
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
     }
 
     a {
-        @apply no-underline text-inherit transition-colors duration-150;
+        @apply no-underline text-inherit;
     }
 
     button {
         @apply font-sans cursor-pointer border-none bg-transparent;
+        border-radius: 0 !important;
     }
 
     input,
     select,
     textarea {
         @apply font-sans text-sm;
-        font-feature-settings: 'cv11';
+        border-radius: 0 !important;
     }
 
-    /* Numeric columns always tabular */
-    .tabular {
-        font-variant-numeric: tabular-nums;
+    /* Global zero-radius enforcement for all containers */
+    div,
+    section,
+    article,
+    aside,
+    nav,
+    main,
+    form,
+    fieldset {
+        border-radius: 0;
     }
 
     img {
         @apply block max-w-full;
-    }
-
-    /* Focus ring — Coinbase style: clean offset ring in brand color */
-    :focus-visible {
-        outline: 2px solid #3C3CEF;
-        outline-offset: 2px;
-        border-radius: 4px;
     }
 
     ::-webkit-scrollbar {
@@ -65,71 +57,6 @@
     }
 
     ::-webkit-scrollbar-thumb {
-        @apply bg-border rounded-full;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        @apply bg-border-medium;
-    }
-}
-
-@layer components {
-    /* ── Coinbase-style button primitives ── */
-    .btn-primary {
-        @apply inline-flex items-center justify-center gap-2
-               px-5 py-3 h-12 rounded-full
-               bg-brand text-white text-[15px] font-semibold
-               shadow-brand hover:bg-brand-dark
-               active:scale-[0.97] transition-all duration-150;
-    }
-
-    .btn-secondary {
-        @apply inline-flex items-center justify-center gap-2
-               px-5 py-3 h-12 rounded-full
-               bg-coin-gray text-t-primary text-[15px] font-semibold
-               border border-border
-               hover:bg-border-light active:scale-[0.97]
-               transition-all duration-150;
-    }
-
-    .btn-ghost {
-        @apply inline-flex items-center justify-center gap-2
-               px-4 py-2 rounded-lg
-               text-t-secondary text-sm font-medium
-               hover:bg-coin-gray active:scale-[0.97]
-               transition-all duration-150;
-    }
-
-    .btn-sm {
-        @apply h-9 px-4 text-[13px] rounded-full;
-    }
-
-    /* ── Card primitive ── */
-    .card {
-        @apply bg-white rounded-card border border-border
-               shadow-card transition-shadow duration-200;
-    }
-
-    .card-hover {
-        @apply hover:shadow-card-hover;
-    }
-
-    /* ── Input primitive ── */
-    .input-field {
-        @apply w-full h-11 px-3.5 rounded-md border border-border
-               bg-white text-sm text-t-primary placeholder-t-muted
-               focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/10
-               transition-all duration-150;
-    }
-
-    /* ── Badge primitive ── */
-    .badge {
-        @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full
-               text-xs font-semibold;
-    }
-
-    /* ── Divider ── */
-    .divider {
-        @apply border-t border-border;
+        @apply bg-border-medium rounded-full;
     }
 }

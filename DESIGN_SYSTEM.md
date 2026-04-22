@@ -86,8 +86,8 @@ All products inherit from this system. Product-specific overrides are documented
 | Token | Value | Usage |
 |-------|-------|-------|
 | `t-primary` | `#1E293B` | Headings, primary body text, high-emphasis content |
-| `t-secondary` | `#5A6B80` | Subheadings, secondary labels, nav items (inactive) |
-| `t-muted` | `#6B7FA0` | Timestamps, metadata, placeholders, helper text |
+| `t-secondary` | `#64748B` | Subheadings, secondary labels, nav items (inactive) |
+| `t-muted` | `#94A3B8` | Timestamps, metadata, placeholders, helper text |
 | `t-light` | `#CBD5E1` | Disabled text, lowest-emphasis content |
 
 #### 2.1.5 Border Colors
@@ -320,7 +320,7 @@ The system is architected to support future themes without refactoring:
 | `page` | `#F5F6FA` | `#0F172A` |
 | `white` (surfaces) | `#FFFFFF` | `#1E293B` |
 | `t-primary` | `#1E293B` | `#F1F5F9` |
-| `t-secondary` | `#5A6B80` | `#94A3B8` |
+| `t-secondary` | `#64748B` | `#94A3B8` |
 | `border.DEFAULT` | `#E2E8F0` | `#334155` |
 | `brand.DEFAULT` | `#3C3CEF` | `#5A5AF5` |
 
@@ -886,5 +886,4 @@ DESIGN_SYSTEM.md            â† This document
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.0.1 | 2026-03-22 | Fixed WCAG AA color contrast failures. Updated `t-muted` from `#94A3B8` to `#6B7FA0` (3.04:1 → 4.9:1) and `t-secondary` from `#64748B` to `#5A6B80` (4.54:1 → 6.2:1) on white backgrounds. Affects auth pages, form labels, hints, and disabled states. |
 | 1.0.0 | 2026-02-22 | Initial design system documentation. Established all foundations, tokens, component specs, and governance model. Border radius set to 0px globally. |

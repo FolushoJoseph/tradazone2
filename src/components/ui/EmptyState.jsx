@@ -2,39 +2,28 @@ import { useNavigate } from 'react-router-dom';
 
 /**
  * Reusable empty state component for list pages.
- * * ISSUE #134: Support dark mode themes in CustomerList.
- * Added 'dark:' variants for background, icon container, and text.
+ *
+ * Props:
+ *  - icon: Lucide icon component
+ *  - title: string
+ *  - description: string
+ *  - actionLabel: string (button label)
+ *  - actionPath: string (route to navigate to)
  */
 function EmptyState({ icon: Icon, title, description, actionLabel, actionPath }) {
     const navigate = useNavigate();
 
     return (
-        <div className="flex flex-col items-center justify-center py-20 px-6 text-center transition-colors">
-            {/* Icon Container: Softer, larger container with coin-gray */}
-            <div className="w-20 h-20 rounded-full bg-coin-gray dark:bg-zinc-900 flex items-center justify-center mb-6">
-                {Icon && (
-                    <Icon 
-                        size={32} 
-                        className="text-t-muted dark:text-zinc-500" 
-                        strokeWidth={1.5} 
-                    />
-                )}
+        <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-brand/8 flex items-center justify-center mb-5">
+                {Icon && <Icon size={28} className="text-brand/60" strokeWidth={1.5} />}
             </div>
-
-            {/* Title: Coinbase style hierarchy */}
-            <h3 className="text-[18px] font-semibold text-t-primary dark:text-zinc-100 mb-2">
-                {title}
-            </h3>
-
-            {/* Description: Coinbase muted blue-gray */}
-            <p className="text-[15px] text-t-secondary dark:text-zinc-500 max-w-sm mb-8 leading-relaxed">
-                {description}
-            </p>
-
+            <h3 className="text-base font-semibold text-t-primary mb-2">{title}</h3>
+            <p className="text-sm text-t-muted max-w-xs mb-6">{description}</p>
             {actionLabel && actionPath && (
                 <button
                     onClick={() => navigate(actionPath)}
-                    className="btn-primary"
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 h-10 bg-brand text-white text-sm font-semibold hover:bg-brand-dark active:scale-95 transition-all shadow-sm shadow-brand/20"
                 >
                     {actionLabel}
                 </button>
