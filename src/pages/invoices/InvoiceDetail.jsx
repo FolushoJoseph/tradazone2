@@ -1,9 +1,10 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Send, Download, Edit, Eye } from 'lucide-react';
+import { ArrowLeft, Send, Download, Edit, Eye, ExternalLink } from 'lucide-react';
 import Button from '../../components/forms/Button';
 import StatusBadge from '../../components/tables/StatusBadge';
 import InvoiceLayout from '../../components/invoice/InvoiceLayout';
+import SendInvoiceModal from '../../components/invoice/SendInvoiceModal';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -11,10 +12,11 @@ function InvoiceDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     const invoiceRef = useRef(null);
-    const { user } = useAuth();
+    const { user, wallet, walletType } = useAuth();
     const { invoices, customers } = useData();
     const invoice = invoices.find(inv => inv.id === id);
     const customer = customers.find(c => c.id === invoice?.customerId);
+    const [isSendModalOpen, setIsSendModalOpen] = useState(false);
 
     if (!invoice) return <div className="p-8"><p className="text-t-muted">Invoice not found</p></div>;
 
@@ -54,10 +56,17 @@ function InvoiceDetail() {
                         <StatusBadge status={invoice.status} />
                     </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap justify-end">
                     <Button variant="secondary" icon={Eye} onClick={() => navigate(`/invoice/${invoice.id}`)}>View Invoice</Button>
                     <Button variant="secondary" icon={Download} onClick={handleDownload}>Download</Button>
-                    <Button variant="secondary" icon={Send}>Send</Button>
+                    <Button
+                        variant="secondary"
+                        icon={Send}
+                        onClick={() => setIsSendModalOpen(true)}
+                        disabled={invoice.status === 'paid'}
+                    >
+                        {invoice.status === 'sent' ? 'Resend' : 'Send'}
+                    </Button>
                     <Button variant="primary" icon={Edit}>Edit</Button>
                 </div>
             </div>
@@ -71,6 +80,52 @@ function InvoiceDetail() {
                     <div><span className="block text-xs text-t-muted mb-1">Created</span><span className="text-sm font-medium">{invoice.createdAt}</span></div>
                 </div>
             </div>
+
+            {/* Payment info (visible after send) */}
+            {(invoice.status === 'sent' || invoice.status === 'paid') && invoice.paymentLink && (
+                <div className="bg-white border border-border rounded-card p-5 mb-5">
+                    <h2 className="text-base font-semibold mb-3">Payment</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <span className="block text-xs text-t-muted mb-1">Payment Link</span>
+                            <a
+                                href={invoice.paymentLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-brand hover:underline font-medium text-xs"
+                            >
+                                Open <ExternalLink size={12} />
+                            </a>
+                        </div>
+                        <div>
+                            <span className="block text-xs text-t-muted mb-1">Network</span>
+                            <span className="font-medium capitalize">{invoice.txNetwork || '—'}</span>
+                        </div>
+                        <div>
+                            <span className="block text-xs text-t-muted mb-1">Email Status</span>
+                            <span className={`font-medium ${invoice.emailStatus === 'sent' ? 'text-success' : invoice.emailStatus === 'failed' ? 'text-error' : 'text-t-muted'}`}>
+                                {invoice.emailStatus || 'pending'}
+                            </span>
+                        </div>
+                        {invoice.status === 'paid' && (
+                            <>
+                                <div>
+                                    <span className="block text-xs text-t-muted mb-1">Tx Hash</span>
+                                    <span className="font-mono text-xs break-all text-t-primary">{invoice.txHash || '—'}</span>
+                                </div>
+                                <div>
+                                    <span className="block text-xs text-t-muted mb-1">Amount Paid</span>
+                                    <span className="font-medium text-success">{invoice.txAmount} {invoice.txCurrency}</span>
+                                </div>
+                                <div>
+                                    <span className="block text-xs text-t-muted mb-1">Paid At</span>
+                                    <span className="font-medium">{invoice.paidAt ? new Date(invoice.paidAt).toLocaleString() : '—'}</span>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
 
             <div className="bg-white border border-border rounded-card overflow-hidden">
                 <div className="px-6 py-4 border-b border-border">
@@ -108,6 +163,16 @@ function InvoiceDetail() {
             <div className="fixed left-[-9999px] top-0">
                 <InvoiceLayout ref={invoiceRef} invoice={invoice} customer={customer} sender={sender} />
             </div>
+
+            <SendInvoiceModal
+                isOpen={isSendModalOpen}
+                onClose={() => setIsSendModalOpen(false)}
+                invoice={invoice}
+                customer={customer}
+                user={user}
+                wallet={wallet}
+                walletType={walletType}
+            />
         </div>
     );
 }

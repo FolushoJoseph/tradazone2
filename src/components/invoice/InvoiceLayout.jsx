@@ -72,7 +72,7 @@ const InvoiceLayout = forwardRef(function InvoiceLayout({ invoice, customer, sen
             <div className="mt-auto">
                 <InvoiceFooter
                     notes={sender?.name || 'Sender'}
-                    paymentLink={`https://pay.tradazone.com/${invoice.id}`}
+                    paymentLink={invoice.paymentLink || `https://pay.tradazone.com/${invoice.id}`}
                 />
             </div>
         </div>

@@ -25,16 +25,12 @@ function save(key, data) {
 
 /* ---------- Provider ---------- */
 export function DataProvider({ children }) {
-    // Clear persisted data so the app starts as a fresh new user
-    localStorage.removeItem(KEYS.customers);
-    localStorage.removeItem(KEYS.invoices);
-    localStorage.removeItem(KEYS.checkouts);
-    localStorage.removeItem(KEYS.items);
-
-    const [customers, setCustomers] = useState([]);
-    const [invoices, setInvoices] = useState([]);
-    const [checkouts, setCheckouts] = useState([]);
-    const [items, setItems] = useState([]);
+    // Data persists across page loads so public payment links remain resolvable.
+    // To reset demo state, use the "Reset Demo Data" button in Payment Settings.
+    const [customers, setCustomers] = useState(() => load(KEYS.customers, []));
+    const [invoices, setInvoices] = useState(() => load(KEYS.invoices, []));
+    const [checkouts, setCheckouts] = useState(() => load(KEYS.checkouts, []));
+    const [items, setItems] = useState(() => load(KEYS.items, []));
 
     // ---------- Customers ----------
     const addCustomer = useCallback((data) => {
@@ -97,9 +93,24 @@ export function DataProvider({ children }) {
                 id: `INV-${String(count + 1).padStart(3, '0')}`,
                 customer: customer ? customer.name : 'Unknown',
                 customerId: data.customerId,
+                customerEmail: customer?.email || '',
                 amount: total.toLocaleString(),
                 currency: 'STRK',
+                // Lifecycle
                 status: 'pending',
+                sentAt: null,
+                paidAt: null,
+                emailStatus: null,
+                // Payment
+                paymentAddress: null,
+                paymentLink: null,
+                txHash: null,
+                txNetwork: null,
+                txAmount: null,
+                txCurrency: null,
+                // Meta
+                senderName: null,
+                senderEmail: null,
                 dueDate: data.dueDate,
                 createdAt: new Date().toISOString().split('T')[0],
                 items: resolvedItems,
@@ -112,6 +123,78 @@ export function DataProvider({ children }) {
             return newInvoice;
         },
         [customers, items, invoices]
+    );
+
+    // Generic single-invoice update — used by higher-level mutations
+    const updateInvoice = useCallback((id, updates) => {
+        setInvoices((prev) => {
+            const next = prev.map((inv) =>
+                inv.id === id ? { ...inv, ...updates } : inv
+            );
+            save(KEYS.invoices, next);
+            return next;
+        });
+    }, []);
+
+    // Mark invoice as sent; store payment routing information
+    const sendInvoice = useCallback(
+        (invoiceId, { senderName, senderEmail, paymentAddress, walletType }) => {
+            const network =
+                walletType === 'stellar'
+                    ? 'stellar'
+                    : walletType === 'starknet'
+                    ? 'starknet'
+                    : 'ethereum';
+
+            const base = window.location.origin;
+            const basename = import.meta.env.BASE_URL || '/Tradazone/';
+            const paymentLink = `${base}${basename}pay/invoice/${invoiceId}`;
+
+            const customer = customers.find(
+                (c) => c.id === invoices.find((i) => i.id === invoiceId)?.customerId
+            );
+
+            updateInvoice(invoiceId, {
+                status: 'sent',
+                sentAt: new Date().toISOString(),
+                paymentAddress,
+                txNetwork: network,
+                paymentLink,
+                senderName,
+                senderEmail,
+                customerEmail: customer?.email || '',
+                emailStatus: 'pending',
+            });
+
+            // Return enriched invoice for callers that need it immediately
+            const base_inv = invoices.find((i) => i.id === invoiceId);
+            return {
+                ...base_inv,
+                status: 'sent',
+                paymentAddress,
+                txNetwork: network,
+                paymentLink,
+                senderName,
+                senderEmail,
+                customerEmail: customer?.email || '',
+            };
+        },
+        [invoices, customers, updateInvoice]
+    );
+
+    // Mark invoice as paid after on-chain confirmation
+    const markInvoicePaid = useCallback(
+        (invoiceId, txDetails) => {
+            updateInvoice(invoiceId, {
+                status: 'paid',
+                paidAt: new Date().toISOString(),
+                txHash: txDetails.hash,
+                txNetwork: txDetails.network,
+                txAmount: txDetails.amount,
+                txCurrency: txDetails.currency,
+            });
+        },
+        [updateInvoice]
     );
 
     // ---------- Checkouts ----------
@@ -140,6 +223,15 @@ export function DataProvider({ children }) {
         [checkouts]
     );
 
+    // Wipe all local data — useful for demo reset
+    const resetDemoData = useCallback(() => {
+        Object.values(KEYS).forEach((k) => localStorage.removeItem(k));
+        setCustomers([]);
+        setInvoices([]);
+        setCheckouts([]);
+        setItems([]);
+    }, []);
+
     return (
         <DataContext.Provider
             value={{
@@ -148,11 +240,21 @@ export function DataProvider({ children }) {
                 checkouts,
                 items,
                 transactions: [],
-                dashboardStats: { walletBalance: '0', currency: 'STRK', receivables: '0', totalTransactions: 0, totalCustomers: 0 },
+                dashboardStats: {
+                    walletBalance: '0',
+                    currency: 'STRK',
+                    receivables: '0',
+                    totalTransactions: 0,
+                    totalCustomers: customers.length,
+                },
                 addCustomer,
                 addItem,
                 addInvoice,
+                updateInvoice,
+                sendInvoice,
+                markInvoicePaid,
                 addCheckout,
+                resetDemoData,
             }}
         >
             {children}
