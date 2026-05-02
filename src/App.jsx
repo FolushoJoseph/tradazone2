@@ -15,6 +15,7 @@ import InvoiceList from './pages/invoices/InvoiceList';
 import CreateInvoice from './pages/invoices/CreateInvoice';
 import InvoiceDetail from './pages/invoices/InvoiceDetail';
 import InvoicePreview from './pages/invoices/InvoicePreview';
+import InvoicePayment from './pages/invoices/InvoicePayment';
 import ItemsList from './pages/items/ItemsList';
 import AddItem from './pages/items/AddItem';
 import ItemDetail from './pages/items/ItemDetail';
@@ -37,6 +38,7 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/pay/:checkoutId" element={<MailCheckout />} />
             <Route path="/invoice/:id" element={<InvoicePreview />} />
+            <Route path="/invoice/:invoiceId/pay" element={<InvoicePayment />} />
 
             {/* Protected routes — require authentication */}
             <Route

@@ -1,9 +1,10 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Send, Download, Edit, Eye } from 'lucide-react';
 import Button from '../../components/forms/Button';
 import StatusBadge from '../../components/tables/StatusBadge';
 import InvoiceLayout from '../../components/invoice/InvoiceLayout';
+import SendInvoiceModal from '../../components/invoice/SendInvoiceModal';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -11,6 +12,7 @@ function InvoiceDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     const invoiceRef = useRef(null);
+    const [sendModalOpen, setSendModalOpen] = useState(false);
     const { user } = useAuth();
     const { invoices, customers } = useData();
     const invoice = invoices.find(inv => inv.id === id);
@@ -57,7 +59,7 @@ function InvoiceDetail() {
                 <div className="flex gap-2">
                     <Button variant="secondary" icon={Eye} onClick={() => navigate(`/invoice/${invoice.id}`)}>View Invoice</Button>
                     <Button variant="secondary" icon={Download} onClick={handleDownload}>Download</Button>
-                    <Button variant="secondary" icon={Send}>Send</Button>
+                    <Button variant="secondary" icon={Send} onClick={() => setSendModalOpen(true)}>Send</Button>
                     <Button variant="primary" icon={Edit}>Edit</Button>
                 </div>
             </div>
@@ -108,6 +110,13 @@ function InvoiceDetail() {
             <div className="fixed left-[-9999px] top-0">
                 <InvoiceLayout ref={invoiceRef} invoice={invoice} customer={customer} sender={sender} />
             </div>
+
+            <SendInvoiceModal
+                isOpen={sendModalOpen}
+                onClose={() => setSendModalOpen(false)}
+                invoice={invoice}
+                customer={customer}
+            />
         </div>
     );
 }
