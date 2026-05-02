@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { X, Send, Mail, CheckCircle, AlertCircle } from 'lucide-react';
-import Button from '../forms/Button';
-import Input from '../forms/Input';
-import { sendInvoiceToCustomer } from '../../services/emailService';
-import { useData } from '../../context/DataContext';
+import { X, Send, Mail, CheckCircle, AlertCircle, Copy } from 'lucide-react';
+import Button from '../../../components/forms/Button';
+import Input from '../../../components/forms/Input';
+import { sendInvoiceToCustomer } from '../../../services/emailService';
+import { useData } from '../../../context/DataContext';
 
 function SendInvoiceModal({ isOpen, onClose, invoice, customer }) {
     const { sendInvoice } = useData();

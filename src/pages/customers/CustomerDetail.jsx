@@ -1,9 +1,9 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
-import Button from '../../components/forms/Button';
-import DataTable from '../../components/tables/DataTable';
-import StatusBadge from '../../components/tables/StatusBadge';
-import { useData } from '../../context/DataContext';
+import Button from '../../../components/forms/Button';
+import DataTable from '../../../components/tables/DataTable';
+import StatusBadge from '../../../components/tables/StatusBadge';
+import { useData } from '../../../context/DataContext';
 
 function CustomerDetail() {
     const { id } = useParams();

@@ -2,16 +2,86 @@ import { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext(null);
 
-const SESSION_KEY = 'tradazone_auth';
-const WALLET_KEY = 'tradazone_last_wallet';
-const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const isDevBypass = import.meta.env.DEV;
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
 
 function loadSession() {
     try {
-        const raw = localStorage.getItem(SESSION_KEY);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        if (Date.now() > parsed.expiresAt) {
+        // 1. Check sensitive ephemeral session in sessionStorage
+        const rawSession = sessionStorage.getItem(SESSION_KEY);
+        if (!rawSession) {
+            // No active session in sessionStorage
+            if (isDevBypass) {
+                return {
+                    id: "0xDEV_BYPASS_ADDRESS",
+                    name: "Developer (Bypass)",
+                    email: "dev@example.com",
+                    avatar: null,
+                    isAuthenticated: true,
+                    walletAddress: "0xDEV_BYPASS_ADDRESS",
+                    walletType: "evm",
+                    phone: "",
+                    company: "",
+                    address: "",
+                    profileDescription: "",
+                };
+            }
+            try {
+                localStorage.removeItem(SESSION_KEY);
+            } catch (e) {
+                // Ignore cleanup errors
+            }
+            return null;
+        }
+
+        const session = JSON.parse(rawSession);
+        
+        // 2. Validate session structure
+        if (!session.expiresAt) {
+            console.warn('[Auth] Session missing expiresAt timestamp');
+            sessionStorage.removeItem(SESSION_KEY);
+            try {
+                localStorage.removeItem(SESSION_KEY);
+            } catch (e) {
+                // Ignore cleanup errors
+            }
+            return null;
+        }
+
+        // 3. Check expiration
+        if (Date.now() > session.expiresAt) {
+            // Session has expired
+            sessionStorage.removeItem(SESSION_KEY);
+            try {
+                localStorage.removeItem(SESSION_KEY);
+            } catch (e) {
+                // Ignore cleanup errors
+            }
+            return null;
+        }
+
+        // 4. Validate user object exists
+        if (!session.user) {
+            console.warn('[Auth] Session missing user object');
+            sessionStorage.removeItem(SESSION_KEY);
+            try {
+                localStorage.removeItem(SESSION_KEY);
+            } catch (e) {
+                // Ignore cleanup errors
+            }
+            return null;
+        }
+
+        // Return user from sessionStorage (source of truth for active sessions)
+        return normalizeUserData(session.user);
+    } catch (error) {
+        console.error('[Auth] Failed to load session:', error);
+        // Clean up corrupted data
+        try {
+            sessionStorage.removeItem(SESSION_KEY);
             localStorage.removeItem(SESSION_KEY);
             return null;
         }
@@ -33,13 +103,17 @@ function clearSession() {
 }
 
 const EMPTY_USER = {
-    id: null,
-    name: '',
-    email: '',
+    id: isDevBypass ? "0xDEV_BYPASS_ADDRESS" : null,
+    name: isDevBypass ? "Developer (Bypass)" : "",
+    email: isDevBypass ? "dev@example.com" : "",
     avatar: null,
-    isAuthenticated: false,
-    walletAddress: null,
-    walletType: null, // 'starknet' | 'stellar'
+    isAuthenticated: isDevBypass,
+    walletAddress: isDevBypass ? "0xDEV_BYPASS_ADDRESS" : null,
+    walletType: isDevBypass ? "evm" : null,
+    phone: "",
+    company: "",
+    address: "",
+    profileDescription: "",
 };
 
 export function AuthProvider({ children }) {

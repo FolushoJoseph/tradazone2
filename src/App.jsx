@@ -1,29 +1,33 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import PrivateRoute from './components/routing/PrivateRoute';
-import SignIn from './pages/auth/SignIn';
-import SignUp from './pages/auth/SignUp';
-import Home from './pages/dashboard/Home';
-import CustomerList from './pages/customers/CustomerList';
-import AddCustomer from './pages/customers/AddCustomer';
-import CustomerDetail from './pages/customers/CustomerDetail';
-import CheckoutList from './pages/checkouts/CheckoutList';
-import CreateCheckout from './pages/checkouts/CreateCheckout';
-import CheckoutDetail from './pages/checkouts/CheckoutDetail';
-import MailCheckout from './pages/checkouts/MailCheckout';
-import InvoiceList from './pages/invoices/InvoiceList';
-import CreateInvoice from './pages/invoices/CreateInvoice';
-import InvoiceDetail from './pages/invoices/InvoiceDetail';
-import InvoicePreview from './pages/invoices/InvoicePreview';
-import InvoicePayment from './pages/invoices/InvoicePayment';
-import ItemsList from './pages/items/ItemsList';
-import AddItem from './pages/items/AddItem';
-import ItemDetail from './pages/items/ItemDetail';
-import Settings from './pages/settings/Settings';
-import ProfileSettings from './pages/settings/ProfileSettings';
-import PaymentSettings from './pages/settings/PaymentSettings';
-import NotificationSettings from './pages/settings/NotificationSettings';
-import PasswordSettings from './pages/settings/PasswordSettings';
+import CheckoutRoutesShell from './components/routing/CheckoutRoutesShell';
+import LoadingSpinner from './components/ui/LoadingSpinner';
+
+const SignIn = lazy(() => import('./features/auth/pages/SignIn'));
+const SignUp = lazy(() => import('./features/auth/pages/SignUp'));
+const Home = lazy(() => import('./features/dashboard/pages/Home'));
+const CustomerList = lazy(() => import('./features/customers/pages/CustomerList'));
+const AddCustomer = lazy(() => import('./features/customers/pages/AddCustomer'));
+const CustomerDetail = lazy(() => import('./features/customers/pages/CustomerDetail'));
+const CheckoutList = lazy(() => import('./features/checkouts/pages/CheckoutList'));
+const CreateCheckout = lazy(() => import('./features/checkouts/pages/CreateCheckout'));
+const CheckoutDetail = lazy(() => import('./features/checkouts/pages/CheckoutDetail'));
+const MailCheckout = lazy(() => import('./features/checkouts/pages/MailCheckout'));
+const InvoiceList = lazy(() => import('./features/invoices/pages/InvoiceList'));
+const CreateInvoice = lazy(() => import('./features/invoices/pages/CreateInvoice'));
+const InvoiceDetail = lazy(() => import('./features/invoices/pages/InvoiceDetail'));
+const InvoicePreview = lazy(() => import('./features/invoices/pages/InvoicePreview'));
+const InvoicePayment = lazy(() => import('./features/invoices/pages/InvoicePayment'));
+const ItemsList = lazy(() => import('./features/items/pages/ItemsList'));
+const AddItem = lazy(() => import('./features/items/pages/AddItem'));
+const ItemDetail = lazy(() => import('./features/items/pages/ItemDetail'));
+const Settings = lazy(() => import('./features/settings/pages/Settings'));
+const ProfileSettings = lazy(() => import('./features/settings/pages/ProfileSettings'));
+const PaymentSettings = lazy(() => import('./features/settings/pages/PaymentSettings'));
+const NotificationSettings = lazy(() => import('./features/settings/pages/NotificationSettings'));
+const PasswordSettings = lazy(() => import('./features/settings/pages/PasswordSettings'));
+
 import { AuthProvider } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
 
@@ -38,7 +42,24 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/pay/:checkoutId" element={<MailCheckout />} />
             <Route path="/invoice/:id" element={<InvoicePreview />} />
-            <Route path="/invoice/:invoiceId/pay" element={<InvoicePayment />} />
+            <Route
+              path="/pay/invoice/:invoiceId"
+              element={
+                <Suspense
+                  fallback={
+                    <div
+                      className="min-h-screen bg-brand"
+                      role="status"
+                      aria-live="polite"
+                      aria-busy="true"
+                      aria-label="Loading payment page"
+                    />
+                  }
+                >
+                  <InvoicePayment />
+                </Suspense>
+              }
+            />
 
             {/* Protected routes — require authentication */}
             <Route

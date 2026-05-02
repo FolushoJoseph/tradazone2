@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { X, ExternalLink, AlertCircle, ChevronLeft } from 'lucide-react';
 import Logo from './Logo';
-import { useDiscoveredProviders } from '../../utils/wallet-discovery';
-import { useFreighter } from '../../hooks/useFreighter';
-import { useAuth } from '../../context/AuthContext';
+import { useLobstr } from '../../hooks/useLobstr';
+import {
+    useAuthActions,
+    useAuthWalletCatalog,
+    useAuthWalletState,
+} from '../../context/AuthContext';
 
-// Stellar star icon
+// Icon components
 function StellarIcon({ size = 20 }) {
     return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -67,30 +70,27 @@ function BaseIcon({ size = 20 }) {
     );
 }
 
-function useWalletDetection() {
-    const discoveredProviders = useDiscoveredProviders();
-    const [installed, setInstalled] = useState({
-        freighter: false,
-        argent: false,
-        metamask: false,
-        phantom: false,
-        base: false,
-        discovered: [],
-    });
+function getWalletIcon(w) {
+    if (w.iconUri) return <img src={w.iconUri} alt={w.name} className="w-6 h-6" />;
+    switch (w.id) {
+        case 'stellar': return <StellarIcon size={22} />;
+        case 'starknet': return <ArgentIcon size={20} />;
+        case 'metamask': return <MetaMaskIcon size={24} />;
+        case 'phantom': return <PhantomIcon size={24} />;
+        case 'base': return <BaseIcon size={24} />;
+        default: return <WalletIcon size={20} />;
+    }
+}
 
-    useEffect(() => {
-        const checkInstallations = () => {
-            const eth = window.ethereum;
-            
-            // Checking common identifiers in window
-            // Freighter: strictly check window.freighterApi as requested
-            const hasFreighter = typeof window !== 'undefined' && !!window.freighterApi;
-            const hasArgent = typeof window !== 'undefined' && !!(window.starknet_argentX || window.starknet?.argentX);
-            
-            // Use EIP-6963 providers for detection if available
-            const hasMetaMask = discoveredProviders.some(p => p.info.rdns === 'io.metamask') || !!(eth && eth.isMetaMask);
-            const hasPhantom = discoveredProviders.some(p => p.info.rdns === 'app.phantom') || !!(window.phantom?.ethereum || (eth && eth.isPhantom));
-            const hasBase = discoveredProviders.some(p => p.info.rdns === 'com.coinbase.wallet') || !!window.coinbaseWalletExtension || !!(eth && eth.isCoinbaseWallet);
+function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
+    const [connecting, setConnecting] = useState(null);
+    const [error, setError] = useState(null);
+    const [view, setView] = useState('primary'); // 'primary' | 'secondary'
+
+    const { completeWalletLogin, disconnectAll } = useAuthActions();
+    const { wallet } = useAuthWalletState();
+    const { installed, availableWallets } = useAuthWalletCatalog();
+    const lobstr = useLobstr();
 
             setInstalled({
                 freighter: hasFreighter,
@@ -138,9 +138,31 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
 
     if (!isOpen) return null;
 
-    const handleConnect = async (type, provider = null) => {
+    const primaryWallets = availableWallets.filter((w) => !w.isSecondary);
+    const secondaryWallets = availableWallets.filter((w) => w.isSecondary);
+    const walletsToShow = view === 'primary' ? primaryWallets : secondaryWallets;
+
+    const handleConnect = async (w) => {
         if (connecting) return;
-        setConnecting(type);
+
+        if (w.id === 'stellar') {
+            const result = await lobstr.connect();
+            if (result?.success) {
+                completeWalletLogin(result.address, 'stellar');
+                if (onConnect) onConnect('stellar');
+            } else if (result?.error) {
+                const isNotInstalled = result.error === 'NOT_INSTALLED';
+                setError({ type: 'stellar', code: isNotInstalled ? 'not_installed' : 'failed', message: result.error });
+            }
+            return;
+        }
+
+        const type = w.id === 'starknet_generic' ? 'starknet_generic' : w.network;
+        const provider = w.rdns
+            ? installed.discovered?.find((p) => p.info.rdns === w.rdns)?.provider
+            : (w.provider || null);
+
+        setConnecting(w.id);
         setError(null);
         try {
             const result = await connectWalletFn(type, provider);
@@ -152,53 +174,57 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
             } else if (result.error === 'already_connecting') {
                 // Connection already in progress, don't reset state
             } else {
-                setError({ type, code: 'failed' });
+                setError({ type: w.network, code: 'failed', message: result.error });
                 setConnecting(null);
             }
-        } catch {
-            setError({ type, code: 'failed' });
+        } catch (e) {
+            setError({ type: w.network, code: 'failed', message: e?.message });
             setConnecting(null);
         }
+    };
+
+    const networkBg = (network) => {
+        if (network === 'stellar') return 'bg-blue-50';
+        if (network === 'starknet') return 'bg-[#FF875B]/10';
+        return 'bg-gray-100';
     };
 
     return (
         <>
             {/* Backdrop */}
-            <div 
-                className="fixed inset-0 bg-black/40 z-50 backdrop-blur-sm transition-opacity" 
-                onClick={() => !connecting && onClose()} 
+            <div
+                className="fixed inset-0 bg-black/40 z-50 backdrop-blur-sm transition-opacity"
+                onClick={() => !connecting && onClose()}
+                aria-hidden="true"
             />
 
-            {/* Modal */}
-            <div className="
-                fixed z-50
-                bottom-0 left-0 right-0
-                lg:bottom-auto lg:left-1/2 lg:top-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-full lg:max-w-md
-                bg-white shadow-2xl rounded-t-2xl lg:rounded-2xl flex flex-col max-h-[90vh] overflow-hidden
-                animate-slide-up lg:animate-none lg:zoom-in
-            ">
-                {/* Header line for mobile */}
-                <div className="lg:hidden w-10 h-1 bg-border rounded-full mx-auto my-3" />
+            {/* Modal — bottom sheet on mobile, centered card on desktop */}
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="cwm-title"
+                className="fixed z-50 bottom-0 left-0 right-0 lg:bottom-auto lg:left-1/2 lg:top-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-full lg:max-w-md bg-white shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-slide-up lg:animate-none"
+            >
+                {/* Drag handle — mobile only */}
+                <div className="lg:hidden w-10 h-1 bg-border rounded-full mx-auto my-3 flex-shrink-0" />
 
                 <div className="flex-1 overflow-y-auto w-full">
                     {/* Header */}
-                    <div className="px-6 pt-2 pb-4 flex justify-between items-center relative border-b border-border/50">
+                    <div className="px-6 pt-2 pb-4 flex justify-between items-center border-b border-border/50 flex-shrink-0">
                         {view === 'primary' ? (
-                            <div className="flex items-center gap-3">
-                                <Logo variant="light" className="h-6" />
-                            </div>
+                            <Logo variant="light" className="h-6" />
                         ) : (
-                            <button 
+                            <button
                                 onClick={() => setView('primary')}
                                 className="flex items-center gap-1.5 text-sm font-semibold text-t-primary hover:text-brand transition-colors"
                             >
-                                <ChevronLeft size={18} />
-                                Back
+                                <ChevronLeft size={18} /> Back
                             </button>
                         )}
-                        <button 
+                        <button
                             onClick={onClose}
                             disabled={connecting !== null}
+                            aria-label="Close modal"
                             className="text-t-muted hover:text-t-primary transition-colors disabled:opacity-50"
                         >
                             <X size={20} />
@@ -206,222 +232,88 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                     </div>
 
                     <div className="p-6">
-                        <h2 className="text-xl font-bold text-t-primary mb-2">Connect your wallet</h2>
+                        <h2 id="cwm-title" className="text-xl font-bold text-t-primary mb-2">
+                            Connect your wallet
+                        </h2>
                         <p className="text-sm text-t-muted mb-6">
                             Choose how you'd like to connect to Tradazone to start accepting payments.
                         </p>
 
+                        {/* Wallet list */}
                         <div className="flex flex-col gap-3">
-                            {view === 'primary' ? (
-                                <>
-                                    {/* Freighter */}
+                            {walletsToShow.map((w) => {
+                                const isThisConnecting = connecting === w.id || (w.id === 'stellar' && lobstr.isConnecting);
+                                const isDisabled = connecting !== null;
+                                return (
                                     <button
-                                        onClick={async () => {
-                                            const result = await freighter.connect();
-                                            if (result?.success) {
-                                                completeWalletLogin(result.address, 'stellar');
-                                                if (onConnect) onConnect('stellar');
-                                            } else if (result?.error) {
-                                                // Pass the error code (e.g. NOT_INSTALLED, LOCKED, ACCESS_DENIED)
-                                                setError({ type: 'stellar', code: result.error === 'NOT_INSTALLED' ? 'not_installed' : 'failed', message: result.error });
-                                            }
-                                        }}
-                                        disabled={connecting !== null || freighter.isConnecting}
-                                        className={`w-full text-left p-4 rounded-xl border flex items-center justify-between transition-all outline-none 
-                                            ${connecting === 'stellar' || freighter.isConnecting ? 'border-blue-400 bg-blue-50/50' : connecting !== null ? 'border-border/50 opacity-50' : 'border-border hover:border-blue-300 hover:bg-blue-50/30'}`}
+                                        key={w.id}
+                                        onClick={() => handleConnect(w)}
+                                        disabled={isDisabled}
+                                        className={`w-full text-left p-4 border flex items-center justify-between transition-all outline-none
+                                            ${isThisConnecting
+                                                ? 'border-brand/40 bg-brand/5'
+                                                : isDisabled
+                                                    ? 'border-border/50 opacity-50'
+                                                    : 'border-border hover:border-brand/30 hover:bg-brand/5'
+                                            }`}
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
-                                                <StellarIcon size={22} />
+                                            <div className={`w-10 h-10 flex items-center justify-center flex-shrink-0 ${networkBg(w.network)}`}>
+                                                {getWalletIcon(w)}
                                             </div>
                                             <div>
                                                 <div className="font-semibold text-t-primary flex items-center gap-2">
-                                                    Freighter
-                                                    <span className="text-[10px] uppercase font-bold tracking-wide bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                                                        Recommended
-                                                    </span>
+                                                    {w.name}
+                                                    {w.isRecommended && (
+                                                        <span className="text-[10px] uppercase font-bold tracking-wide bg-blue-100 text-blue-700 px-2 py-0.5">
+                                                            Recommended
+                                                        </span>
+                                                    )}
                                                 </div>
-                                                <div className="text-xs text-t-muted">Stellar Network</div>
+                                                <div className="text-xs text-t-muted">{w.networkName}</div>
                                             </div>
                                         </div>
-                                        {freighter.isConnecting ? (
-                                            <span className="w-4 h-4 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-                                        ) : installed.freighter && (
-                                            <span className="text-[10px] uppercase font-bold tracking-wide text-green-600 bg-green-50 px-2 py-1 rounded-md">Installed</span>
-                                        )}
-                                    </button>
-
-                                    {/* Argent */}
-                                    <button
-                                        onClick={() => handleConnect('starknet')}
-                                        disabled={connecting !== null}
-                                        className={`w-full text-left p-4 rounded-xl border flex items-center justify-between transition-all outline-none 
-                                            ${connecting === 'starknet' ? 'border-brand/40 bg-brand/5' : connecting !== null ? 'border-border/50 opacity-50' : 'border-border hover:border-brand/30 hover:bg-brand/5'}`}
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-[#FF875B]/10 flex items-center justify-center flex-shrink-0">
-                                                <ArgentIcon size={20} />
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold text-t-primary">Argent</div>
-                                                <div className="text-xs text-t-muted">Starknet Network</div>
-                                            </div>
-                                        </div>
-                                        {connecting === 'starknet' ? (
+                                        {isThisConnecting ? (
                                             <span className="w-4 h-4 border-2 border-brand/30 border-t-brand rounded-full animate-spin" />
-                                        ) : installed.argent && (
-                                            <span className="text-[10px] uppercase font-bold tracking-wide text-green-600 bg-green-50 px-2 py-1 rounded-md">Installed</span>
-                                        )}
+                                        ) : (w.isInstalled || w.rdns) ? (
+                                            <span className="text-[10px] uppercase font-bold tracking-wide text-green-600 bg-green-50 px-2 py-1">
+                                                Installed
+                                            </span>
+                                        ) : null}
                                     </button>
-
-                                    {/* MetaMask */}
-                                    <button
-                                        onClick={() => {
-                                            const provider = installed.discovered.find(p => p.info.rdns === 'io.metamask')?.provider;
-                                            handleConnect('evm', provider);
-                                        }}
-                                        disabled={connecting !== null}
-                                        className={`w-full text-left p-4 rounded-xl border flex items-center justify-between transition-all outline-none 
-                                            ${connecting === 'evm' ? 'border-orange-200 bg-orange-50/50' : connecting !== null ? 'border-border/50 opacity-50' : 'border-border hover:border-orange-200 hover:bg-orange-50/30'}`}
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center flex-shrink-0">
-                                                <MetaMaskIcon size={24} />
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold text-t-primary">MetaMask</div>
-                                                <div className="text-xs text-t-muted">EVM Network</div>
-                                            </div>
-                                        </div>
-                                        {connecting === 'evm' ? (
-                                            <span className="w-4 h-4 border-2 border-orange-200 border-t-orange-500 rounded-full animate-spin" />
-                                        ) : installed.metamask && (
-                                            <span className="text-[10px] uppercase font-bold tracking-wide text-green-600 bg-green-50 px-2 py-1 rounded-md">Installed</span>
-                                        )}
-                                    </button>
-
-                                    {/* Phantom */}
-                                    <button
-                                        onClick={() => {
-                                            const provider = installed.discovered.find(p => p.info.rdns === 'app.phantom')?.provider;
-                                            handleConnect('evm', provider);
-                                        }}
-                                        disabled={connecting !== null}
-                                        className={`w-full text-left p-4 rounded-xl border flex items-center justify-between transition-all outline-none 
-                                            ${connecting === 'evm' ? 'border-purple-200 bg-purple-50/50' : connecting !== null ? 'border-border/50 opacity-50' : 'border-border hover:border-purple-200 hover:bg-purple-50/30'}`}
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center flex-shrink-0">
-                                                <PhantomIcon size={24} />
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold text-t-primary">Phantom</div>
-                                                <div className="text-xs text-t-muted">Solana / EVM</div>
-                                            </div>
-                                        </div>
-                                        {connecting === 'evm' ? (
-                                            <span className="w-4 h-4 border-2 border-purple-200 border-t-purple-500 rounded-full animate-spin" />
-                                        ) : installed.phantom && (
-                                            <span className="text-[10px] uppercase font-bold tracking-wide text-green-600 bg-green-50 px-2 py-1 rounded-md">Installed</span>
-                                        )}
-                                    </button>
-
-                                    {/* Base Account */}
-                                    <button
-                                        onClick={() => {
-                                            const provider = installed.discovered.find(p => p.info.rdns === 'com.coinbase.wallet')?.provider;
-                                            handleConnect('evm', provider);
-                                        }}
-                                        disabled={connecting !== null}
-                                        className={`w-full text-left p-4 rounded-xl border flex items-center justify-between transition-all outline-none 
-                                            ${connecting === 'evm' ? 'border-blue-200 bg-blue-50/50' : connecting !== null ? 'border-border/50 opacity-50' : 'border-border hover:border-blue-200 hover:bg-blue-50/30'}`}
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
-                                                <BaseIcon size={24} />
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold text-t-primary">Base Account</div>
-                                                <div className="text-xs text-t-muted">Smart Wallet / EVM</div>
-                                            </div>
-                                        </div>
-                                        {connecting === 'evm' ? (
-                                            <span className="w-4 h-4 border-2 border-blue-200 border-t-blue-500 rounded-full animate-spin" />
-                                        ) : installed.base && (
-                                            <span className="text-[10px] uppercase font-bold tracking-wide text-green-600 bg-green-50 px-2 py-1 rounded-md">Installed</span>
-                                        )}
-                                    </button>
-
-                                    <button
-                                        onClick={() => setView('secondary')}
-                                        disabled={connecting !== null}
-                                        className="w-full mt-2 text-center text-sm font-semibold text-t-secondary hover:text-brand transition-colors p-3 rounded-lg border border-transparent hover:border-border hover:bg-gray-50 disabled:opacity-50"
-                                    >
-                                        View more options
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    {/* Generic Starknet Wallets */}
-                                    <button
-                                        onClick={() => handleConnect('starknet_generic')}
-                                        disabled={connecting !== null}
-                                        className={`w-full text-left p-4 rounded-xl border flex items-center justify-between transition-all outline-none 
-                                            ${connecting === 'starknet_generic' ? 'border-gray-400 bg-gray-50/50' : connecting !== null ? 'border-border/50 opacity-50' : 'border-border hover:border-gray-300 hover:bg-gray-50/30'}`}
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 text-gray-500">
-                                                <WalletIcon size={20} />
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold text-t-primary">Other Starknet Wallets</div>
-                                                <div className="text-xs text-t-muted">Braavos, etc.</div>
-                                            </div>
-                                        </div>
-                                        {connecting === 'starknet_generic' && (
-                                            <span className="w-4 h-4 border-2 border-gray-200 border-t-gray-600 rounded-full animate-spin" />
-                                        )}
-                                    </button>
-
-                                    {/* EVM / Browser Wallets */}
-                                    <button
-                                        onClick={() => handleConnect('evm')}
-                                        disabled={connecting !== null}
-                                        className={`w-full text-left p-4 rounded-xl border flex items-center justify-between transition-all outline-none 
-                                            ${connecting === 'evm' ? 'border-gray-400 bg-gray-50/50' : connecting !== null ? 'border-border/50 opacity-50' : 'border-border hover:border-gray-300 hover:bg-gray-50/30'}`}
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 text-gray-500">
-                                                <WalletIcon size={20} />
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold text-t-primary">EVM / Browser Wallets</div>
-                                                <div className="text-xs text-t-muted">Any injected Web3 provider</div>
-                                            </div>
-                                        </div>
-                                        {connecting === 'evm' && (
-                                            <span className="w-4 h-4 border-2 border-gray-200 border-t-gray-600 rounded-full animate-spin" />
-                                        )}
-                                    </button>
-                                </>
-                            )}
+                                );
+                            })}
                         </div>
 
-                        {/* Error Handling */}
+                        {walletsToShow.length === 0 && (
+                            <p className="text-center py-8 text-t-muted text-sm">No wallets available.</p>
+                        )}
+
+                        {/* View more / back */}
+                        {view === 'primary' && secondaryWallets.length > 0 && (
+                            <button
+                                onClick={() => setView('secondary')}
+                                disabled={connecting !== null}
+                                className="w-full mt-4 text-center text-sm font-semibold text-t-secondary hover:text-brand transition-colors p-3 border border-transparent hover:border-border hover:bg-gray-50 disabled:opacity-50"
+                            >
+                                View more options
+                            </button>
+                        )}
+
+                        {/* Error */}
                         {error?.code === 'not_installed' && (
-                            <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2 text-sm text-red-800 animate-fade-in">
-                                <AlertCircle size={16} className="flex-shrink-0 mt-0.5 text-red-500" />
+                            <div className="mt-4 p-3 bg-error-bg border border-error/20 flex items-start gap-2 text-sm text-error">
+                                <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
                                 <div>
                                     <p className="font-medium">
-                                        {error.type === 'stellar' ? 'Freighter is not installed.' : 
-                                         error.type === 'starknet' ? 'Argent is not installed.' :
-                                         error.type === 'evm' ? 'EVM wallet not detected in browser.' :
-                                         'Wallet is not installed.'}
+                                        {error.type === 'stellar' ? 'LOBSTR is not installed.' :
+                                         error.type === 'starknet' ? 'Argent X is not installed.' :
+                                         'Wallet extension not detected.'}
                                     </p>
                                     {(error.type === 'stellar' || error.type === 'starknet') && (
-                                        <a 
-                                            href={error.type === 'stellar' ? 'https://www.freighter.app/' : 'https://www.argent.xyz/argent-x/'} 
-                                            target="_blank" 
+                                        <a
+                                            href={error.type === 'stellar' ? 'https://lobstr.co/' : 'https://www.argent.xyz/argent-x/'}
+                                            target="_blank"
                                             rel="noopener noreferrer"
                                             className="inline-flex items-center gap-1 font-semibold underline mt-1"
                                         >
@@ -432,25 +324,27 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                             </div>
                         )}
                         {error?.code === 'failed' && (
-                            <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg flex items-start gap-2 text-sm text-red-800 animate-fade-in">
-                                <AlertCircle size={16} className="flex-shrink-0 mt-0.5 text-red-500" />
+                            <div className="mt-4 p-3 bg-error-bg border border-error/20 flex items-start gap-2 text-sm text-error">
+                                <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
                                 <div>
                                     <p className="font-medium">
-                                        {error.message === 'LOCKED' ? 'Freighter is locked' : 
-                                         error.message === 'ACCESS_DENIED' ? 'Access denied' : 
-                                         'Connection failed'}
+                                        {error.message === 'LOCKED' ? 'Wallet is locked — open the extension and enter your password.' :
+                                         error.message === 'ACCESS_DENIED' ? 'Access denied — allow this site in your wallet extension.' :
+                                         'Connection failed. Please try again.'}
                                     </p>
-                                    <div className="text-xs mt-1 opacity-80">
-                                        {error.message === 'LOCKED' ? (
-                                            <span>Open the extension and enter your password.</span>
-                                        ) : error.message === 'ACCESS_DENIED' ? (
-                                            <span>Open Freighter &rarr; Connected Sites and allow this site.</span>
-                                        ) : (
-                                            error.message || 'The connection was cancelled or failed. Please try again.'
-                                        )}
-                                    </div>
                                 </div>
                             </div>
+                        )}
+
+                        {/* Disconnect */}
+                        {wallet?.isConnected && (
+                            <button
+                                onClick={async () => { await disconnectAll(); onClose(); }}
+                                disabled={connecting !== null}
+                                className="mt-5 w-full text-center text-sm font-semibold text-error hover:text-error/80 transition-colors p-3 border border-transparent hover:border-error/20 hover:bg-error-bg disabled:opacity-50"
+                            >
+                                Disconnect all wallets
+                            </button>
                         )}
                     </div>
                 </div>

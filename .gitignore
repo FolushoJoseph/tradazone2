@@ -22,3 +22,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Generated Issues
+issues.json
+create_issues.js
+
+# Environment variable files
+# .env.example, .env.development, .env.staging, .env.production are committed
+# (they contain no secrets — only safe defaults).
+# Local overrides with real secrets must never be committed.
+.env.local
+.env.development.local
+.env.staging.local
+.env.production.local
+.env.*.local
+.claude/
