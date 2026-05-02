@@ -1,0 +1,51 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`App Routing snapshots > matches snapshot for Catch-all Route (Redirect to Sign In) 1`] = `
+<div
+  data-testid="theme-provider"
+>
+  <div
+    data-testid="data-provider"
+  />
+</div>
+`;
+
+exports[`App Routing snapshots > matches snapshot for Protected Route — / (Unauthenticated Redirect) 1`] = `
+<div
+  data-testid="theme-provider"
+>
+  <div
+    data-testid="data-provider"
+  />
+</div>
+`;
+
+exports[`App Routing snapshots > matches snapshot for Public Route — /pay/:checkoutId (MailCheckout) 1`] = `
+<div
+  data-testid="theme-provider"
+>
+  <div
+    data-testid="data-provider"
+  />
+</div>
+`;
+
+exports[`App Routing snapshots > matches snapshot for Public Route — /signin 1`] = `
+<div
+  data-testid="theme-provider"
+>
+  <div
+    data-testid="data-provider"
+  />
+</div>
+`;
+
+exports[`App Routing snapshots > matches snapshot for Public Route — /signup 1`] = `
+<div
+  data-testid="theme-provider"
+>
+  <div
+    data-testid="data-provider"
+  />
+</div>
+`;

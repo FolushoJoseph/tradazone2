@@ -1,0 +1,13 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Routing Components Snapshots > PrivateRoute Component > should match snapshot when session is expired 1`] = `null`;
+
+exports[`Routing Components Snapshots > PrivateRoute Component > should match snapshot when user is authenticated and session is valid 1`] = `
+<div>
+  Protected Content
+</div>
+`;
+
+exports[`Routing Components Snapshots > PrivateRoute Component > should match snapshot when user is not authenticated 1`] = `null`;
+
+exports[`Routing Components Snapshots > PrivateRoute Component > should match snapshot with different redirect paths 1`] = `null`;

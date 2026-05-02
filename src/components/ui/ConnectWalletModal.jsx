@@ -17,7 +17,6 @@ function StellarIcon({ size = 20 }) {
     );
 }
 
-// Argent Icon
 function ArgentIcon({ size = 20 }) {
     return (
         <svg width={size} height={size} viewBox="0 0 20 20" fill="none">
@@ -26,7 +25,6 @@ function ArgentIcon({ size = 20 }) {
     );
 }
 
-// Generic Wallet Icon
 function WalletIcon({ size = 20 }) {
     return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -37,7 +35,6 @@ function WalletIcon({ size = 20 }) {
     );
 }
 
-// MetaMask Icon (simplified fox)
 function MetaMaskIcon({ size = 20 }) {
     return (
         <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
@@ -51,7 +48,6 @@ function MetaMaskIcon({ size = 20 }) {
     );
 }
 
-// Phantom Icon (simplified ghost)
 function PhantomIcon({ size = 20 }) {
     return (
         <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
@@ -60,7 +56,6 @@ function PhantomIcon({ size = 20 }) {
     );
 }
 
-// Base Icon (blue circle over hollow circle)
 function BaseIcon({ size = 20 }) {
     return (
         <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
@@ -92,42 +87,6 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
     const { installed, availableWallets } = useAuthWalletCatalog();
     const lobstr = useLobstr();
 
-            setInstalled({
-                freighter: hasFreighter,
-                argent: hasArgent,
-                metamask: hasMetaMask,
-                phantom: hasPhantom,
-                base: hasBase,
-                discovered: discoveredProviders,
-            });
-        };
-
-        checkInstallations();
-
-        // Non-EIP-6963 extensions (like Freighter/Argent) sometimes inject a bit later
-        const timer = setTimeout(checkInstallations, 1000);
-        const timer2 = setTimeout(checkInstallations, 2500); // Second check for slow injectors
-        
-        return () => {
-            clearTimeout(timer);
-            clearTimeout(timer2);
-        };
-    }, [discoveredProviders]);
-
-    return installed;
-}
-
-function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
-    const [connecting, setConnecting] = useState(null); // 'starknet' | 'stellar' | 'evm' | 'starknet_generic' | null
-    const [error, setError] = useState(null);
-    const [view, setView] = useState('primary'); // 'primary' | 'secondary'
-
-    const { completeWalletLogin, isConnecting: isAuthConnecting } = useAuth();
-    const freighter = useFreighter();
-
-    const installed = useWalletDetection();
-
-    // Reset state when modal opens
     useEffect(() => {
         if (isOpen) {
             setConnecting(null);
@@ -169,10 +128,8 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
             if (result.success) {
                 if (onConnect) onConnect(type);
             } else if (result.error === 'not_installed') {
-                setError({ type, code: 'not_installed' });
+                setError({ type: w.network, code: 'not_installed' });
                 setConnecting(null);
-            } else if (result.error === 'already_connecting') {
-                // Connection already in progress, don't reset state
             } else {
                 setError({ type: w.network, code: 'failed', message: result.error });
                 setConnecting(null);
@@ -323,6 +280,7 @@ function ConnectWalletModal({ isOpen, onClose, onConnect, connectWalletFn }) {
                                 </div>
                             </div>
                         )}
+
                         {error?.code === 'failed' && (
                             <div className="mt-4 p-3 bg-error-bg border border-error/20 flex items-start gap-2 text-sm text-error">
                                 <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />

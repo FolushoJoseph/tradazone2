@@ -1,22 +1,80 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+/**
+ * DataContext.jsx
+ *
+ * ISSUE: #180 (Build size limits and monitoring for DataContext)
+ * Category: DevOps & Infrastructure
+ * Affected Area: DataContext
+ * Description: Implements production build size limits and monitoring for DataContext.
+ *   - DataContext is isolated into its own chunk (data-context) for size tracking
+ *   - Build size budget: defined in package.json and vite.config.js
+ *   - CI pipeline includes bundle size check that fails if limits exceeded
+ *
+ * Size Limits:
+ *   - DataContext chunk: 50KB max (gzip)
+ *   - General chunks: 500KB max (gzip)
+ *   - Total bundle: 1000KB max (gzip)
+ *
+ * Build Commands:
+ *   - pnpm build        : Standard production build
+ *   - pnpm size         : Run size-limit check
+ *   - pnpm build:size  : Build and check sizes
+ *
+ * ISSUE INVESTIGATION: "Missing alt tags on critical <img> elements in DataContext"
+ * STATUS: Investigated and confirmed this is a false positive. DataContext is a
+ * pure React Context provider that manages application state (customers, invoices,
+ * checkouts, items). It contains NO JSX rendering, NO <img> elements, and NO UI
+ * components whatsoever. This file only exports DataProvider (context wrapper) and
+ * useData (custom hook). Alt tag accessibility issues are not applicable here.
+ *
+ * SECURITY FIX #(console-leak): Duplicate-operation console.warn calls were
+ * unconditionally logging operation names in production, which could expose
+ * sensitive user data (customer PII, invoice details) via browser DevTools or
+ * log-aggregation pipelines. Warnings are now gated to development builds only
+ * via `import.meta.env.DEV`.
+ *
+ * Central data and operation provider for customers, invoices, checkouts, and items.
+ * Contains performance-related context split for checkout flow (#61) and
+ * avoids excessive rerenders by memoizing operations and context values.
+ *
+ * ISSUE: #145 — Integration tests for context mutations live in
+ *   src/test/ContextMutations.integration.test.jsx (see README “Developer Setup Notes”).
+ */
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
+import {
+  dispatchWebhook,
+  setWebhookUrl,
+  getWebhookUrl,
+} from "../services/webhook";
+import { toUtcMidnightIso } from "../utils/date";
+import { safeAdd, calculateItemsTotal } from "../utils/currency";
+import api from "../services/api";
+import {
+  CUSTOMER_FILTER_CONFIG,
+  INVOICE_FILTER_CONFIG,
+  ITEM_FILTER_CONFIG,
+  CHECKOUT_FILTER_CONFIG,
+} from "./filterConfigs";
 
 const DataContext = createContext(null);
+const CheckoutContext = createContext(null);
 
-/* ---------- localStorage helpers ---------- */
 const KEYS = {
-    customers: 'tradazone_customers',
-    invoices: 'tradazone_invoices',
-    checkouts: 'tradazone_checkouts',
-    items: 'tradazone_items',
+  customers: "tradazone_customers",
+  invoices: "tradazone_invoices",
+  checkouts: "tradazone_checkouts",
+  items: "tradazone_items",
 };
 
-function load(key, fallback) {
-    try {
-        const raw = localStorage.getItem(key);
-        return raw ? JSON.parse(raw) : fallback;
-    } catch {
-        return fallback;
-    }
+function save(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
 }
 
 function loadFromStorage(key) {
@@ -303,118 +361,42 @@ export function DataProvider({ children }) {
 
       if (customerId) {
         setCustomers((prev) => {
-            const next = [...prev, newCustomer];
-            save(KEYS.customers, next);
-            return next;
-        });
-        return newCustomer;
-    }, []);
-
-    // ---------- Items ----------
-    const addItem = useCallback((data) => {
-        const newItem = {
-            id: Date.now().toString(),
-            name: data.name,
-            description: data.description || '',
-            type: data.type || 'service',
-            price: data.price,
-            currency: 'STRK',
-            unit: data.unit || 'unit',
-        };
-        setItems((prev) => {
-            const next = [...prev, newItem];
-            save(KEYS.items, next);
-            return next;
-        });
-        return newItem;
-    }, []);
-
-    // ---------- Invoices ----------
-    const addInvoice = useCallback(
-        (data) => {
-            const customer = customers.find((c) => c.id === data.customerId);
-            const resolvedItems = data.items.map((di) => {
-                const found = items.find((i) => i.id === di.itemId);
-                return {
-                    name: found ? found.name : 'Custom Item',
-                    quantity: parseInt(di.quantity, 10) || 1,
-                    price: di.price || (found ? found.price : '0'),
-                };
-            });
-            const total = resolvedItems.reduce(
-                (sum, it) => sum + parseFloat(it.price) * it.quantity,
-                0
-            );
-            const count = invoices.filter((i) => i.id.startsWith('INV-')).length;
-            const newInvoice = {
-                id: `INV-${String(count + 1).padStart(3, '0')}`,
-                customer: customer ? customer.name : 'Unknown',
-                customerId: data.customerId,
-                amount: total.toLocaleString(),
-                currency: 'STRK',
-                status: 'pending',
-                dueDate: data.dueDate,
-                createdAt: new Date().toISOString().split('T')[0],
-                items: resolvedItems,
+          const next = prev.map((c) => {
+            if (c.id !== customerId) return c;
+            const prevSpent = parseFloat(c.totalSpent.replace(/,/g, '')) || 0;
+            const updatedTotal = safeAdd(prevSpent, added, 2);
+            return {
+              ...c,
+              totalSpent: updatedTotal.toLocaleString(undefined, {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              }),
+              invoiceCount: c.invoiceCount + 1,
             };
-            setInvoices((prev) => {
-                const next = [...prev, newInvoice];
-                save(KEYS.invoices, next);
-                return next;
-            });
-            return newInvoice;
-        },
-        [customers, items, invoices]
-    );
-
-    // ---------- Invoice actions ----------
-    const sendInvoice = useCallback((invoiceId) => {
-        setInvoices((prev) => {
-            const next = prev.map((inv) =>
-                inv.id === invoiceId ? { ...inv, status: 'sent' } : inv
-            );
-            save(KEYS.invoices, next);
-            return next;
+          });
+          save(KEYS.customers, next);
+          return next;
         });
-    }, []);
+      }
 
-    const markInvoicePaid = useCallback((invoiceId, txDetails) => {
-        setInvoices((prev) => {
-            const next = prev.map((inv) =>
-                inv.id === invoiceId
-                    ? { ...inv, status: 'paid', txHash: txDetails?.hash || null, paidAt: new Date().toISOString() }
-                    : inv
-            );
-            save(KEYS.invoices, next);
-            return next;
+      if (paidCheckout) {
+        dispatchWebhook('checkout.paid', {
+          id: paidCheckout.id,
+          title: paidCheckout.title,
+          amount: paidCheckout.amount,
+          currency: paidCheckout.currency,
+          customerId,
+          walletType,
         });
-    }, []);
+      }
+    },
+    [checkouts],
+  );
 
-    // ---------- Checkouts ----------
-    const addCheckout = useCallback(
-        (data) => {
-            const count = checkouts.filter((c) => c.id.startsWith('CHK-')).length;
-            const newCheckout = {
-                id: `CHK-${String(count + 1).padStart(3, '0')}`,
-                title: data.title,
-                description: data.description || '',
-                amount: data.amount,
-                currency: data.currency || 'STRK',
-                status: 'active',
-                createdAt: new Date().toISOString().split('T')[0],
-                paymentLink: `https://pay.tradazone.com/CHK-${String(count + 1).padStart(3, '0')}`,
-                views: 0,
-                payments: 0,
-            };
-            setCheckouts((prev) => {
-                const next = [...prev, newCheckout];
-                save(KEYS.checkouts, next);
-                return next;
-            });
-            return newCheckout;
-        },
-        [checkouts]
-    );
+  const recordCheckoutView = useCallback(
+    (checkoutId) => {
+      const target = checkouts.find((c) => c.id === checkoutId);
+      if (!target) return;
 
       const nextViews = (target.views || 0) + 1;
       setCheckouts((prev) => {
@@ -486,7 +468,137 @@ export function DataProvider({ children }) {
 }
 
 export function useData() {
-    const ctx = useContext(DataContext);
-    if (!ctx) throw new Error('useData must be used within a DataProvider');
-    return ctx;
+  const context = useContext(DataContext);
+  if (!context) throw new Error('useData must be used within a DataProvider');
+  return context;
 }
+
+export function useCheckoutData() {
+  const context = useContext(CheckoutContext);
+  if (!context) throw new Error('useCheckoutData must be used within a DataProvider');
+  return context;
+}
+
+export function useDataFilters(type) {
+  const [filters, setFilters] = useState({
+    search: "",
+    sort: { field: "createdAt", dir: "desc" },
+    status: "all",
+    dateFrom: "",
+    dateTo: "",
+    amountMin: "",
+    amountMax: "",
+  });
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(`tradazone_filters_${type}`);
+      if (saved) {
+        setFilters(JSON.parse(saved));
+      }
+    } catch (_err) {
+      // Ignore parse errors
+    }
+  }, [type]);
+
+  const setFiltersWithSave = useCallback(
+    (newFilters) => {
+      setFilters(newFilters);
+      try {
+        localStorage.setItem(`tradazone_filters_${type}`, JSON.stringify(newFilters));
+      } catch (_err) {
+        // Ignore storage errors
+      }
+    },
+    [type],
+  );
+
+  const resetFilters = useCallback(() => {
+    const defaultFilters = {
+      search: "",
+      sort: { field: "createdAt", dir: "desc" },
+      status: "all",
+      dateFrom: "",
+      dateTo: "",
+      amountMin: "",
+      amountMax: "",
+    };
+    setFiltersWithSave(defaultFilters);
+  }, [setFiltersWithSave]);
+
+  return {
+    filters,
+    setFilters: setFiltersWithSave,
+    resetFilters,
+  };
+}
+
+export function useFilteredData({ data = [], filters, config }) {
+  return useMemo(() => {
+    let result = [...data];
+
+    if (filters.search) {
+      const query = filters.search.toLowerCase().trim();
+      result = result.filter((item) =>
+        config.searchableFields.some((field) =>
+          String(item[field] || "").toLowerCase().includes(query),
+        ),
+      );
+    }
+
+    if (config.statusField && filters.status !== "all") {
+      result = result.filter((item) => item[config.statusField] === filters.status);
+    }
+
+    if (config.dateFields) {
+      const fromDate = filters.dateFrom ? new Date(filters.dateFrom) : null;
+      const toDate = filters.dateTo ? new Date(filters.dateTo) : null;
+
+      result = result.filter((item) => {
+        const itemDate = new Date(item[config.dateFields.from]);
+        if (fromDate && itemDate < fromDate) return false;
+        if (toDate && itemDate > toDate) return false;
+        return true;
+      });
+    }
+
+    if (config.amountField && (filters.amountMin || filters.amountMax)) {
+      const min = parseFloat(filters.amountMin) || 0;
+      const max = parseFloat(filters.amountMax) || Infinity;
+      result = result.filter((item) => {
+        const amount = parseFloat((item[config.amountField] || "0").replace(/,/g, ""));
+        return amount >= min && amount <= max;
+      });
+    }
+
+    if (filters.sort.field) {
+      result.sort((a, b) => {
+        let aVal = a[filters.sort.field];
+        let bVal = b[filters.sort.field];
+
+        if (!isNaN(parseFloat(aVal)) && !isNaN(parseFloat(bVal))) {
+          aVal = parseFloat(aVal);
+          bVal = parseFloat(bVal);
+        } else {
+          aVal = new Date(aVal);
+          bVal = new Date(bVal);
+          if (isNaN(aVal.getTime())) aVal = String(aVal || "").toLowerCase();
+          if (isNaN(bVal.getTime())) bVal = String(bVal || "").toLowerCase();
+        }
+
+        if (aVal < bVal) return filters.sort.dir === "asc" ? -1 : 1;
+        if (aVal > bVal) return filters.sort.dir === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return result;
+  }, [data, filters, config]);
+}
+
+export const FILTER_CONFIGS = {
+  customers: CUSTOMER_FILTER_CONFIG,
+  invoices: INVOICE_FILTER_CONFIG,
+  items: ITEM_FILTER_CONFIG,
+  checkouts: CHECKOUT_FILTER_CONFIG,
+};
