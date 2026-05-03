@@ -2,7 +2,7 @@
   "name": "tradazone",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://FolushoJoseph.github.io/Tradazone",
+  "homepage": "https://blockora-dex.github.io/Tradazone",
   "type": "module",
   "scripts": {
     "dev": "vite",
