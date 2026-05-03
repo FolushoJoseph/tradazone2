@@ -16,7 +16,30 @@ import WelcomeModal from '../../../components/ui/WelcomeModal';
 
 function Home() {
     const { user, wallet, connectWallet } = useAuth();
-    const { transactions, dashboardStats } = useData();
+    const { invoices = [] } = useData();
+
+    // Calculate dashboard stats
+    const receivables = invoices
+        .filter(inv => inv.status !== 'paid')
+        .reduce((sum, inv) => sum + parseFloat((inv.amount || '0').replace(/,/g, '')), 0);
+        
+    const dashboardStats = {
+        walletBalance: wallet.balance || '0',
+        receivables: receivables.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+    };
+    
+    // Calculate transactions from paid invoices
+    const transactions = invoices
+        .filter(inv => inv.status === 'paid')
+        .map(inv => ({
+            id: inv.id,
+            description: `Payment from ${inv.customer}`,
+            date: inv.paidAt ? new Date(inv.paidAt).toLocaleDateString() : 'Unknown',
+            amount: inv.amount,
+            customer: inv.customer
+        }))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
     const recentTransactions = transactions.slice(0, 5);
 
     return (
