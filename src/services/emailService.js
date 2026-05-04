@@ -58,6 +58,7 @@ export async function sendInvoiceToCustomer(invoice) {
         invoice_due_date: invoice.dueDate,
         payment_link: invoice.paymentLink || '',
         sender_name: invoice.senderName || 'Tradazone',
+        item_description: invoice.items?.[0]?.name || 'Design',
     });
 }
 
@@ -73,6 +74,7 @@ export async function sendInvoiceConfirmationToSender(invoice) {
         invoice_due_date: invoice.dueDate,
         payment_link: invoice.paymentLink || '',
         sender_name: invoice.senderName || 'Tradazone',
+        item_description: invoice.items?.[0]?.name || 'Design',
     });
 }
 

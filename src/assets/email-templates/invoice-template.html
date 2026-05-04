@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Invoice from Tradazone</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #F5F6FA; /* Tradazone page background */
+            margin: 0;
+            padding: 0;
+            color: #1E293B; /* Tradazone t-primary */
+            -webkit-font-smoothing: antialiased;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        .wrapper {
+            width: 100%;
+            background-color: #F5F6FA;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #FFFFFF;
+            border: 1px solid #E2E8F0;
+        }
+        .header {
+            background-color: #3C3CEF; /* Tradazone brand DEFAULT */
+            text-align: center;
+            padding: 24px;
+        }
+        .header img {
+            height: 32px;
+            display: block;
+            margin: 0 auto;
+        }
+        .greeting-section {
+            padding: 40px 32px 32px 32px;
+            text-align: center;
+        }
+        .greeting {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 0 0 12px 0;
+            color: #1E293B;
+        }
+        .subtitle {
+            font-size: 15px;
+            color: #64748B;
+            margin: 0;
+        }
+        .details-header {
+            background-color: #B6B6F8; /* Light purple to match design */
+            padding: 16px;
+            font-weight: 500;
+            text-align: center;
+            border-top: 1px solid #E2E8F0;
+            border-bottom: 1px solid #E2E8F0;
+            color: #1E293B;
+            font-size: 16px;
+        }
+        .details-table {
+            width: 100%;
+        }
+        .details-row {
+            border-bottom: 1px solid #E2E8F0;
+        }
+        .details-cell {
+            padding: 20px 32px;
+            font-size: 15px;
+        }
+        .details-label {
+            text-align: left;
+            color: #1E293B;
+        }
+        .details-value {
+            text-align: right;
+            font-weight: 500;
+            color: #1E293B;
+        }
+        .value-currency {
+            color: #B6B6F8; /* Light purple for currency text */
+            margin-left: 4px;
+        }
+        .action-container {
+            padding: 32px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+        .btn-pay {
+            display: block;
+            background-color: #3C3CEF;
+            color: #FFFFFF;
+            text-decoration: none;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+            margin: 0 auto;
+        }
+        .btn-download-container {
+            text-align: center;
+            margin-top: 24px;
+            padding-bottom: 8px;
+        }
+        .btn-download {
+            color: #64748B;
+            text-decoration: none;
+            font-size: 15px;
+        }
+        .footer {
+            padding: 32px;
+            text-align: center;
+            font-size: 14px;
+            color: #64748B;
+            background-color: #F8F9FA;
+        }
+        .footer a {
+            color: #64748B;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <table class="wrapper" role="presentation" cellspacing="0" cellpadding="0" border="0">
+        <tr>
+            <td align="center">
+                <table class="container" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <!-- Header -->
+                    <tr>
+                        <td class="header">
+                            <!-- IMPORTANT: Replace this src with the actual hosted URL of your white logo (e.g. upload to imgbb or your web server) -->
+                            <img src="https://blockora-dex.github.io/Tradazone/logo-white.png" alt="Tradazone">
+                        </td>
+                    </tr>
+
+                    <!-- Greeting -->
+                    <tr>
+                        <td class="greeting-section">
+                            <p class="greeting">Hi {{to_name}}</p>
+                            <p class="subtitle">Please find your invoice details below.</p>
+                        </td>
+                    </tr>
+
+                    <!-- Details Header -->
+                    <tr>
+                        <td class="details-header">
+                            Invoice details
+                        </td>
+                    </tr>
+
+                    <!-- Details Table -->
+                    <tr>
+                        <td>
+                            <table class="details-table" role="presentation" cellspacing="0" cellpadding="0" border="0">
+                                <tr class="details-row">
+                                    <td class="details-cell details-label">Item and Services</td>
+                                    <td class="details-cell details-value">{{item_description}}</td>
+                                </tr>
+                                <tr class="details-row">
+                                    <td class="details-cell details-label">Invoice ID:</td>
+                                    <td class="details-cell details-value">{{invoice_id}}</td>
+                                </tr>
+                                <tr class="details-row">
+                                    <td class="details-cell details-label">Amount Due:</td>
+                                    <td class="details-cell details-value">{{invoice_amount}}<span class="value-currency">{{invoice_currency}}</span></td>
+                                </tr>
+                                <tr class="details-row">
+                                    <td class="details-cell details-label">Due Date:</td>
+                                    <td class="details-cell details-value">{{invoice_due_date}}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Actions -->
+                    <tr>
+                        <td class="action-container">
+                            <a href="{{payment_link}}" class="btn-pay" style="color: #ffffff;">Pay here</a>
+                            
+                            <div class="btn-download-container">
+                                <a href="{{payment_link}}" class="btn-download">Download invoice as PDF</a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td class="footer">
+                            <p style="margin: 0 0 16px 0;">If you have questions or issues with this payment, contact us at <a href="mailto:support@tradazone.com">support@tradazone.com</a> or simply reply to this email.</p>
+                            <p style="margin: 0;"><a href="https://tradazone.com">Tradazone.com</a></p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
